@@ -1,0 +1,30 @@
+[gd_scene load_steps=7 format=3 uid="uid://wbpqro6tssd5"]
+
+[ext_resource type="Script" path="res://scripts/json.gd" id="1_3pqby"]
+[ext_resource type="Script" path="res://scripts/tilemap.gd" id="2_e3udp"]
+[ext_resource type="Texture2D" uid="uid://y7usubla6juc" path="res://assets/tiles/1-conveyor.png" id="2_obwd8"]
+[ext_resource type="Script" path="res://scripts/classes.gd" id="4_mms3p"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tbejw"]
+texture = ExtResource("2_obwd8")
+0:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_huth1"]
+sources/1 = SubResource("TileSetAtlasSource_tbejw")
+
+[node name="World" type="Node2D"]
+
+[node name="Json" type="Node" parent="."]
+script = ExtResource("1_3pqby")
+
+[node name="TileMap" type="TileMap" parent="."]
+tile_set = SubResource("TileSet_huth1")
+format = 2
+layer_0/tile_data = PackedInt32Array(0, 1, 0, 131075, 1, 0, 131078, 1, 0, 262150, 1, 0)
+script = ExtResource("2_e3udp")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+anchor_mode = 0
+
+[node name="Classes" type="Node" parent="."]
+script = ExtResource("4_mms3p")
