@@ -1,1 +1,5 @@
 res://scenes/game.tscn
+res://scripts/tilemap.gd
+res://scripts/camera.gd
+res://scripts/json.gd
+res://assets/world.json
