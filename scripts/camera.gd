@@ -2,6 +2,7 @@ extends Camera2D
 
 
 @export var zoom_speed = 0.4
+@export var background:Node = null
 
 # the total number of times zoomed in
 var status = 0
@@ -25,20 +26,11 @@ func _input(event: InputEvent):
 func zoom(direction):
 	print(self.get_zoom())
 	# recursion = ridiculous floating point errors
-	
 	var a = direction * zoom_speed
 	
-#	self.position = (1 / (1 + zoom_speed)) * (get_screen_center_position() - get_global_mouse_position()) + get_global_mouse_position()
 	self.position =  (a/(1 + a)) * (-get_screen_center_position() + get_global_mouse_position()) + get_screen_center_position()
-#	print("vgfdagg")
-#	print(get_screen_center_position() - get_global_mouse_position())
-#	print(get_global_mouse_position())
-	
-	
-	self.set_zoom(self.get_zoom() * (1 + a))
-#	var f = zoom_base * pow(1 + zoom_speed, status)
-#	self.set_zoom(Vector2(f,f))
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
+	self.set_zoom(self.get_zoom() * (1 + a))
+
 func _process(delta):
-	pass
+	background.draw_grid(self.get_global_transform().origin, self.get_zoom().x)

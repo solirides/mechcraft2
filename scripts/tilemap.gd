@@ -56,6 +56,6 @@ func update_tilemap():
 	
 
 func load_tiles():
-	var world
+	var world:Dictionary = {}
 	
 	return world

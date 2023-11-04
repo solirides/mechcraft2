@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://wbpqro6tssd5"]
+[gd_scene load_steps=18 format=3 uid="uid://wbpqro6tssd5"]
 
 [ext_resource type="Script" path="res://scripts/json.gd" id="1_3pqby"]
 [ext_resource type="Script" path="res://scripts/tilemap.gd" id="2_e3udp"]
@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://dj7h73b0ck0od" path="res://assets/tiles/3-splitter.png" id="4_o0q4j"]
 [ext_resource type="Texture2D" uid="uid://c5vn60414xt4t" path="res://assets/tiles/4-miner.png" id="5_eqt5e"]
 [ext_resource type="Texture2D" uid="uid://eg1scyadfujp" path="res://assets/tiles/5-storage.png" id="6_y2sc0"]
+[ext_resource type="Script" path="res://scripts/background.gd" id="10_y4vju"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tbejw"]
 texture = ExtResource("2_obwd8")
@@ -49,19 +50,28 @@ format = 2
 layer_0/tile_data = PackedInt32Array(0, 1, 0, 131075, 1, 0, 131078, 1, 0, 262150, 1, 0)
 script = ExtResource("2_e3udp")
 
-[node name="Camera2D" type="Camera2D" parent="."]
+[node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("background")]
 script = ExtResource("4_3i4pa")
+background = NodePath("CanvasLayer/Background")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="Camera2D"]
+layer = -1
+
+[node name="Background" type="Node2D" parent="Camera2D/CanvasLayer"]
+script = ExtResource("10_y4vju")
 
 [node name="Classes" type="Node" parent="."]
 script = ExtResource("4_mms3p")
 
 [node name="Line2D" type="Line2D" parent="."]
+visible = false
 points = PackedVector2Array(-800, 0, 800, 0)
 width = 2.0
 default_color = Color(1, 0.0627451, 0.294118, 1)
 antialiased = true
 
 [node name="Line2D2" type="Line2D" parent="."]
+visible = false
 points = PackedVector2Array(0, -800, 0, 800)
 width = 2.0
 default_color = Color(0.121569, 1, 0.623529, 1)
