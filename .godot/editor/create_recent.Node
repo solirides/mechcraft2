@@ -1,5 +1,7 @@
-Node2D
+RichTextLabel
 CanvasLayer
+Control
+Node2D
 WorldEnvironment
 Line2D
 Node

@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://wbpqro6tssd5"]
+[gd_scene load_steps=20 format=3 uid="uid://wbpqro6tssd5"]
 
 [ext_resource type="Script" path="res://scripts/json.gd" id="1_3pqby"]
 [ext_resource type="Script" path="res://scripts/tilemap.gd" id="2_e3udp"]
@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://dj7h73b0ck0od" path="res://assets/tiles/3-splitter.png" id="4_o0q4j"]
 [ext_resource type="Texture2D" uid="uid://c5vn60414xt4t" path="res://assets/tiles/4-miner.png" id="5_eqt5e"]
 [ext_resource type="Texture2D" uid="uid://eg1scyadfujp" path="res://assets/tiles/5-storage.png" id="6_y2sc0"]
+[ext_resource type="Script" path="res://scripts/gui.gd" id="10_ocoff"]
 [ext_resource type="Script" path="res://scripts/background.gd" id="10_y4vju"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tbejw"]
@@ -17,15 +18,19 @@ texture = ExtResource("2_obwd8")
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_y1uis"]
 texture = ExtResource("3_adxkv")
+0:0/0 = 0
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_vmbpx"]
 texture = ExtResource("4_o0q4j")
+0:0/0 = 0
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_w0fur"]
 texture = ExtResource("5_eqt5e")
+0:0/0 = 0
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_c0vm1"]
 texture = ExtResource("6_y2sc0")
+0:0/0 = 0
 
 [sub_resource type="TileSet" id="TileSet_huth1"]
 sources/1 = SubResource("TileSetAtlasSource_tbejw")
@@ -33,6 +38,9 @@ sources/5 = SubResource("TileSetAtlasSource_c0vm1")
 sources/4 = SubResource("TileSetAtlasSource_w0fur")
 sources/3 = SubResource("TileSetAtlasSource_vmbpx")
 sources/2 = SubResource("TileSetAtlasSource_y1uis")
+
+[sub_resource type="SystemFont" id="SystemFont_rtmsu"]
+generate_mipmaps = true
 
 [sub_resource type="Environment" id="Environment_tiixt"]
 background_mode = 3
@@ -44,11 +52,12 @@ glow_hdr_threshold = 0.87
 [node name="Json" type="Node" parent="."]
 script = ExtResource("1_3pqby")
 
-[node name="TileMap" type="TileMap" parent="."]
+[node name="TileMap" type="TileMap" parent="." node_paths=PackedStringArray("gui")]
 tile_set = SubResource("TileSet_huth1")
 format = 2
 layer_0/tile_data = PackedInt32Array(0, 1, 0, 131075, 1, 0, 131078, 1, 0, 262150, 1, 0)
 script = ExtResource("2_e3udp")
+gui = NodePath("../Camera2D/GUI")
 
 [node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("background")]
 script = ExtResource("4_3i4pa")
@@ -59,6 +68,21 @@ layer = -1
 
 [node name="Background" type="Node2D" parent="Camera2D/CanvasLayer"]
 script = ExtResource("10_y4vju")
+
+[node name="GUI" type="CanvasLayer" parent="Camera2D" node_paths=PackedStringArray("selection_label")]
+layer = 10
+script = ExtResource("10_ocoff")
+selection_label = NodePath("Selection")
+
+[node name="Selection" type="RichTextLabel" parent="Camera2D/GUI"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/normal_font = SubResource("SystemFont_rtmsu")
+theme_override_font_sizes/normal_font_size = 20
+text = "hello"
 
 [node name="Classes" type="Node" parent="."]
 script = ExtResource("4_mms3p")

@@ -1,4 +1,3 @@
-res://scripts/background.gd
 res://scenes/game.tscn
+res://scripts/gui.gd
 res://scripts/tilemap.gd
-res://scripts/camera.gd

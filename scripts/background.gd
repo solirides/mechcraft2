@@ -28,9 +28,9 @@ func _draw():
 	var offset = fmod(origin.x, space)
 #	offset = 0
 	
-	print(floor(get_viewport().size.x / size / zoom))
+#	print(floor(get_viewport().size.x / size / zoom))
 	
-	draw_circle(Vector2(offset,10), 10, Color(1,0.5,1,1))
+#	draw_circle(Vector2(offset,10), 10, Color(1,0.5,1,1))
 	
 	for i in range(get_viewport().size.x / space + 1):
 		draw_line(Vector2(space * i + offset, 0), \
