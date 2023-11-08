@@ -6,7 +6,9 @@ extends TileMap
 @onready var json = get_node("../Json")
 @export var gui:CanvasLayer = null
 
-var world: Dictionary 
+var world_tiles = []
+var world_tiledata = []
+var chunk_size
 
 const sides = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 
@@ -18,8 +20,11 @@ var tile_rotation = 0
 # Called when the node enters the scene tree for the first time.
 func _ready():
 #	print(json.json)
-	world = load_tiles()
-	update_tilemap()
+	chunk_size = json.json["chunk_size"]
+	world_tiles = load_tiles()
+	world_tiledata = load_tiledata()
+	
+	set_tilemap(world_tiles, world_tiledata)
 	
 	gui.selection_changed.connect(_on_selection_changed)
 
@@ -40,8 +45,9 @@ func _input(event):
 		print(p);
 		var c = Vector2(int(p.x) / 16, int(p.y) / 16)
 		self.set_cell(0, c, 0, Vector2i.ZERO)
-		
-		print("reload")
+	
+	if event.is_action_pressed("reload"):
+		print("recalculate")
 		detect_world_tiles()
 		detect_conveyors_lines()
 
@@ -71,13 +77,33 @@ func detect_connections(current_cell:Vector2i):
 		if neighbor == 1:
 				print("found")
 
-func update_tilemap():
-	pass
+func set_tilemap(world_tiles, world_tiledata):
+	for c in len(world_tiles):
+		for i in pow(chunk_size, 2):
+			print(world_tiles[c][i])
+			self.set_cell(0, \
+				Vector2i(fmod(i, chunk_size), floor(i / chunk_size)), world_tiles[c][i], \
+				Vector2i.ZERO
+			)
+#		world_tiledata[c]["rotation"][i]
 	
 
 func load_tiles():
-	var world:Dictionary = {}
+	var world = []
+	print("loading tiles")
+	for i in len(json.json["chunks"]):
+#		print(json.json["chunks"][i]["tiles"])
+		world.append(json.json["chunks"][i]["tiles"])
+#		print(world[0])
 	
+	return world
+
+func load_tiledata():
+	var world = []
+	print("loading tiledata")
+	for i in len(json.json["chunks"]):
+		world.append(json.json["chunks"][i]["tiledata"])
+#		print(world[0]["rotation"])
 	return world
 
 func _on_selection_changed(selected_tile, tile_rotation):

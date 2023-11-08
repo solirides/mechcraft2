@@ -14,7 +14,10 @@
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tbejw"]
 texture = ExtResource("2_obwd8")
+0:0/next_alternative_id = 2
 0:0/0 = 0
+0:0/1 = 1
+0:0/1/transpose = true
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_y1uis"]
 texture = ExtResource("3_adxkv")

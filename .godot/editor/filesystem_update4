@@ -1,3 +1,4 @@
 res://scenes/game.tscn
-res://scripts/gui.gd
+res://assets/world.json
 res://scripts/tilemap.gd
+res://scripts/json.gd
