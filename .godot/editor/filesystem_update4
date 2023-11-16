@@ -1,4 +1,3 @@
 res://scenes/game.tscn
-res://assets/world.json
 res://scripts/tilemap.gd
-res://scripts/json.gd
+res://generated_tileset.tres
