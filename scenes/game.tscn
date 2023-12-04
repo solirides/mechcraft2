@@ -55,12 +55,12 @@ glow_hdr_threshold = 0.87
 [node name="Json" type="Node" parent="."]
 script = ExtResource("1_3pqby")
 
-[node name="TileMap" type="TileMap" parent="." node_paths=PackedStringArray("gui")]
+[node name="TileMap" type="TileMap" parent="." node_paths=PackedStringArray("gui", "debug_dot")]
 tile_set = SubResource("TileSet_huth1")
 format = 2
-layer_0/tile_data = PackedInt32Array(0, 1, 0, 131075, 1, 0, 131078, 1, 0, 262150, 1, 0)
 script = ExtResource("2_e3udp")
 gui = NodePath("../Camera2D/GUI")
+debug_dot = NodePath("../DebugDot")
 
 [node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("background")]
 script = ExtResource("4_3i4pa")
@@ -106,3 +106,8 @@ antialiased = true
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_tiixt")
+
+[node name="DebugDot" type="Polygon2D" parent="."]
+scale = Vector2(4, 4)
+color = Color(1, 0, 0.713726, 0.584314)
+polygon = PackedVector2Array(1, 1, -1, 1, -1, -1, 1, -1)
