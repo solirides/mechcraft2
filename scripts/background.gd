@@ -2,7 +2,7 @@ extends Node2D
 
 
 var pos = Vector2(100,100)
-var size = 256
+var size:int = 256/2
 var zoom = 1
 
 # Called when the node enters the scene tree for the first time.

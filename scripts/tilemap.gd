@@ -9,6 +9,7 @@ extends TileMap
 
 var world_tiles = []
 var world_tiledata = []
+var world_size:int
 var chunk_size:int
 var chunk_area:int
 var conveyor_lines = []
@@ -19,18 +20,22 @@ var selected_tile = 1
 var tile_rotation = 0
 
 var tileset = TileSet.new()
+var bounds:Rect2i
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 #	print(json.json)
 	make_tileset_exist(tileset)
 	ResourceSaver.save(tileset, "res://generated_tileset.tres")
-	self.tileset = tileset
+	self.tile_set = tileset
 	
+	world_size = json.json["chunk_size"]
+	bounds = Rect2i(0, 0,world_size, world_size)
 	chunk_size = json.json["chunk_size"]
 	chunk_area = pow(chunk_size, 2)
 	world_tiles = load_tiles()
 	world_tiledata = load_tiledata()
+	
 	
 	
 	set_tilemap(world_tiles, world_tiledata)
@@ -72,46 +77,62 @@ func detect_world_tiles():
 #	var cells = self.get_used_cells(0)
 	var d = [chunk_size, 1, -chunk_size, -1]
 	var lines:Array = []
+	var c = 0
 	
-	for cell in chunk_area:
-#		print(world_tiles[0][cell])
+	for index in chunk_area:
+#		print(world_tiles[0][index])
 		# one chunk
-		match int(world_tiles[0][cell]):
-			1:
-				print("1")
-				
-				var current_cell = cell
-				var loop = true
-				#each tiles is a chunk index tile index
+		match int(world_tiles[c][index]):
+			5:
+				print("5")
+				# line includes miners and storage
 				var line: Array[Vector2i] = []
+				var gc = local2global(index2local(index, c))
+#				print(Vector3i(index % chunk_size, floor(index / chunk_size), c))
+#				print(gc)
 				for b in range(4):
-#					var neighbor = self.get_cell_source_id(0, cell + sides[b])
-					var facing = cell + d[b]
-					if facing >= 0 and facing <= chunk_area:
-						# tile id
-						var neighbor = world_tiles[0][cell]
-						if neighbor == 1:
-								print(Vector2i(0, cell))
-								print(Vector2(fmod(facing, chunk_size), \
-									floor(facing / chunk_size)))
-								line.append(Vector2i(0, cell))
-								var a = Polygon2D.new()
-								a.polygon = [Vector2(1,1), Vector2(-1,1), Vector2(-1,-1), Vector2(1,-1)]
-								a.color = Color(1, 0, 1, 0.7)
-								a.position = Vector2(16 * fmod(facing, chunk_size) + 8, \
-									16 * floor(facing / chunk_size) + 8)
-								self.add_child(a)
+#					var neighbor = self.get_cell_source_id(0, index + sides[b])
+					var facing:Vector2i = gc + sides[b]
+					# temp solution
+					if not Rect2i(0,0,chunk_size,chunk_size).has_point(facing):
+						print("a")
+						continue
+					
+					var facing_lc = global2local(facing)
+					var facing_id = world_tiles[facing_lc.z][local2index(Vector2i(facing_lc.x, facing_lc.y))]
+					var facing_dir = world_tiledata[facing_lc.z]["rotation"][local2index(Vector2i(facing_lc.x, facing_lc.y))]
+					print(facing)
+					print(facing_lc)
+					print(facing_id)
+					print(facing_dir)
+					debug_marker(gc, Color(0, 1, 1, 0.7))
+					if facing_id == 1 and facing_dir == (b + 2) % 4:
+						print(Vector2i(0, index))
+						line.append(local2global(index2local(index, c)))
+						detect_connections
+						debug_marker(gc, Color(1, 0, 1, 0.7))
+						detect_connections(facing, facing_dir)
+								
 	return lines
 
+func neighbor(gc:Vector2i, dir:int):
+	var tile = gc + sides[dir]
+	if bounds.has_point(tile):
+		return tile
+	return null
 
-
-func detect_connections(current_cell:Vector2i):
-	var neighbors: Array[int] = []
+func detect_connections(gc:Vector2i, start_dir:int):
+	var c = global2local(gc).z
 	for b in range(4):
-		var neighbor = self.get_cell_source_id(0, current_cell + sides[b])
-		neighbors.append(neighbor)
-		if neighbor == 1:
-				print("found")
+		var facing:Vector2i = gc + sides[b + start_dir]
+		if not Rect2i(0,0,chunk_size,chunk_size).has_point(facing):
+			print("a")
+			continue
+		var neighbor = world_tiles[c][local2index(facing)]
+		if neighbor == 1 and world_tiledata[0]["rotation"][local2index(facing)] == int(b + start_dir + 2) % 4:
+			debug_marker(gc, Color(1, 0, 1, 0.7))
+			return 1
+	return 0
 
 func update_items(roots:Array, lines:Array):
 	for cell in chunk_area:
@@ -119,26 +140,47 @@ func update_items(roots:Array, lines:Array):
 			1:
 				pass
 
-func neighbor_index(chunk:int, index:int, direction:int):
-	var location:Vector3
-	var x:int = index % chunk_size
-	var y:int = floor(index / chunk_size)
-	
-	return location
+#func neighbor_index(chunk:int, index:int, direction:int):
+#	var location:Vector3
+#	var x:int = index % chunk_size
+#	var y:int = floor(index / chunk_size)
+#
+#	return location
+
+func local2index(local_coords:Vector2i):
+	return local_coords.x + local_coords.y * chunk_size
+
+func index2local(index, chunk):
+	return Vector3i(index % chunk_size, floor(index / chunk_size), chunk)
+
+func local2global(local_coords:Vector3i):
+	var c = Vector2i(local_coords.z % world_size, floor(local_coords.z / world_size))
+	return Vector2i(local_coords.x + c.x * chunk_size, local_coords.y + c.y * chunk_size)
+
+func global2local(global_coords:Vector2i):
+	return Vector3i(global_coords.x % chunk_size, \
+		global_coords.y % chunk_size, \
+		floor(global_coords.x / chunk_size) + world_size*floor(global_coords.y/chunk_size))
 
 func set_tile(global_coords:Vector2i, tile:int, rotation:int):
 #	no storage data yet
-	var local_coords = Vector3i(global_coords.x % chunk_size, \
-		floor(global_coords.y/chunk_size) % chunk_size, \
-		global_coords.x/chunk_size + chunk_size*floor(global_coords.y/chunk_size))
+	var local_coords = global2local(global_coords)
 	
-	world_tiledata[local_coords.z]["storage"][local_coords.x + local_coords.y * chunk_size] = []
+#	world_tiledata[local_coords.z]["storage"][local_coords.x + local_coords.y * chunk_size] = null
 	world_tiles[local_coords.z][local_coords.x + local_coords.y * chunk_size] = selected_tile
 	world_tiledata[local_coords.z]["rotation"][local_coords.x + local_coords.y * chunk_size] = tile_rotation
 	self.set_cell(0, \
 		global_coords, tile, \
-		Vector2i.ZERO, rotation
+		Vector2i.ZERO, tile_rotation
 		)
+
+func debug_marker(global_coords:Vector2i, color:Color):
+	var a = Polygon2D.new()
+	a.polygon = [Vector2(1,1), Vector2(-1,1), Vector2(-1,-1), Vector2(1,-1)]
+	a.color = color
+	a.position = Vector2(16 * global_coords.x + 8, \
+		16 * global_coords.y + 8)
+	self.add_child(a)
 
 func set_tilemap(world_tiles, world_tiledata):
 	for c in len(world_tiles):
@@ -177,6 +219,10 @@ func make_tileset_exist(ts: TileSet):
 	var id = 0
 	var path = "res://assets/tiles/"
 	var dir = DirAccess.open(path)
+	
+	var blank = TileSetAtlasSource.new()
+	ts.add_source(blank)
+	
 	if dir:
 		dir.list_dir_begin()
 		var file_name = dir.get_next()

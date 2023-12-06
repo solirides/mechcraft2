@@ -1,6 +1,7 @@
 {
 	"name":"test",
 	"chunk_size":8,
+	"world_size": 16,
 	"chunks":[
 		{
 			"tiles":[

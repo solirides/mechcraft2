@@ -24,7 +24,7 @@ func _input(event: InputEvent):
 		get_tree().quit()
 
 func zoom(direction):
-	print(self.get_zoom())
+#	print(self.get_zoom())
 	# recursion = ridiculous floating point errors
 	var a = direction * zoom_speed
 	
