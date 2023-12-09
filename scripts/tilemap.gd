@@ -90,28 +90,29 @@ func detect_world_tiles():
 				var gc = local2global(index2local(index, c))
 #				print(Vector3i(index % chunk_size, floor(index / chunk_size), c))
 #				print(gc)
-				for b in range(4):
-#					var neighbor = self.get_cell_source_id(0, index + sides[b])
-					var facing:Vector2i = gc + sides[b]
-					# temp solution
-					if not Rect2i(0,0,chunk_size,chunk_size).has_point(facing):
-						print("a")
-						continue
-					
-					var facing_lc = global2local(facing)
-					var facing_id = world_tiles[facing_lc.z][local2index(Vector2i(facing_lc.x, facing_lc.y))]
-					var facing_dir = world_tiledata[facing_lc.z]["rotation"][local2index(Vector2i(facing_lc.x, facing_lc.y))]
-					print(facing)
-					print(facing_lc)
-					print(facing_id)
-					print(facing_dir)
-					debug_marker(gc, Color(0, 1, 1, 0.7))
-					if facing_id == 1 and facing_dir == (b + 2) % 4:
-						print(Vector2i(0, index))
-						line.append(local2global(index2local(index, c)))
-						detect_connections
-						debug_marker(gc, Color(1, 0, 1, 0.7))
-						detect_connections(facing, facing_dir)
+				debug_marker(gc, Color(1, 0, 1, 0.7))
+				detect_connections(gc, 0)
+#				for b in range(4):
+##					var neighbor = self.get_cell_source_id(0, index + sides[b])
+#					var facing:Vector2i = gc + sides[b]
+#					# temp solution
+#					if not Rect2i(0,0,chunk_size,chunk_size).has_point(facing):
+#						print("a")
+#						continue
+#
+#					var facing_lc = global2local(facing)
+#					var facing_id = world_tiles[facing_lc.z][local2index(Vector2i(facing_lc.x, facing_lc.y))]
+#					var facing_dir = world_tiledata[facing_lc.z]["rotation"][local2index(Vector2i(facing_lc.x, facing_lc.y))]
+#					print(facing)
+#					print(facing_lc)
+#					print(facing_id)
+#					print(facing_dir)
+#					debug_marker(gc, Color(0, 1, 1, 0.7))
+#					if facing_id == 1 and facing_dir == (b + 2) % 4:
+#						print(Vector2i(0, index))
+#						line.append(local2global(index2local(index, c)))
+#						debug_marker(gc, Color(1, 0, 1, 0.7))
+#						detect_connections(facing, facing_dir)
 								
 	return lines
 
@@ -122,16 +123,27 @@ func neighbor(gc:Vector2i, dir:int):
 	return null
 
 func detect_connections(gc:Vector2i, start_dir:int):
-	var c = global2local(gc).z
-	for b in range(4):
-		var facing:Vector2i = gc + sides[b + start_dir]
-		if not Rect2i(0,0,chunk_size,chunk_size).has_point(facing):
-			print("a")
-			continue
-		var neighbor = world_tiles[c][local2index(facing)]
-		if neighbor == 1 and world_tiledata[0]["rotation"][local2index(facing)] == int(b + start_dir + 2) % 4:
-			debug_marker(gc, Color(1, 0, 1, 0.7))
-			return 1
+	var tile = gc
+	var dir:int = start_dir
+	var loop = true
+	while loop:
+		loop = false
+		for b in range(4):
+			var facing_gc:Vector2i = tile + sides[(b + dir + 2) % 4]
+			var facing_lc:Vector3i = global2local(facing_gc)
+			var facing:Vector2i = Vector2i(facing_lc.x,facing_lc.y)
+			var c = facing_lc.z
+			print(facing_lc)
+			if not Rect2i(0,0,chunk_size,chunk_size).has_point(facing):
+				print("a")
+				continue
+			var facing_idx = local2index(facing)
+			if world_tiles[c][facing_idx] == 1 and world_tiledata[c]["rotation"][facing_idx] == int(b + dir) % 4:
+				debug_marker(facing_gc, Color(1, 0, 1, 0.7))
+				tile = facing_gc
+				dir = world_tiledata[c]["rotation"][facing_idx]
+				loop = true
+				break
 	return 0
 
 func update_items(roots:Array, lines:Array):
