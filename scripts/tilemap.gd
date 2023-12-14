@@ -67,6 +67,7 @@ func _input(event):
 	
 	if event.is_action_pressed("reload"):
 		print("recalculate")
+		clear_markers()
 		#detect miners and create conveyor lines
 		var roots:Array = []
 		var lines:Array = detect_world_tiles()
@@ -76,7 +77,7 @@ func _input(event):
 func detect_world_tiles():
 #	var cells = self.get_used_cells(0)
 	var d = [chunk_size, 1, -chunk_size, -1]
-	var lines:Array = []
+	var lines:Array[Vector2i] = []
 	var c = 0
 	
 	for index in chunk_area:
@@ -86,12 +87,11 @@ func detect_world_tiles():
 			5:
 				print("5")
 				# line includes miners and storage
-				var line: Array[Vector2i] = []
 				var gc = local2global(index2local(index, c))
 #				print(Vector3i(index % chunk_size, floor(index / chunk_size), c))
 #				print(gc)
 				debug_marker(gc, Color(1, 0, 1, 0.7))
-				detect_connections(gc, 0)
+				lines.append_array(detect_connections(gc, 0, 0))
 #				for b in range(4):
 ##					var neighbor = self.get_cell_source_id(0, index + sides[b])
 #					var facing:Vector2i = gc + sides[b]
@@ -122,10 +122,14 @@ func neighbor(gc:Vector2i, dir:int):
 		return tile
 	return null
 
-func detect_connections(gc:Vector2i, start_dir:int):
+func detect_connections(gc:Vector2i, p:int, start_dir:int):
 	var tile = gc
 	var dir:int = start_dir
 	var loop = true
+	var priority:int = p
+	var priorities:Array[int] = []
+	var result:Array[Array] = []
+	var line:Array[Vector2i] = []
 	while loop:
 		loop = false
 		for b in range(4):
@@ -135,16 +139,31 @@ func detect_connections(gc:Vector2i, start_dir:int):
 			var c = facing_lc.z
 			print(facing_lc)
 			if not Rect2i(0,0,chunk_size,chunk_size).has_point(facing):
+				# out of bounds
 				print("a")
 				continue
 			var facing_idx = local2index(facing)
-			if world_tiles[c][facing_idx] == 1 and world_tiledata[c]["rotation"][facing_idx] == int(b + dir) % 4:
-				debug_marker(facing_gc, Color(1, 0, 1, 0.7))
-				tile = facing_gc
-				dir = world_tiledata[c]["rotation"][facing_idx]
-				loop = true
-				break
-	return 0
+			var facing_rot = world_tiledata[c]["rotation"][facing_idx]
+			match int(world_tiles[c][facing_idx]):
+				1:
+					if facing_rot == int(b + dir) % 4:
+						if line.has(facing_gc):
+							break
+						# extend line
+						debug_marker(facing_gc, Color(1, 0, 1, 0.7))
+						tile = facing_gc
+						dir = world_tiledata[c]["rotation"][facing_idx]
+						loop = true
+						break
+				3:
+					if facing_rot == int(b + dir) % 4 or facing_rot == int(b + dir + 1) % 4:
+						# new line
+						priority += 1
+						
+						break
+						
+			# no tile found
+	return result
 
 func update_items(roots:Array, lines:Array):
 	for cell in chunk_area:
@@ -192,7 +211,11 @@ func debug_marker(global_coords:Vector2i, color:Color):
 	a.color = color
 	a.position = Vector2(16 * global_coords.x + 8, \
 		16 * global_coords.y + 8)
-	self.add_child(a)
+	$Debug.add_child(a)
+
+func clear_markers():
+	for node in $Debug.get_children():
+		$Debug.remove_child(node)
 
 func set_tilemap(world_tiles, world_tiledata):
 	for c in len(world_tiles):

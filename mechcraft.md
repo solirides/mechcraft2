@@ -7,7 +7,7 @@ The game will process every tile in the world every tick. There will probably li
 world update order:
 - for each storage tile
   - process conveyor lines ending at it
-    - process lines connecting to those
+	- process lines connecting to those
 - process remaining lines and tiles
 - miner storage replenishes
 
@@ -40,6 +40,8 @@ merger, splitter, and launcher have been combined into conveyor balancer
   - The input alternates for each item
 - If 1 input and 1 output are connected
   - uhhh, it doesn't do anything?
+
+outputs are `rotation` and `rotation + 1`
 
 ## Conveyor Line
 

@@ -62,6 +62,8 @@ script = ExtResource("2_e3udp")
 gui = NodePath("../Camera2D/GUI")
 debug_dot = NodePath("../DebugDot")
 
+[node name="Debug" type="Node" parent="TileMap"]
+
 [node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("background")]
 script = ExtResource("4_3i4pa")
 background = NodePath("CanvasLayer/Background")
