@@ -12,7 +12,10 @@ var world_tiledata = []
 var world_size:int
 var chunk_size:int
 var chunk_area:int
-var conveyor_lines = []
+
+var lines:Array[Array] = []
+var priorities:Array[int] = []
+var used_tiles:Array[Array] = []
 
 const sides = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 
@@ -29,13 +32,19 @@ func _ready():
 	ResourceSaver.save(tileset, "res://generated_tileset.tres")
 	self.tile_set = tileset
 	
-	world_size = json.json["chunk_size"]
-	bounds = Rect2i(0, 0,world_size, world_size)
+	world_size = json.json["world_size"]
 	chunk_size = json.json["chunk_size"]
+	bounds = Rect2i(0, 0,world_size * chunk_size, world_size * chunk_size)
+	
 	chunk_area = pow(chunk_size, 2)
 	world_tiles = load_tiles()
 	world_tiledata = load_tiledata()
 	
+	for i in bounds.size.x:
+		var a = []
+		a.resize(bounds.size.y)
+		a.fill(0)
+		used_tiles.append(a)
 	
 	
 	set_tilemap(world_tiles, world_tiledata)
@@ -60,19 +69,22 @@ func _input(event):
 	if event.is_action_pressed("right_click"):
 		var p = get_global_mouse_position()
 		print(p);
-		var c = Vector2i(int(p.x) / 16, int(p.y) / 16)
-		self.set_cell(0, c, 0, Vector2i.ZERO)
-		world_tiles[0][c.x + c.y * chunk_size] = 0
-		world_tiledata[0]["rotation"][c.x + c.y * chunk_size] = 0
+		set_tile(Vector2i(floor(p.x/16), floor(p.y/16)), 0, 0)
 	
 	if event.is_action_pressed("reload"):
 		print("recalculate")
 		clear_markers()
 		#detect miners and create conveyor lines
-		var roots:Array = []
-		var lines:Array = detect_world_tiles()
+		#var roots:Array = []
+		detect_world_tiles()
 		#move items
-		update_items(roots, lines)
+		update_items()
+		
+	if event.is_action_pressed("ping"):
+		var p = get_global_mouse_position()
+		print(p);
+		var c = Vector2i(int(p.x) / 16, int(p.y) / 16)
+		print("PING " + " " + str(c) + " " + str(global2local(Vector2i(floor(p.x/16), floor(p.y/16)))) )
 
 func detect_world_tiles():
 #	var cells = self.get_used_cells(0)
@@ -138,7 +150,7 @@ func detect_connections(gc:Vector2i, p:int, start_dir:int):
 			var facing:Vector2i = Vector2i(facing_lc.x,facing_lc.y)
 			var c = facing_lc.z
 			print(facing_lc)
-			if not Rect2i(0,0,chunk_size,chunk_size).has_point(facing):
+			if not bounds.has_point(facing):
 				# out of bounds
 				print("a")
 				continue
@@ -165,7 +177,7 @@ func detect_connections(gc:Vector2i, p:int, start_dir:int):
 			# no tile found
 	return result
 
-func update_items(roots:Array, lines:Array):
+func update_items():
 	for cell in chunk_area:
 		match int(world_tiles[0][cell]):
 			1:
@@ -198,11 +210,11 @@ func set_tile(global_coords:Vector2i, tile:int, rotation:int):
 	var local_coords = global2local(global_coords)
 	
 #	world_tiledata[local_coords.z]["storage"][local_coords.x + local_coords.y * chunk_size] = null
-	world_tiles[local_coords.z][local_coords.x + local_coords.y * chunk_size] = selected_tile
-	world_tiledata[local_coords.z]["rotation"][local_coords.x + local_coords.y * chunk_size] = tile_rotation
+	world_tiles[local_coords.z][local_coords.x + local_coords.y * chunk_size] = tile
+	world_tiledata[local_coords.z]["rotation"][local_coords.x + local_coords.y * chunk_size] = rotation
 	self.set_cell(0, \
 		global_coords, tile, \
-		Vector2i.ZERO, tile_rotation
+		Vector2i.ZERO, rotation
 		)
 
 func debug_marker(global_coords:Vector2i, color:Color):
@@ -220,10 +232,11 @@ func clear_markers():
 func set_tilemap(world_tiles, world_tiledata):
 	for c in len(world_tiles):
 		for i in chunk_area:
-			print(world_tiles[c][i])
+			#print(world_tiles[c][i])
 			# left to right, top to bottom
 			self.set_cell(0, \
-				Vector2i(fmod(i, chunk_size), floor(i / chunk_size)), world_tiles[c][i], \
+				Vector2i(fmod(i, chunk_size) + (c % world_size)*chunk_size, \
+					floor(i / chunk_size) + floor(c / world_size)*chunk_size), world_tiles[c][i], \
 				Vector2i.ZERO, world_tiledata[c]["rotation"][i]
 			)
 #		world_tiledata[c]["rotation"][i]
@@ -236,6 +249,13 @@ func load_tiles():
 		world.append(PackedInt32Array(json.json["chunks"][i]["tiles"]))
 #		print(world[0])
 	
+	# fill missing chunks
+	var a:PackedInt32Array = []
+	a.resize(pow(chunk_size, 2))
+	a.fill(0)
+	for i in pow(world_size, 2) - len(world):
+		world.append(a)
+	
 	return world
 
 func load_tiledata():
@@ -244,6 +264,15 @@ func load_tiledata():
 	for i in len(json.json["chunks"]):
 		world.append(json.json["chunks"][i]["tiledata"])
 #		print(world[0]["rotation"])
+	
+	# fill missing chunks
+	var a:PackedInt32Array = []
+	a.resize(pow(chunk_size, 2))
+	a.fill(0)
+	var d:Dictionary = {"storage": [], "rotation": a}
+	for i in pow(world_size, 2) - len(world):
+		world.append(d)
+	
 	return world
 
 func _on_selection_changed(selected_tile, tile_rotation):

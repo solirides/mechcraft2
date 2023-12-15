@@ -7,6 +7,8 @@ class_name Json
 func _ready():
 	json = ReadData("res://assets/world.json")
 	print(json["chunks"][0]["tiles"])
+	
+	
 
 
 func ReadData(file_path):
