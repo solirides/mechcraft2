@@ -1,26 +1,28 @@
-~~Coding~~ Designing this is gonna be really annoying.
+~~Coding~~ ~~Designing~~ Doing anything that makes progress for this is gonna be ~~really~~ mildly annoying.
 
 ## General stuff about making the game not crash
 
 The game will process every tile in the world every tick. There will probably like 5 ticks every second or something.  
 
-world update order:
+🌎 world update order:
 - for each storage tile
-  - process conveyor lines ending at it
-	- process lines connecting to those
-- process remaining lines and tiles
+  - process conveyor lines ending at it (while recursively processing line connecting to those)
+- process remaining lines and tiles (the random unconnected ones)
 - miner storage replenishes
+- whatever else there is (winning objectives)
 
-🌟singular item storage
+🌟singular item storage (for conveyors and stuff)
 - simplifies code and rules
 - speed upgrades not viable
 - alternate objective like organization
 
 🌟output items to empty tiles and storage overflow items are deleted
 
-❌~~infinite~~ finite storage + time delay for internal storage?
-
 merger, splitter, and launcher have been combined into conveyor balancer
+
+## Item costs?
+
+idk
 
 ## Conveyor
 
@@ -29,6 +31,8 @@ merger, splitter, and launcher have been combined into conveyor balancer
 - Splitting and merging will be handled by other tiles.
 
 ## Conveyor Balancer
+
+Basically it merges or splits two inputs and outputs
 
 - Has 2 adjacent inputs and 2 adjacent outputs
 - Has a selected input and output (when needed)
@@ -45,12 +49,15 @@ outputs are `rotation` and `rotation + 1`
 
 ## Conveyor Line
 
-- A list of tiles used for calculations
+A list of tiles used for calculations
+
 - One path of conveyors defined by a start tile (miner) and an end tile (merger, splitter, storage, basically everything that isn't a conveyor)
 - No weird loops cause that would make the code way more complicated.
 - Processes from end tile to first conveyor
 
 ## Miner
+
+Where stuff spawns
 
 - Has a small internal storage
 - Adds resources to internal storage every tick
@@ -62,20 +69,8 @@ outputs are `rotation` and `rotation + 1`
 
 ## Constructor
 
+Makes stuff
+
 - Has 2 adjacent inputs and 1 output (2 layouts ignoring rotation)
 - Takes two input items to make one output item
 
-## ~~Launcher~~
-
-- Launches item to certain tile without collision
-- Larger delay
-
-## ~~Conveyor Merger~~
-
-- Has exactly one output and up to 3 inputs.
-- Keeps track of which input will be taken next so inputs don't get skipped.
-
-## ~~Conveyor Splitter~~
-
-- Basically the merger but reversed
-- Waits for enough items to split evenly
