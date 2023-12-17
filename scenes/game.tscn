@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://wbpqro6tssd5"]
+[gd_scene load_steps=22 format=3 uid="uid://wbpqro6tssd5"]
 
 [ext_resource type="Script" path="res://scripts/json.gd" id="1_3pqby"]
 [ext_resource type="Script" path="res://scripts/tilemap.gd" id="2_e3udp"]
@@ -10,6 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://c5vn60414xt4t" path="res://assets/tiles/4-miner.png" id="5_eqt5e"]
 [ext_resource type="Texture2D" uid="uid://eg1scyadfujp" path="res://assets/tiles/5-storage.png" id="6_y2sc0"]
 [ext_resource type="Script" path="res://scripts/gui.gd" id="10_ocoff"]
+[ext_resource type="Shader" path="res://assets/shaders/test.gdshader" id="10_shcmx"]
 [ext_resource type="Script" path="res://scripts/background.gd" id="10_y4vju"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tbejw"]
@@ -42,6 +43,13 @@ sources/4 = SubResource("TileSetAtlasSource_w0fur")
 sources/3 = SubResource("TileSetAtlasSource_vmbpx")
 sources/2 = SubResource("TileSetAtlasSource_y1uis")
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tfcjj"]
+shader = ExtResource("10_shcmx")
+shader_parameter/exponent = 1.0
+shader_parameter/strength = 0.003
+shader_parameter/variation = 0.001
+shader_parameter/frequency = 0.4
+
 [sub_resource type="SystemFont" id="SystemFont_rtmsu"]
 generate_mipmaps = true
 
@@ -73,6 +81,17 @@ layer = -1
 
 [node name="Background" type="Node2D" parent="Camera2D/CanvasLayer"]
 script = ExtResource("10_y4vju")
+
+[node name="Shaders" type="CanvasLayer" parent="Camera2D"]
+
+[node name="ColorRect" type="ColorRect" parent="Camera2D/Shaders"]
+material = SubResource("ShaderMaterial_tfcjj")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 0.156863, 0.568627, 1)
 
 [node name="GUI" type="CanvasLayer" parent="Camera2D" node_paths=PackedStringArray("selection_label")]
 layer = 10

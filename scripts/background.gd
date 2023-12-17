@@ -32,13 +32,13 @@ func _draw():
 	
 #	draw_circle(Vector2(offset,10), 10, Color(1,0.5,1,1))
 	
-	for i in range(get_viewport().size.x / space + 1):
+	for i in range(get_viewport().size.x / space + 2):
 		draw_line(Vector2(space * i + offset, 0), \
 			Vector2(space * i + offset, get_viewport().size.y), Color(1,1,1,1))
 	
 	offset = fmod(origin.y, space)
 	
-	for i in range(get_viewport().size.y / space + 1):
+	for i in range(get_viewport().size.y / space + 2):
 		draw_line(Vector2(0, space * i + offset), \
 			Vector2(get_viewport().size.x, space * i + offset), Color(1,1,1,1))
 	

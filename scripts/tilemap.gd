@@ -43,7 +43,7 @@ func _ready():
 	for i in bounds.size.x:
 		var a = []
 		a.resize(bounds.size.y)
-		a.fill(0)
+		a.fill(false)
 		used_tiles.append(a)
 	
 	
@@ -76,6 +76,9 @@ func _input(event):
 		clear_markers()
 		#detect miners and create conveyor lines
 		#var roots:Array = []
+		for i in len(used_tiles):
+			used_tiles[i].fill(false)
+		
 		detect_world_tiles()
 		#move items
 		update_items()
@@ -103,7 +106,8 @@ func detect_world_tiles():
 #				print(Vector3i(index % chunk_size, floor(index / chunk_size), c))
 #				print(gc)
 				debug_marker(gc, Color(1, 0, 1, 0.7))
-				lines.append_array(detect_connections(gc, 0, 0))
+				used_tiles[gc.x][gc.y] == true
+				lines.append_array(detect_connections(gc, 0, 0, true))
 #				for b in range(4):
 ##					var neighbor = self.get_cell_source_id(0, index + sides[b])
 #					var facing:Vector2i = gc + sides[b]
@@ -134,45 +138,64 @@ func neighbor(gc:Vector2i, dir:int):
 		return tile
 	return null
 
-func detect_connections(gc:Vector2i, p:int, start_dir:int):
+func detect_connections(gc:Vector2i, p:int, start_dir:int, recurse:bool):
 	var tile = gc
 	var dir:int = start_dir
 	var loop = true
+	
+	# temp vars to continue checking for lines after one path has been found
+	var n_tile = tile
+	var n_dir = dir
+	var split = false
+	
+	var color = Color.from_hsv(randf(), randf_range(0.7, 1), randf_range(0.7, 1))
+	debug_marker(tile, color)
+	
 	var priority:int = p
 	var priorities:Array[int] = []
 	var result:Array[Array] = []
 	var line:Array[Vector2i] = []
 	while loop:
 		loop = false
+		split = false
+		tile = n_tile
+		dir =  n_dir
 		for b in range(4):
 			var facing_gc:Vector2i = tile + sides[(b + dir + 2) % 4]
 			var facing_lc:Vector3i = global2local(facing_gc)
 			var facing:Vector2i = Vector2i(facing_lc.x,facing_lc.y)
 			var c = facing_lc.z
 			print(facing_lc)
-			if not bounds.has_point(facing):
+			if not bounds.has_point(facing) or used_tiles[facing.x][facing.y] == true:
 				# out of bounds
 				print("a")
 				continue
 			var facing_idx = local2index(facing)
 			var facing_rot = world_tiledata[c]["rotation"][facing_idx]
+			
 			match int(world_tiles[c][facing_idx]):
 				1:
 					if facing_rot == int(b + dir) % 4:
-						if line.has(facing_gc):
-							break
+						debug_marker(facing_gc, color)
+						used_tiles[facing_gc.x][facing_gc.y] = true
+						# create new line
+						if split:
+							detect_connections(facing_gc, priority + 1, dir, true)
+							continue
 						# extend line
-						debug_marker(facing_gc, Color(1, 0, 1, 0.7))
-						tile = facing_gc
-						dir = world_tiledata[c]["rotation"][facing_idx]
-						loop = true
-						break
-				3:
-					if facing_rot == int(b + dir) % 4 or facing_rot == int(b + dir + 1) % 4:
-						# new line
-						priority += 1
 						
-						break
+						n_tile = facing_gc
+						n_dir = facing_rot
+						loop = true
+						split = true
+				3:
+					if facing_rot == int(b + dir) % 4:
+						# start new line
+						used_tiles[facing_gc.x][facing_gc.y] = true
+						n_tile = facing_gc
+						n_dir = facing_rot
+						if recurse:
+							detect_connections(facing_gc, priority + 1, dir, true)
 						
 			# no tile found
 	return result
@@ -219,7 +242,7 @@ func set_tile(global_coords:Vector2i, tile:int, rotation:int):
 
 func debug_marker(global_coords:Vector2i, color:Color):
 	var a = Polygon2D.new()
-	a.polygon = [Vector2(1,1), Vector2(-1,1), Vector2(-1,-1), Vector2(1,-1)]
+	a.polygon = [Vector2(0.8,0.8), Vector2(-0.8,0.8), Vector2(-0.8,-0.8), Vector2(0.8,-0.8)]
 	a.color = color
 	a.position = Vector2(16 * global_coords.x + 8, \
 		16 * global_coords.y + 8)
