@@ -57,14 +57,21 @@ func _process(delta):
 	pass
 
 func _input(event):
+	
 	if event.is_action_pressed("left_click"):
 		var p = get_global_mouse_position()
+		
 		print(p);
 		set_tile(Vector2i(floor(p.x/16), floor(p.y/16)), selected_tile, tile_rotation)
 #		var c = Vector2i(int(p.x) / 16, int(p.y) / 16)
 #		self.set_cell(0, c, selected_tile, Vector2i.ZERO, tile_rotation)
 #		world_tiles[0][c.x + c.y * chunk_size] = selected_tile
 #		world_tiledata[0]["rotation"][c.x + c.y * chunk_size] = tile_rotation
+	if event.is_action_pressed("middle_click"):
+		var p = get_global_mouse_position()
+		var tile_pos = Vector2i(floor(p.x / 16), floor(p.y / 16))
+		rotate_conveyor(tile_pos)
+	
 	
 	if event.is_action_pressed("right_click"):
 		var p = get_global_mouse_position()
@@ -131,6 +138,17 @@ func detect_world_tiles():
 #						detect_connections(facing, facing_dir)
 								
 	return lines
+	
+func rotate_conveyor(tile_pos): 
+	var local_coords = global2local(tile_pos)
+	var index = local2index(Vector2i(local_coords.x, local_coords.y))
+	var tile = world_tiles[local_coords.z][index]
+	var rotation = world_tiledata[local_coords.z]["rotation"][index]
+	
+	if tile == 1:
+		rotation = (rotation + 1) % 4
+		world_tiledata[local_coords.z]["rotation"][index] = rotation
+		set_cell(0, tile_pos, tile, Vector2i(0, 0), rotation) 
 
 func neighbor(gc:Vector2i, dir:int):
 	var tile = gc + sides[dir]
