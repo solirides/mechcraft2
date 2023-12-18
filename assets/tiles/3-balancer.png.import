@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://yqteq3q57wm2"
-path="res://.godot/imported/2-merger.png-55e2199c5ad837b4b28cd0dea1c21c80.ctex"
+uid="uid://dj7h73b0ck0od"
+path="res://.godot/imported/3-balancer.png-39e00692669849989f9252e11d599ff7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/tiles/2-merger.png"
-dest_files=["res://.godot/imported/2-merger.png-55e2199c5ad837b4b28cd0dea1c21c80.ctex"]
+source_file="res://assets/tiles/3-balancer.png"
+dest_files=["res://.godot/imported/3-balancer.png-39e00692669849989f9252e11d599ff7.ctex"]
 
 [params]
 

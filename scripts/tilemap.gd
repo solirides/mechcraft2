@@ -184,10 +184,9 @@ func rotate_conveyor(tile_pos):
 	var tile = world_tiles[local_coords.z][index]
 	var rotation:int = world_tiledata[local_coords.z]["rotation"][index]
 	
-	if tile == 1 || tile == 2 || tile == 3:
-		rotation = (rotation + 1) % 4
-		world_tiledata[local_coords.z]["rotation"][index] = rotation
-		set_cell(0, tile_pos, tile, Vector2i(0, 0), rotation)
+	rotation = (rotation + 1) % 4
+	world_tiledata[local_coords.z]["rotation"][index] = rotation
+	set_cell(0, tile_pos, tile, Vector2i(0, 0), rotation)
 
 func neighbor(gc:Vector2i, dir:int):
 	var tile = gc + sides[dir]
