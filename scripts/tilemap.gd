@@ -235,13 +235,18 @@ func detect_connections(gc:Vector2i, p:int, start_dir:int, recurse:bool):
 			match int(world_tiles[c][facing_idx]):
 				1:
 					if facing_rot == int(b + dir) % 4:
-						debug_marker(facing_gc, color)
 						used_tiles[facing_gc.x][facing_gc.y] = true
 						# create new line
 						if split:
-							detect_connections(facing_gc, priority + 1, dir, true)
+							result.append(line)
+							priorities.append(priority)
+							var a = detect_connections(facing_gc, priority + 1, dir, true)
+							result.append_array(a[0])
+							priorities.append_array(a[1])
 							continue
 						# extend line
+						debug_marker(facing_gc, color)
+						line.append(facing_gc)
 						
 						n_tile = facing_gc
 						n_dir = facing_rot
@@ -250,14 +255,20 @@ func detect_connections(gc:Vector2i, p:int, start_dir:int, recurse:bool):
 				3:
 					if facing_rot == int(b + dir) % 4:
 						# start new line
+						#line.append(facing_gc) # might not be needed
+						result.append(line)
+						priorities.append(priority)
+						
 						used_tiles[facing_gc.x][facing_gc.y] = true
 						n_tile = facing_gc
 						n_dir = facing_rot
 						if recurse:
-							detect_connections(facing_gc, priority + 1, dir, true)
+							var a = detect_connections(facing_gc, priority + 1, dir, true)
+							result.append_array(a[0])
+							priorities.append_array(a[1])
 						
 			# no tile found
-	return result
+	return [result, priorities]
 
 func update_items():
 	for cell in chunk_area:
