@@ -71,6 +71,8 @@ texture = ExtResource("10_1k22r")
 [node name="TileMap" type="TileMap" parent="." node_paths=PackedStringArray("gui", "debug_dot")]
 tile_set = SubResource("TileSet_huth1")
 format = 2
+layer_1/z_index = 1
+layer_1/tile_data = PackedInt32Array()
 script = ExtResource("2_e3udp")
 gui = NodePath("../Camera2D/GUI")
 debug_dot = NodePath("../DebugDot")
