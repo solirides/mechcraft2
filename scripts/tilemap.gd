@@ -143,7 +143,7 @@ func rotate_conveyor(tile_pos):
 	var local_coords = global2local(tile_pos)
 	var index = local2index(Vector2i(local_coords.x, local_coords.y))
 	var tile = world_tiles[local_coords.z][index]
-	var rotation = world_tiledata[local_coords.z]["rotation"][index]
+	var rotation:int = world_tiledata[local_coords.z]["rotation"][index]
 	
 	if tile == 1:
 		rotation = (rotation + 1) % 4
@@ -310,7 +310,7 @@ func load_tiledata():
 	var a:PackedInt32Array = []
 	a.resize(pow(chunk_size, 2))
 	a.fill(0)
-	var d:Dictionary = {"storage": [], "rotation": a}
+	var d:Dictionary = {"storage": a, "rotation": a, "state": a}
 	for i in pow(world_size, 2) - len(world):
 		world.append(d)
 	
