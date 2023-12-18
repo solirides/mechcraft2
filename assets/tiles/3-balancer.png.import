@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dj7h73b0ck0od"
-path="res://.godot/imported/3-splitter.png-0459c1a4d66af1d80371f66d767b1d75.ctex"
+path="res://.godot/imported/3-balancer.png-39e00692669849989f9252e11d599ff7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/tiles/3-splitter.png"
-dest_files=["res://.godot/imported/3-splitter.png-0459c1a4d66af1d80371f66d767b1d75.ctex"]
+source_file="res://assets/tiles/3-balancer.png"
+dest_files=["res://.godot/imported/3-balancer.png-39e00692669849989f9252e11d599ff7.ctex"]
 
 [params]
 

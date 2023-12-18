@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://drpelh6jwa88k"
-path="res://.godot/imported/6-iron.png-d1a1b64f9ece374899123fb0eb492975.ctex"
+uid="uid://yqteq3q57wm2"
+path="res://.godot/imported/2-construtor.png-010e7f6214889a4e8764164700266b0c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/tiles/6-iron.png"
-dest_files=["res://.godot/imported/6-iron.png-d1a1b64f9ece374899123fb0eb492975.ctex"]
+source_file="res://assets/tiles/2-construtor.png"
+dest_files=["res://.godot/imported/2-construtor.png-010e7f6214889a4e8764164700266b0c.ctex"]
 
 [params]
 
