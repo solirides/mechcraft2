@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3 uid="uid://wbpqro6tssd5"]
+[gd_scene load_steps=23 format=3 uid="uid://wbpqro6tssd5"]
 
 [ext_resource type="Script" path="res://scripts/json.gd" id="1_3pqby"]
 [ext_resource type="Script" path="res://scripts/tilemap.gd" id="2_e3udp"]
@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://dj7h73b0ck0od" path="res://assets/tiles/3-balancer.png" id="4_o0q4j"]
 [ext_resource type="Texture2D" uid="uid://c5vn60414xt4t" path="res://assets/tiles/4-miner.png" id="5_eqt5e"]
 [ext_resource type="Texture2D" uid="uid://eg1scyadfujp" path="res://assets/tiles/5-storage.png" id="6_y2sc0"]
+[ext_resource type="Texture2D" uid="uid://5am0arvmxore" path="res://assets/factorygame3.png" id="10_1k22r"]
 [ext_resource type="Script" path="res://scripts/gui.gd" id="10_ocoff"]
 [ext_resource type="Shader" path="res://assets/shaders/test.gdshader" id="10_shcmx"]
 [ext_resource type="Script" path="res://scripts/background.gd" id="10_y4vju"]
@@ -62,6 +63,10 @@ glow_hdr_threshold = 0.87
 
 [node name="Json" type="Node" parent="."]
 script = ExtResource("1_3pqby")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+self_modulate = Color(1, 1, 1, 0.247059)
+texture = ExtResource("10_1k22r")
 
 [node name="TileMap" type="TileMap" parent="." node_paths=PackedStringArray("gui", "debug_dot")]
 tile_set = SubResource("TileSet_huth1")
