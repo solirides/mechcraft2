@@ -73,6 +73,7 @@ func _input(event):
 		rotate_conveyor(tile_pos)
 	
 	
+	
 	if event.is_action_pressed("right_click"):
 		var p = get_global_mouse_position()
 		print(p);
@@ -138,17 +139,55 @@ func detect_world_tiles():
 #						detect_connections(facing, facing_dir)
 								
 	return lines
+
+func initiate_resource_movement(tile_pos):
+	var local_coords = global2local(tile_pos)
+	var index = local2index(Vector2i(local_coords.x, local_coords.y))
+	var rotation = world_tiledata[local_coords.z]["rotation"][index]
 	
+	if world_tiles[local_coords.z][index] == 6:
+		match rotation:
+			0:  
+				move_resource(tile_pos, "up")
+			1:  
+				move_resource(tile_pos, "right")
+			2:  
+				move_resource(tile_pos, "down")
+			3:  
+				move_resource(tile_pos, "left")
+
+func move_resource(tile_pos, direction):
+	var current_tile = world_tiles[tile_pos.z][local2index(Vector2i(tile_pos.x, tile_pos.y))]
+	var next_tile = null
+	
+	match direction:
+		"right":
+			next_tile = Vector2i(tile_pos.x + 1, tile_pos.y)
+		"left":
+			next_tile = Vector2i(tile_pos.x - 1, tile_pos.y)
+		"up":
+			next_tile = Vector2i(tile_pos.x, tile_pos.y - 1)
+		"down":
+			next_tile = Vector2i(tile_pos.x, tile_pos.y + 1)
+		_:
+			print("Invalid direction")
+			
+	
+	if next_tile and world_tiles[next_tile.z][local2index(Vector2i(next_tile.x, next_tile.y))] == 6:
+		print("Moving resource from ", tile_pos, " to ", next_tile)
+	else:
+		print("Cannot move in that direction or no conveyor")
+
 func rotate_conveyor(tile_pos): 
 	var local_coords = global2local(tile_pos)
 	var index = local2index(Vector2i(local_coords.x, local_coords.y))
 	var tile = world_tiles[local_coords.z][index]
 	var rotation:int = world_tiledata[local_coords.z]["rotation"][index]
 	
-	if tile == 1:
+	if tile == 1 || tile == 2 || tile == 3:
 		rotation = (rotation + 1) % 4
 		world_tiledata[local_coords.z]["rotation"][index] = rotation
-		set_cell(0, tile_pos, tile, Vector2i(0, 0), rotation) 
+		set_cell(0, tile_pos, tile, Vector2i(0, 0), rotation)
 
 func neighbor(gc:Vector2i, dir:int):
 	var tile = gc + sides[dir]

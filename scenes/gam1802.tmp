@@ -1,0 +1,134 @@
+[gd_scene load_steps=22 format=3 uid="uid://wbpqro6tssd5"]
+
+[ext_resource type="Script" path="res://scripts/json.gd" id="1_3pqby"]
+[ext_resource type="Script" path="res://scripts/tilemap.gd" id="2_e3udp"]
+[ext_resource type="Texture2D" uid="uid://y7usubla6juc" path="res://assets/tiles/1-conveyor.png" id="2_obwd8"]
+[ext_resource type="Texture2D" uid="uid://yqteq3q57wm2" path="res://assets/tiles/2-merger.png" id="3_adxkv"]
+[ext_resource type="Script" path="res://scripts/camera.gd" id="4_3i4pa"]
+[ext_resource type="Script" path="res://scripts/classes.gd" id="4_mms3p"]
+[ext_resource type="Texture2D" uid="uid://dj7h73b0ck0od" path="res://assets/tiles/3-splitter.png" id="4_o0q4j"]
+[ext_resource type="Texture2D" uid="uid://c5vn60414xt4t" path="res://assets/tiles/4-miner.png" id="5_eqt5e"]
+[ext_resource type="Texture2D" uid="uid://eg1scyadfujp" path="res://assets/tiles/5-storage.png" id="6_y2sc0"]
+[ext_resource type="Script" path="res://scripts/gui.gd" id="10_ocoff"]
+[ext_resource type="Shader" path="res://assets/shaders/test.gdshader" id="10_shcmx"]
+[ext_resource type="Script" path="res://scripts/background.gd" id="10_y4vju"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tbejw"]
+texture = ExtResource("2_obwd8")
+0:0/next_alternative_id = 2
+0:0/0 = 0
+0:0/1 = 1
+0:0/1/transpose = true
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_y1uis"]
+texture = ExtResource("3_adxkv")
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_vmbpx"]
+texture = ExtResource("4_o0q4j")
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_w0fur"]
+texture = ExtResource("5_eqt5e")
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_c0vm1"]
+texture = ExtResource("6_y2sc0")
+0:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_huth1"]
+sources/1 = SubResource("TileSetAtlasSource_tbejw")
+sources/5 = SubResource("TileSetAtlasSource_c0vm1")
+sources/4 = SubResource("TileSetAtlasSource_w0fur")
+sources/3 = SubResource("TileSetAtlasSource_vmbpx")
+sources/2 = SubResource("TileSetAtlasSource_y1uis")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tfcjj"]
+shader = ExtResource("10_shcmx")
+shader_parameter/exponent = 1.0
+shader_parameter/strength = 0.003
+shader_parameter/variation = 0.001
+shader_parameter/frequency = 0.4
+
+[sub_resource type="SystemFont" id="SystemFont_rtmsu"]
+generate_mipmaps = true
+
+[sub_resource type="Environment" id="Environment_tiixt"]
+background_mode = 3
+glow_enabled = true
+glow_hdr_threshold = 0.87
+
+[node name="World" type="Node2D"]
+
+[node name="Json" type="Node" parent="."]
+script = ExtResource("1_3pqby")
+
+[node name="TileMap" type="TileMap" parent="." node_paths=PackedStringArray("gui", "debug_dot")]
+tile_set = SubResource("TileSet_huth1")
+format = 2
+script = ExtResource("2_e3udp")
+gui = NodePath("../Camera2D/GUI")
+debug_dot = NodePath("../DebugDot")
+
+[node name="Debug" type="Node" parent="TileMap"]
+
+[node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("background")]
+script = ExtResource("4_3i4pa")
+background = NodePath("CanvasLayer/Background")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="Camera2D"]
+layer = -1
+
+[node name="Background" type="Node2D" parent="Camera2D/CanvasLayer"]
+script = ExtResource("10_y4vju")
+
+[node name="Shaders" type="CanvasLayer" parent="Camera2D"]
+
+[node name="ColorRect" type="ColorRect" parent="Camera2D/Shaders"]
+material = SubResource("ShaderMaterial_tfcjj")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 0.156863, 0.568627, 1)
+
+[node name="GUI" type="CanvasLayer" parent="Camera2D" node_paths=PackedStringArray("selection_label")]
+layer = 10
+script = ExtResource("10_ocoff")
+selection_label = NodePath("Selection")
+
+[node name="Selection" type="RichTextLabel" parent="Camera2D/GUI"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/normal_font = SubResource("SystemFont_rtmsu")
+theme_override_font_sizes/normal_font_size = 20
+text = "hello"
+
+[node name="Classes" type="Node" parent="."]
+script = ExtResource("4_mms3p")
+
+[node name="Line2D" type="Line2D" parent="."]
+visible = false
+points = PackedVector2Array(-800, 0, 800, 0)
+width = 2.0
+default_color = Color(1, 0.0627451, 0.294118, 1)
+antialiased = true
+
+[node name="Line2D2" type="Line2D" parent="."]
+visible = false
+points = PackedVector2Array(0, -800, 0, 800)
+width = 2.0
+default_color = Color(0.121569, 1, 0.623529, 1)
+antialiased = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_tiixt")
+
+[node name="DebugDot" type="Polygon2D" parent="."]
+scale = Vector2(4, 4)
+color = Color(1, 0, 0.713726, 0.584314)
+polygon = PackedVector2Array(1, 1, -1, 1, -1, -1, 1, -1)
