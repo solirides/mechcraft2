@@ -14,8 +14,8 @@ var chunk_size:int
 var chunk_area:int
 var result:Array[Array]
 
-var lines:Array[Array] = []
-var priorities:Array[int] = []
+var lines_global:Array[Array] = []
+var priorities_global:Array[int] = []
 var used_tiles:Array[Array] = []
 
 const sides = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
@@ -129,7 +129,9 @@ func detect_world_tiles():
 #				print(gc)
 				debug_marker(gc, Color(1, 0, 1, 0.7))
 				used_tiles[gc.x][gc.y] == true
-				lines.append_array(detect_connections(gc, 0, 0, true))
+				var a = detect_connections(gc, 0, 0, true)
+				lines_global.append_array(a[0])
+				priorities_global.append_array(a[1])
 #				for b in range(4):
 ##					var neighbor = self.get_cell_source_id(0, index + sides[b])
 #					var facing:Vector2i = gc + sides[b]
@@ -152,7 +154,10 @@ func detect_world_tiles():
 #						debug_marker(gc, Color(1, 0, 1, 0.7))
 #						detect_connections(facing, facing_dir)
 								
-	return lines
+	return null
+
+func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement():
+	pass
 
 func initiate_resource_movement(tile_pos):
 	var local_coords = global2local(tile_pos)
@@ -223,7 +228,7 @@ func detect_connections(gc:Vector2i, p:int, start_dir:int, recurse:bool):
 	
 	var priority:int = p
 	var priorities:Array[int] = []
-	result = []
+	var result = []
 	var line:Array[Vector2i] = []
 	while loop:
 		loop = false
