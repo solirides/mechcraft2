@@ -62,7 +62,7 @@ func _input(event):
 		var p = get_global_mouse_position()
 		
 		print(p);
-		set_tile(Vector2i(floor(p.x/16), floor(p.y/16)), selected_tile, tile_rotation)
+		set_tile(0, Vector2i(floor(p.x/16), floor(p.y/16)), selected_tile, tile_rotation)
 #		var c = Vector2i(int(p.x) / 16, int(p.y) / 16)
 #		self.set_cell(0, c, selected_tile, Vector2i.ZERO, tile_rotation)
 #		world_tiles[0][c.x + c.y * chunk_size] = selected_tile
@@ -72,12 +72,15 @@ func _input(event):
 		var tile_pos = Vector2i(floor(p.x / 16), floor(p.y / 16))
 		rotate_conveyor(tile_pos)
 	
-	
+	if event.is_action_pressed("resource"):
+		var p = get_global_mouse_position()
+		print("resource spawned")
+		set_tile(1, Vector2i(floor(p.x/16), floor(p.y/16)), 6, tile_rotation)
 	
 	if event.is_action_pressed("right_click"):
 		var p = get_global_mouse_position()
 		print(p);
-		set_tile(Vector2i(floor(p.x/16), floor(p.y/16)), 0, 0)
+		set_tile(0, Vector2i(floor(p.x/16), floor(p.y/16)), 0, 0)
 	
 	if event.is_action_pressed("reload"):
 		print("recalculate")
@@ -284,14 +287,14 @@ func global2local(global_coords:Vector2i):
 		global_coords.y % chunk_size, \
 		floor(global_coords.x / chunk_size) + world_size*floor(global_coords.y/chunk_size))
 
-func set_tile(global_coords:Vector2i, tile:int, rotation:int):
+func set_tile(layer:int, global_coords:Vector2i, tile:int, rotation:int):
 #	no storage data yet
 	var local_coords = global2local(global_coords)
 	
 #	world_tiledata[local_coords.z]["storage"][local_coords.x + local_coords.y * chunk_size] = null
 	world_tiles[local_coords.z][local_coords.x + local_coords.y * chunk_size] = tile
 	world_tiledata[local_coords.z]["rotation"][local_coords.x + local_coords.y * chunk_size] = rotation
-	self.set_cell(0, \
+	self.set_cell(layer, \
 		global_coords, tile, \
 		Vector2i.ZERO, rotation
 		)
