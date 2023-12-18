@@ -12,6 +12,7 @@ var world_tiledata = []
 var world_size:int
 var chunk_size:int
 var chunk_area:int
+var result:Array[Array]
 
 var lines:Array[Array] = []
 var priorities:Array[int] = []
@@ -54,7 +55,17 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
+	#for line in result:
+		#if is_resource_on_conveyor(line):
+			#print("Resource ID 6 is on a conveyor line")
 	pass
+
+#func is_resource_on_conveyor(line):
+	#for coord in line:
+		#var local_coords = global2local(Vector2i(floor(p.x / 16), floor(p.y / 16)))
+		#var index = local2index(Vector2i(local_coords.x, local_coords.y))
+		#if tile == 6:
+			#return true
 
 func _input(event):
 	
@@ -212,7 +223,7 @@ func detect_connections(gc:Vector2i, p:int, start_dir:int, recurse:bool):
 	
 	var priority:int = p
 	var priorities:Array[int] = []
-	var result:Array[Array] = []
+	result = []
 	var line:Array[Vector2i] = []
 	while loop:
 		loop = false
