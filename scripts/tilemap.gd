@@ -420,6 +420,17 @@ func make_tileset_exist(ts: TileSet):
 				
 				source.get_tile_data(Vector2i(0,0), 3).transpose = true
 				
+				# temp solution
+				if file_name == "3-balancer.png":
+					source.get_tile_data(Vector2i(0,0), 1).flip_h = true
+					source.get_tile_data(Vector2i(0,0), 1).transpose = true
+					
+					source.get_tile_data(Vector2i(0,0), 2).flip_v = false
+					source.get_tile_data(Vector2i(0,0), 2).transpose = true
+					
+					source.get_tile_data(Vector2i(0,0), 3).flip_v = true
+					source.get_tile_data(Vector2i(0,0), 3).transpose = true
+					
 				
 				ts.add_source(source)
 			file_name = dir.get_next()
