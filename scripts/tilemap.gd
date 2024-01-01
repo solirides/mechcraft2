@@ -29,26 +29,7 @@ var bounds:Rect2i
 # Called when the node enters the scene tree for the first time.
 func _ready():
 #	print(json.json)
-	make_tileset_exist(tileset)
-	ResourceSaver.save(tileset, "res://generated_tileset.tres")
-	self.tile_set = tileset
-	
-	world_size = json.json["world_size"]
-	chunk_size = json.json["chunk_size"]
-	bounds = Rect2i(0, 0,world_size * chunk_size, world_size * chunk_size)
-	
-	chunk_area = pow(chunk_size, 2)
-	world_tiles = load_tiles()
-	world_tiledata = load_tiledata()
-	
-	for i in bounds.size.x:
-		var a = []
-		a.resize(bounds.size.y)
-		a.fill(false)
-		used_tiles.append(a)
-	
-	
-	set_tilemap(world_tiles, world_tiledata)
+	setup()
 	
 	gui.selection_changed.connect(_on_selection_changed)
 
@@ -102,15 +83,18 @@ func _input(event):
 			used_tiles[i].fill(false)
 		
 		detect_world_tiles()
-		#move items
-		update_items()
-		
+	
 	if event.is_action_pressed("ping"):
 		var p = get_global_mouse_position()
 		print(p);
 		var c = Vector2i(int(p.x) / 16, int(p.y) / 16)
 		print("PING " + " " + str(c) + " " + str(global2local(Vector2i(floor(p.x/16), floor(p.y/16)))) )
+		
+	if event.is_action_pressed("tick"):
+		do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement()
 
+# Detecting conveyor lines:
+#region
 func detect_world_tiles():
 #	var cells = self.get_used_cells(0)
 	var d = [chunk_size, 1, -chunk_size, -1]
@@ -154,63 +138,6 @@ func detect_world_tiles():
 #						debug_marker(gc, Color(1, 0, 1, 0.7))
 #						detect_connections(facing, facing_dir)
 								
-	return null
-
-func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement():
-	pass
-
-func initiate_resource_movement(tile_pos):
-	var local_coords = global2local(tile_pos)
-	var index = local2index(Vector2i(local_coords.x, local_coords.y))
-	var rotation = world_tiledata[local_coords.z]["rotation"][index]
-	
-	if world_tiles[local_coords.z][index] == 6:
-		match rotation:
-			0:  
-				move_resource(tile_pos, "up")
-			1:  
-				move_resource(tile_pos, "right")
-			2:  
-				move_resource(tile_pos, "down")
-			3:  
-				move_resource(tile_pos, "left")
-
-func move_resource(tile_pos, direction):
-	var current_tile = world_tiles[tile_pos.z][local2index(Vector2i(tile_pos.x, tile_pos.y))]
-	var next_tile = null
-	
-	match direction:
-		"right":
-			next_tile = Vector2i(tile_pos.x + 1, tile_pos.y)
-		"left":
-			next_tile = Vector2i(tile_pos.x - 1, tile_pos.y)
-		"up":
-			next_tile = Vector2i(tile_pos.x, tile_pos.y - 1)
-		"down":
-			next_tile = Vector2i(tile_pos.x, tile_pos.y + 1)
-		_:
-			print("Invalid direction")
-			
-	
-	if next_tile and world_tiles[next_tile.z][local2index(Vector2i(next_tile.x, next_tile.y))] == 6:
-		print("Moving resource from ", tile_pos, " to ", next_tile)
-	else:
-		print("Cannot move in that direction or no conveyor")
-
-func rotate_conveyor(tile_pos): 
-	var local_coords = global2local(tile_pos)
-	var index = local2index(Vector2i(local_coords.x, local_coords.y))
-	var tile = world_tiles[local_coords.z][index]
-	var rotation:int = world_tiledata[local_coords.z]["rotation"][index]
-	
-	rotation = (rotation + 1) % 4
-	world_tiledata[local_coords.z]["rotation"][index] = rotation
-	set_cell(0, tile_pos, tile, Vector2i(0, 0), rotation)
-
-func neighbor(gc:Vector2i, dir:int):
-	var tile = gc + sides[dir]
-	if bounds.has_point(tile):
-		return tile
 	return null
 
 func detect_connections(gc:Vector2i, p:int, start_dir:int, recurse:bool):
@@ -286,11 +213,71 @@ func detect_connections(gc:Vector2i, p:int, start_dir:int, recurse:bool):
 			# no tile found
 	return [result, priorities]
 
-func update_items():
-	for cell in chunk_area:
-		match int(world_tiles[0][cell]):
-			1:
-				pass
+#endregion
+
+# Processing tiles
+#region
+
+func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement():
+	pass
+
+func initiate_resource_movement(tile_pos):
+	var local_coords = global2local(tile_pos)
+	var index = local2index(Vector2i(local_coords.x, local_coords.y))
+	var rotation = world_tiledata[local_coords.z]["rotation"][index]
+	
+	if world_tiles[local_coords.z][index] == 6:
+		match rotation:
+			0:  
+				move_resource(tile_pos, "up")
+			1:  
+				move_resource(tile_pos, "right")
+			2:  
+				move_resource(tile_pos, "down")
+			3:  
+				move_resource(tile_pos, "left")
+
+func move_resource(tile_pos, direction):
+	var current_tile = world_tiles[tile_pos.z][local2index(Vector2i(tile_pos.x, tile_pos.y))]
+	var next_tile = null
+	
+	match direction:
+		"right":
+			next_tile = Vector2i(tile_pos.x + 1, tile_pos.y)
+		"left":
+			next_tile = Vector2i(tile_pos.x - 1, tile_pos.y)
+		"up":
+			next_tile = Vector2i(tile_pos.x, tile_pos.y - 1)
+		"down":
+			next_tile = Vector2i(tile_pos.x, tile_pos.y + 1)
+		_:
+			print("Invalid direction")
+			
+	
+	if next_tile and world_tiles[next_tile.z][local2index(Vector2i(next_tile.x, next_tile.y))] == 6:
+		print("Moving resource from ", tile_pos, " to ", next_tile)
+	else:
+		print("Cannot move in that direction or no conveyor")
+
+#endregion
+
+func rotate_conveyor(tile_pos): 
+	var local_coords = global2local(tile_pos)
+	var index = local2index(Vector2i(local_coords.x, local_coords.y))
+	var tile = world_tiles[local_coords.z][index]
+	var rotation:int = world_tiledata[local_coords.z]["rotation"][index]
+	
+	rotation = (rotation + 1) % 4
+	world_tiledata[local_coords.z]["rotation"][index] = rotation
+	set_cell(0, tile_pos, tile, Vector2i(0, 0), rotation)
+
+func neighbor(gc:Vector2i, dir:int):
+	var tile = gc + sides[dir]
+	if bounds.has_point(tile):
+		return tile
+	return null
+
+
 
 #func neighbor_index(chunk:int, index:int, direction:int):
 #	var location:Vector3
@@ -299,6 +286,9 @@ func update_items():
 #
 #	return location
 
+
+# Coordinate stuff:
+#region
 func local2index(local_coords:Vector2i):
 	return local_coords.x + local_coords.y * chunk_size
 
@@ -337,6 +327,33 @@ func debug_marker(global_coords:Vector2i, color:Color):
 func clear_markers():
 	for node in $Debug.get_children():
 		$Debug.remove_child(node)
+
+#endregion
+
+# Setup
+#region
+
+func setup():
+	make_tileset_exist(tileset)
+	ResourceSaver.save(tileset, "res://generated_tileset.tres")
+	self.tile_set = tileset
+	
+	world_size = json.json["world_size"]
+	chunk_size = json.json["chunk_size"]
+	bounds = Rect2i(0, 0,world_size * chunk_size, world_size * chunk_size)
+	
+	chunk_area = pow(chunk_size, 2)
+	world_tiles = load_tiles()
+	world_tiledata = load_tiledata()
+	
+	for i in bounds.size.x:
+		var a = []
+		a.resize(bounds.size.y)
+		a.fill(false)
+		used_tiles.append(a)
+	
+	
+	set_tilemap(world_tiles, world_tiledata)
 
 func set_tilemap(world_tiles, world_tiledata):
 	for c in len(world_tiles):
@@ -384,10 +401,7 @@ func load_tiledata():
 	
 	return world
 
-func _on_selection_changed(selected_tile, tile_rotation):
-	self.selected_tile = selected_tile
-	self.tile_rotation = tile_rotation
-	
+
 func make_tileset_exist(ts: TileSet):
 	var id = 0
 	var path = "res://assets/tiles/"
@@ -398,8 +412,8 @@ func make_tileset_exist(ts: TileSet):
 	
 	if dir:
 		dir.list_dir_begin()
-		var file_name = dir.get_next()
-		while file_name != "":
+		#var file_name = dir.get_next()
+		for file_name in dir.get_files():
 			if dir.current_is_dir():
 				print("Found directory: " + file_name)
 			elif file_name.ends_with(".png"):
@@ -434,25 +448,14 @@ func make_tileset_exist(ts: TileSet):
 				
 				ts.add_source(source)
 			file_name = dir.get_next()
+		dir.list_dir_end()
 	else:
 		print("An error occurred when trying to access the path.")
 	
 
-#	ts.tile_set_name()
-#	ts.tile_set_texture(id, ...)
-#	ts.tile_set_region(id, ...)
+#endregion
 
-func dir_contents(path):
-	var dir = DirAccess.open("res://assets/tiles")
-	if dir:
-		dir.list_dir_begin()
-		var file_name = dir.get_next()
-		while file_name != "":
-			if dir.current_is_dir():
-				print("Found directory: " + file_name)
-			else:
-				print("Found file: " + file_name)
-			file_name = dir.get_next()
-	else:
-		print("An error occurred when trying to access the path.")
+func _on_selection_changed(selected_tile, tile_rotation):
+	self.selected_tile = selected_tile
+	self.tile_rotation = tile_rotation
 
