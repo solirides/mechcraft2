@@ -4,6 +4,7 @@ extends CanvasLayer
 signal selection_changed
 
 @export var selection_label:RichTextLabel = null
+@export var alert_label:RichTextLabel = null
 var selected_tile = 1
 var tile_rotation = 0
 
@@ -35,3 +36,7 @@ func update_selection():
 	selection_label.text = str(selected_tile) + " " + str(tile_rotation)
 	
 	selection_changed.emit(selected_tile, tile_rotation)
+
+func alert(text:String):
+	alert_label.text = text
+	
