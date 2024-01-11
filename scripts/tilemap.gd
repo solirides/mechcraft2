@@ -150,7 +150,7 @@ func detect_connections(gc:Vector2i, p:int, start_dir:int, recurse:bool):
 	var priority:int = p
 	var priorities:Array[int] = []
 	var result = []
-	var line:Array[Vector2i] = []
+	var line:Array[Vector2i] = [gc]
 	while loop:
 		loop = false
 		split = false
@@ -221,10 +221,12 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 			for gc in lines_global[p2]:
 				var lc = global2local(gc)
 				var index = local2index(Vector2i(lc.x, lc.y))
-				if world_items[lc.z][index] == 6:
+				if world_items[lc.z][index] != 0:
 					# doesn't work with balancers yet
-					var dir = world_tiledata[lc.z]["rotation"][index]
-					move_resource(gc, dir)
+					match world_tiles[lc.z][index]:
+						1:
+							var dir = world_tiledata[lc.z]["rotation"][index]
+							move_resource(gc, dir)
 
 #func initiate_resource_movement(tile_pos):
 	#var local_coords = global2local(tile_pos)
