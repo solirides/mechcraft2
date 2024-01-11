@@ -17,6 +17,8 @@ var result:Array[Array]
 
 var lines_global:Array[Array] = []
 var priorities_global:Array[int] = []
+var priorities_index:Array[Array] = []
+var max_priority:int = 0
 var used_tiles:Array[Array] = []
 
 const sides = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
@@ -80,6 +82,11 @@ func _input(event):
 		clear_markers()
 		#detect miners and create conveyor lines
 		#var roots:Array = []
+		lines_global = []
+		priorities_global = []
+		priorities_index = []
+		max_priority = 0
+		
 		for i in len(used_tiles):
 			used_tiles[i].fill(false)
 		
@@ -92,6 +99,7 @@ func _input(event):
 		print("PING " + " " + str(c) + " " + str(global2local(Vector2i(floor(p.x/16), floor(p.y/16)))) )
 		
 	if event.is_action_pressed("tick"):
+		print("tick")
 		do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement()
 
 # Detecting conveyor lines:
@@ -106,39 +114,24 @@ func detect_world_tiles():
 #		print(world_tiles[0][index])
 		# one chunk
 		match int(world_tiles[c][index]):
-			5:
+			5: # line includes miners and storage
 				print("5")
-				# line includes miners and storage
 				var gc = local2global(index2local(index, c))
 #				print(Vector3i(index % chunk_size, floor(index / chunk_size), c))
 #				print(gc)
 				debug_marker(gc, Color(1, 0, 1, 0.7))
 				used_tiles[gc.x][gc.y] == true
-				var a = detect_connections(gc, 0, 0, true)
+				var a = detect_connections(gc, 1, 0, true)
 				lines_global.append_array(a[0])
 				priorities_global.append_array(a[1])
-#				for b in range(4):
-##					var neighbor = self.get_cell_source_id(0, index + sides[b])
-#					var facing:Vector2i = gc + sides[b]
-#					# temp solution
-#					if not Rect2i(0,0,chunk_size,chunk_size).has_point(facing):
-#						print("a")
-#						continue
-#
-#					var facing_lc = global2local(facing)
-#					var facing_id = world_tiles[facing_lc.z][local2index(Vector2i(facing_lc.x, facing_lc.y))]
-#					var facing_dir = world_tiledata[facing_lc.z]["rotation"][local2index(Vector2i(facing_lc.x, facing_lc.y))]
-#					print(facing)
-#					print(facing_lc)
-#					print(facing_id)
-#					print(facing_dir)
-#					debug_marker(gc, Color(0, 1, 1, 0.7))
-#					if facing_id == 1 and facing_dir == (b + 2) % 4:
-#						print(Vector2i(0, index))
-#						line.append(local2global(index2local(index, c)))
-#						debug_marker(gc, Color(1, 0, 1, 0.7))
-#						detect_connections(facing, facing_dir)
-								
+	
+	# sort lines
+	for i in range(max_priority + 1):
+		priorities_index.append([])
+	
+	for i in len(priorities_global):
+		priorities_index[priorities_global[i]].append(i)
+	
 	return null
 
 func detect_connections(gc:Vector2i, p:int, start_dir:int, recurse:bool):
@@ -182,8 +175,8 @@ func detect_connections(gc:Vector2i, p:int, start_dir:int, recurse:bool):
 						used_tiles[facing_gc.x][facing_gc.y] = true
 						# create new line
 						if split:
-							result.append(line)
-							priorities.append(priority)
+							#result.append(line)
+							#priorities.append(priority)
 							var a = detect_connections(facing_gc, priority + 1, dir, true)
 							result.append_array(a[0])
 							priorities.append_array(a[1])
@@ -196,12 +189,12 @@ func detect_connections(gc:Vector2i, p:int, start_dir:int, recurse:bool):
 						n_dir = facing_rot
 						loop = true
 						split = true
-				3:
+				3: # sketchy
 					if facing_rot == (b + dir) % 4 or facing_rot == (b + dir - 1) % 4:
 						# start new line
 						#line.append(facing_gc) # might not be needed
-						result.append(line)
-						priorities.append(priority)
+						#result.append(line)
+						#priorities.append(priority)
 						
 						used_tiles[facing_gc.x][facing_gc.y] = true
 						n_tile = facing_gc
@@ -211,7 +204,10 @@ func detect_connections(gc:Vector2i, p:int, start_dir:int, recurse:bool):
 							result.append_array(a[0])
 							priorities.append_array(a[1])
 						
-			# no tile found
+	result.append(line)
+	priorities.append(priority)
+	
+	max_priority = max(max_priority, priority)
 	return [result, priorities]
 
 #endregion
@@ -220,45 +216,46 @@ func detect_connections(gc:Vector2i, p:int, start_dir:int, recurse:bool):
 #region
 
 func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement():
-	pass
+	for p in priorities_index:
+		for p2 in p:
+			for gc in lines_global[p2]:
+				var lc = global2local(gc)
+				var index = local2index(Vector2i(lc.x, lc.y))
+				if world_items[lc.z][index] == 6:
+					# doesn't work with balancers yet
+					var dir = world_tiledata[lc.z]["rotation"][index]
+					move_resource(gc, dir)
 
-func initiate_resource_movement(tile_pos):
-	var local_coords = global2local(tile_pos)
-	var index = local2index(Vector2i(local_coords.x, local_coords.y))
-	var rotation = world_tiledata[local_coords.z]["rotation"][index]
-	
-	if world_tiles[local_coords.z][index] == 6:
-		match rotation:
-			0:  
-				move_resource(tile_pos, "up")
-			1:  
-				move_resource(tile_pos, "right")
-			2:  
-				move_resource(tile_pos, "down")
-			3:  
-				move_resource(tile_pos, "left")
+#func initiate_resource_movement(tile_pos):
+	#var local_coords = global2local(tile_pos)
+	#var index = local2index(Vector2i(local_coords.x, local_coords.y))
+	#var rotation = world_tiledata[local_coords.z]["rotation"][index]
+	#
+	#if world_tiles[local_coords.z][index] == 6:
+		#match rotation:
+			#0:  
+				#move_resource(tile_pos, "up")
+			#1:  
+				#move_resource(tile_pos, "right")
+			#2:  
+				#move_resource(tile_pos, "down")
+			#3:  
+				#move_resource(tile_pos, "left")
 
-func move_resource(tile_pos, direction):
-	var current_tile = world_tiles[tile_pos.z][local2index(Vector2i(tile_pos.x, tile_pos.y))]
-	var next_tile = null
+func move_resource(gc:Vector2i, direction:int):
+	var lc = global2local(gc)
+	var idx = local2index(Vector2i(lc.x, lc.y))
+	var current_tile = world_tiles[lc.z][idx]
+	var next_tile = gc + sides[direction]
+	var id = world_items[lc.z][idx]
 	
-	match direction:
-		"right":
-			next_tile = Vector2i(tile_pos.x + 1, tile_pos.y)
-		"left":
-			next_tile = Vector2i(tile_pos.x - 1, tile_pos.y)
-		"up":
-			next_tile = Vector2i(tile_pos.x, tile_pos.y - 1)
-		"down":
-			next_tile = Vector2i(tile_pos.x, tile_pos.y + 1)
-		_:
-			print("Invalid direction")
-			
+	set_item(1, gc, 0)
+	set_item(1, next_tile, id)
 	
-	if next_tile and world_tiles[next_tile.z][local2index(Vector2i(next_tile.x, next_tile.y))] == 6:
-		print("Moving resource from ", tile_pos, " to ", next_tile)
-	else:
-		print("Cannot move in that direction or no conveyor")
+	#if next_tile and world_tiles[next_tile.z][local2index(Vector2i(next_tile.x, next_tile.y))] == 6:
+		#print("Moving resource from ", tile_pos, " to ", next_tile)
+	#else:
+		#print("Cannot move in that direction or no conveyor")
 
 #endregion
 
