@@ -9,6 +9,7 @@ extends TileMap
 
 var world_tiles = []
 var world_tiledata = []
+var world_items = []
 var world_size:int
 var chunk_size:int
 var chunk_area:int
@@ -67,7 +68,7 @@ func _input(event):
 	if event.is_action_pressed("resource"):
 		var p = get_global_mouse_position()
 		print("resource spawned")
-		set_tile(1, Vector2i(floor(p.x/16), floor(p.y/16)), 6, tile_rotation)
+		set_item(1, Vector2i(floor(p.x/16), floor(p.y/16)), 6)
 	
 	if event.is_action_pressed("right_click"):
 		var p = get_global_mouse_position()
@@ -162,22 +163,22 @@ func detect_connections(gc:Vector2i, p:int, start_dir:int, recurse:bool):
 		split = false
 		tile = n_tile
 		dir =  n_dir
-		for b in range(4):
+		for b:int in range(4):
 			var facing_gc:Vector2i = tile + sides[(b + dir + 2) % 4]
 			var facing_lc:Vector3i = global2local(facing_gc)
-			var facing:Vector2i = Vector2i(facing_lc.x,facing_lc.y)
-			var c = facing_lc.z
 			print(facing_lc)
-			if not bounds.has_point(facing) or used_tiles[facing.x][facing.y] == true:
+			if not bounds.has_point(Vector2i(facing_lc.x,facing_lc.y)) or used_tiles[facing_lc.x][facing_lc.y] == true:
 				# out of bounds
 				print("a")
 				continue
-			var facing_idx = local2index(facing)
+			var c = facing_lc.z
+			var facing_idx = local2index(Vector2i(facing_lc.x,facing_lc.y))
 			var facing_rot = world_tiledata[c]["rotation"][facing_idx]
+			var facing_tile = world_tiles[c][facing_idx]
 			
 			match int(world_tiles[c][facing_idx]):
 				1:
-					if facing_rot == int(b + dir) % 4:
+					if facing_rot == (b + dir) % 4:
 						used_tiles[facing_gc.x][facing_gc.y] = true
 						# create new line
 						if split:
@@ -196,7 +197,7 @@ func detect_connections(gc:Vector2i, p:int, start_dir:int, recurse:bool):
 						loop = true
 						split = true
 				3:
-					if facing_rot == int(b + dir) % 4:
+					if facing_rot == (b + dir) % 4 or facing_rot == (b + dir - 1) % 4:
 						# start new line
 						#line.append(facing_gc) # might not be needed
 						result.append(line)
@@ -312,9 +313,18 @@ func set_tile(layer:int, global_coords:Vector2i, tile:int, rotation:int):
 	world_tiles[local_coords.z][local_coords.x + local_coords.y * chunk_size] = tile
 	world_tiledata[local_coords.z]["rotation"][local_coords.x + local_coords.y * chunk_size] = rotation
 	self.set_cell(layer, \
-		global_coords, tile, \
-		Vector2i.ZERO, rotation
-		)
+			global_coords, tile, \
+			Vector2i.ZERO, rotation
+			)
+
+func set_item(layer:int, global_coords:Vector2i, tile:int):
+	var local_coords = global2local(global_coords)
+	
+	world_items[local_coords.z][local_coords.x + local_coords.y * chunk_size] = tile
+	self.set_cell(layer, \
+			global_coords, tile, \
+			Vector2i.ZERO, rotation
+			)
 
 func debug_marker(global_coords:Vector2i, color:Color):
 	var a = Polygon2D.new()
@@ -344,6 +354,7 @@ func setup():
 	
 	chunk_area = pow(chunk_size, 2)
 	world_tiles = load_tiles()
+	world_items = load_items()
 	world_tiledata = load_tiledata()
 	
 	for i in bounds.size.x:
@@ -376,6 +387,20 @@ func load_tiles():
 #		print(world[0])
 	
 	# fill missing chunks
+	var a:PackedInt32Array = []
+	a.resize(pow(chunk_size, 2))
+	a.fill(0)
+	for i in pow(world_size, 2) - len(world):
+		world.append(a)
+	
+	return world
+
+func load_items():
+	var world = []
+	print("loading items")
+	for i in len(json.json["chunks"]):
+		world.append(PackedInt32Array(json.json["chunks"][i]["items"]))
+
 	var a:PackedInt32Array = []
 	a.resize(pow(chunk_size, 2))
 	a.fill(0)
