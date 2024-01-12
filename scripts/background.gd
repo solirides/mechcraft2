@@ -22,6 +22,9 @@ func draw_grid(pos:Vector2, zoom:float):
 func _draw():
 	var space = size * zoom
 	
+	while space < size * 0.2:
+		space *= 8
+	
 	var origin = Vector2(get_viewport().size.x / 2 - pos.x * zoom, \
 		get_viewport().size.y / 2 - pos.y * zoom)
 		

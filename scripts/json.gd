@@ -8,8 +8,6 @@ func _ready():
 	json = ReadData("res://assets/world.json")
 	print(json["chunks"][0]["tiles"])
 	
-	
-
 
 func ReadData(file_path):
 	
@@ -30,3 +28,6 @@ func ReadData(file_path):
 	file_data = null
 	return json_data
 
+
+func SaveData(file_path):
+	pass

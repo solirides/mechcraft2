@@ -7,14 +7,22 @@ extends TileMap
 @export var gui:CanvasLayer = null
 @export var debug_dot:Polygon2D = null
 
+var running = false
+var last_tick = 0
+var tps:float = 3
+
 var world_tiles = []
 var world_tiledata = []
+var world_items = []
 var world_size:int
 var chunk_size:int
 var chunk_area:int
+var result:Array[Array]
 
-var lines:Array[Array] = []
-var priorities:Array[int] = []
+var lines_global:Array[Array] = []
+var priorities_global:Array[int] = []
+var priorities_index:Array[Array] = []
+var max_priority:int = 0
 var used_tiles:Array[Array] = []
 
 const sides = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
@@ -28,33 +36,25 @@ var bounds:Rect2i
 # Called when the node enters the scene tree for the first time.
 func _ready():
 #	print(json.json)
-	make_tileset_exist(tileset)
-	ResourceSaver.save(tileset, "res://generated_tileset.tres")
-	self.tile_set = tileset
-	
-	world_size = json.json["world_size"]
-	chunk_size = json.json["chunk_size"]
-	bounds = Rect2i(0, 0,world_size * chunk_size, world_size * chunk_size)
-	
-	chunk_area = pow(chunk_size, 2)
-	world_tiles = load_tiles()
-	world_tiledata = load_tiledata()
-	
-	for i in bounds.size.x:
-		var a = []
-		a.resize(bounds.size.y)
-		a.fill(false)
-		used_tiles.append(a)
-	
-	
-	set_tilemap(world_tiles, world_tiledata)
+	setup()
 	
 	gui.selection_changed.connect(_on_selection_changed)
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	pass
+	var p = get_global_mouse_position()
+	var gc = Vector2i(floor(p.x / 16), floor(p.y / 16))
+	var lc = global2local(gc)
+	gui.alert(str(gc.x) + " " + str(gc.y) + "\n" + str(lc.x) + " " + str(lc.y) + " " + str(lc.z))
+	
+
+func _physics_process(delta):
+	#print(last_tick)
+	last_tick += delta
+	if running == true and last_tick >= (1.0 / tps):
+		last_tick = 0
+		do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement()
 
 func _input(event):
 	
@@ -75,7 +75,7 @@ func _input(event):
 	if event.is_action_pressed("resource"):
 		var p = get_global_mouse_position()
 		print("resource spawned")
-		set_tile(1, Vector2i(floor(p.x/16), floor(p.y/16)), 6, tile_rotation)
+		set_item(1, Vector2i(floor(p.x/16), floor(p.y/16)), 6)
 	
 	if event.is_action_pressed("right_click"):
 		var p = get_global_mouse_position()
@@ -87,19 +87,31 @@ func _input(event):
 		clear_markers()
 		#detect miners and create conveyor lines
 		#var roots:Array = []
+		lines_global = []
+		priorities_global = []
+		priorities_index = []
+		max_priority = 0
+		
 		for i in len(used_tiles):
 			used_tiles[i].fill(false)
 		
 		detect_world_tiles()
-		#move items
-		update_items()
-		
+	
 	if event.is_action_pressed("ping"):
 		var p = get_global_mouse_position()
 		print(p);
 		var c = Vector2i(int(p.x) / 16, int(p.y) / 16)
 		print("PING " + " " + str(c) + " " + str(global2local(Vector2i(floor(p.x/16), floor(p.y/16)))) )
+		
+	if event.is_action_pressed("tick"):
+		print("tick")
+		do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement()
+	if event.is_action_pressed("pause"):
+		running = !running
+		
 
+# Detecting conveyor lines:
+#region
 func detect_world_tiles():
 #	var cells = self.get_used_cells(0)
 	var d = [chunk_size, 1, -chunk_size, -1]
@@ -110,91 +122,24 @@ func detect_world_tiles():
 #		print(world_tiles[0][index])
 		# one chunk
 		match int(world_tiles[c][index]):
-			5:
+			5: # line includes miners and storage
 				print("5")
-				# line includes miners and storage
 				var gc = local2global(index2local(index, c))
 #				print(Vector3i(index % chunk_size, floor(index / chunk_size), c))
 #				print(gc)
 				debug_marker(gc, Color(1, 0, 1, 0.7))
 				used_tiles[gc.x][gc.y] == true
-				lines.append_array(detect_connections(gc, 0, 0, true))
-#				for b in range(4):
-##					var neighbor = self.get_cell_source_id(0, index + sides[b])
-#					var facing:Vector2i = gc + sides[b]
-#					# temp solution
-#					if not Rect2i(0,0,chunk_size,chunk_size).has_point(facing):
-#						print("a")
-#						continue
-#
-#					var facing_lc = global2local(facing)
-#					var facing_id = world_tiles[facing_lc.z][local2index(Vector2i(facing_lc.x, facing_lc.y))]
-#					var facing_dir = world_tiledata[facing_lc.z]["rotation"][local2index(Vector2i(facing_lc.x, facing_lc.y))]
-#					print(facing)
-#					print(facing_lc)
-#					print(facing_id)
-#					print(facing_dir)
-#					debug_marker(gc, Color(0, 1, 1, 0.7))
-#					if facing_id == 1 and facing_dir == (b + 2) % 4:
-#						print(Vector2i(0, index))
-#						line.append(local2global(index2local(index, c)))
-#						debug_marker(gc, Color(1, 0, 1, 0.7))
-#						detect_connections(facing, facing_dir)
-								
-	return lines
-
-func initiate_resource_movement(tile_pos):
-	var local_coords = global2local(tile_pos)
-	var index = local2index(Vector2i(local_coords.x, local_coords.y))
-	var rotation = world_tiledata[local_coords.z]["rotation"][index]
+				var a = detect_connections(gc, 1, 0, true)
+				lines_global.append_array(a[0])
+				priorities_global.append_array(a[1])
 	
-	if world_tiles[local_coords.z][index] == 6:
-		match rotation:
-			0:  
-				move_resource(tile_pos, "up")
-			1:  
-				move_resource(tile_pos, "right")
-			2:  
-				move_resource(tile_pos, "down")
-			3:  
-				move_resource(tile_pos, "left")
-
-func move_resource(tile_pos, direction):
-	var current_tile = world_tiles[tile_pos.z][local2index(Vector2i(tile_pos.x, tile_pos.y))]
-	var next_tile = null
+	# sort lines
+	for i in range(max_priority + 1):
+		priorities_index.append([])
 	
-	match direction:
-		"right":
-			next_tile = Vector2i(tile_pos.x + 1, tile_pos.y)
-		"left":
-			next_tile = Vector2i(tile_pos.x - 1, tile_pos.y)
-		"up":
-			next_tile = Vector2i(tile_pos.x, tile_pos.y - 1)
-		"down":
-			next_tile = Vector2i(tile_pos.x, tile_pos.y + 1)
-		_:
-			print("Invalid direction")
-			
+	for i in len(priorities_global):
+		priorities_index[priorities_global[i]].append(i)
 	
-	if next_tile and world_tiles[next_tile.z][local2index(Vector2i(next_tile.x, next_tile.y))] == 6:
-		print("Moving resource from ", tile_pos, " to ", next_tile)
-	else:
-		print("Cannot move in that direction or no conveyor")
-
-func rotate_conveyor(tile_pos): 
-	var local_coords = global2local(tile_pos)
-	var index = local2index(Vector2i(local_coords.x, local_coords.y))
-	var tile = world_tiles[local_coords.z][index]
-	var rotation:int = world_tiledata[local_coords.z]["rotation"][index]
-	
-	rotation = (rotation + 1) % 4
-	world_tiledata[local_coords.z]["rotation"][index] = rotation
-	set_cell(0, tile_pos, tile, Vector2i(0, 0), rotation)
-
-func neighbor(gc:Vector2i, dir:int):
-	var tile = gc + sides[dir]
-	if bounds.has_point(tile):
-		return tile
 	return null
 
 func detect_connections(gc:Vector2i, p:int, start_dir:int, recurse:bool):
@@ -212,58 +157,139 @@ func detect_connections(gc:Vector2i, p:int, start_dir:int, recurse:bool):
 	
 	var priority:int = p
 	var priorities:Array[int] = []
-	var result:Array[Array] = []
-	var line:Array[Vector2i] = []
+	var result = []
+	var line:Array[Vector2i] = [gc]
 	while loop:
 		loop = false
 		split = false
 		tile = n_tile
 		dir =  n_dir
-		for b in range(4):
+		print(tile)
+		for b:int in range(4):
 			var facing_gc:Vector2i = tile + sides[(b + dir + 2) % 4]
 			var facing_lc:Vector3i = global2local(facing_gc)
-			var facing:Vector2i = Vector2i(facing_lc.x,facing_lc.y)
-			var c = facing_lc.z
-			print(facing_lc)
-			if not bounds.has_point(facing) or used_tiles[facing.x][facing.y] == true:
+			#print(facing_lc)
+			print(facing_gc)
+			if not bounds.has_point(Vector2i(facing_lc.x,facing_lc.y)) or used_tiles[facing_gc.x][facing_gc.y]:
 				# out of bounds
 				print("a")
+				#print(bounds.has_point(Vector2i(facing_lc.x,facing_lc.y)))
+				#print(used_tiles[facing_lc.x][facing_lc.y])
 				continue
-			var facing_idx = local2index(facing)
+			var c = facing_lc.z
+			var facing_idx = local2index(Vector2i(facing_lc.x,facing_lc.y))
 			var facing_rot = world_tiledata[c]["rotation"][facing_idx]
+			var facing_tile = world_tiles[c][facing_idx]
 			
 			match int(world_tiles[c][facing_idx]):
-				1:
-					if facing_rot == int(b + dir) % 4:
-						debug_marker(facing_gc, color)
+				1: # conveyor
+					if facing_rot == (b + dir) % 4:
 						used_tiles[facing_gc.x][facing_gc.y] = true
 						# create new line
 						if split:
-							detect_connections(facing_gc, priority + 1, dir, true)
+							#result.append(line)
+							#priorities.append(priority)
+							var a = detect_connections(facing_gc, priority + 1, dir, true)
+							result.append_array(a[0])
+							priorities.append_array(a[1])
 							continue
 						# extend line
+						debug_marker(facing_gc, color)
+						line.append(facing_gc)
 						
 						n_tile = facing_gc
 						n_dir = facing_rot
 						loop = true
 						split = true
-				3:
-					if facing_rot == int(b + dir) % 4:
+				3: # sketchy
+					if facing_rot == (b + dir) % 4 or facing_rot == (b + dir - 1) % 4:
 						# start new line
+						#line.append(facing_gc) # might not be needed
+						#result.append(line)
+						#priorities.append(priority)
+						
 						used_tiles[facing_gc.x][facing_gc.y] = true
 						n_tile = facing_gc
 						n_dir = facing_rot
 						if recurse:
-							detect_connections(facing_gc, priority + 1, dir, true)
+							var a = detect_connections(facing_gc, priority + 1, dir, true)
+							result.append_array(a[0])
+							priorities.append_array(a[1])
 						
-			# no tile found
-	return result
+	result.append(line)
+	priorities.append(priority)
+	
+	max_priority = max(max_priority, priority)
+	return [result, priorities]
 
-func update_items():
-	for cell in chunk_area:
-		match int(world_tiles[0][cell]):
-			1:
-				pass
+#endregion
+
+# Processing tiles
+#region
+
+func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement():
+	for p in priorities_index:
+		for p2 in p:
+			for gc in lines_global[p2]:
+				var lc = global2local(gc)
+				var index = local2index(Vector2i(lc.x, lc.y))
+				if world_items[lc.z][index] != 0:
+					# doesn't work with balancers yet
+					match world_tiles[lc.z][index]:
+						1:
+							var dir = world_tiledata[lc.z]["rotation"][index]
+							move_resource(gc, dir)
+
+#func initiate_resource_movement(tile_pos):
+	#var local_coords = global2local(tile_pos)
+	#var index = local2index(Vector2i(local_coords.x, local_coords.y))
+	#var rotation = world_tiledata[local_coords.z]["rotation"][index]
+	#
+	#if world_tiles[local_coords.z][index] == 6:
+		#match rotation:
+			#0:  
+				#move_resource(tile_pos, "up")
+			#1:  
+				#move_resource(tile_pos, "right")
+			#2:  
+				#move_resource(tile_pos, "down")
+			#3:  
+				#move_resource(tile_pos, "left")
+
+func move_resource(gc:Vector2i, direction:int):
+	var lc = global2local(gc)
+	var idx = local2index(Vector2i(lc.x, lc.y))
+	var current_tile = world_tiles[lc.z][idx]
+	var next_tile = gc + sides[direction]
+	var id = world_items[lc.z][idx]
+	
+	set_item(1, gc, 0)
+	set_item(1, next_tile, id)
+	
+	#if next_tile and world_tiles[next_tile.z][local2index(Vector2i(next_tile.x, next_tile.y))] == 6:
+		#print("Moving resource from ", tile_pos, " to ", next_tile)
+	#else:
+		#print("Cannot move in that direction or no conveyor")
+
+#endregion
+
+func rotate_conveyor(tile_pos): 
+	var local_coords = global2local(tile_pos)
+	var index = local2index(Vector2i(local_coords.x, local_coords.y))
+	var tile = world_tiles[local_coords.z][index]
+	var rotation:int = world_tiledata[local_coords.z]["rotation"][index]
+	
+	rotation = (rotation + 1) % 4
+	world_tiledata[local_coords.z]["rotation"][index] = rotation
+	set_cell(0, tile_pos, tile, Vector2i(0, 0), rotation)
+
+func neighbor(gc:Vector2i, dir:int):
+	var tile = gc + sides[dir]
+	if bounds.has_point(tile):
+		return tile
+	return null
+
+
 
 #func neighbor_index(chunk:int, index:int, direction:int):
 #	var location:Vector3
@@ -272,6 +298,9 @@ func update_items():
 #
 #	return location
 
+
+# Coordinate stuff:
+#region
 func local2index(local_coords:Vector2i):
 	return local_coords.x + local_coords.y * chunk_size
 
@@ -295,9 +324,18 @@ func set_tile(layer:int, global_coords:Vector2i, tile:int, rotation:int):
 	world_tiles[local_coords.z][local_coords.x + local_coords.y * chunk_size] = tile
 	world_tiledata[local_coords.z]["rotation"][local_coords.x + local_coords.y * chunk_size] = rotation
 	self.set_cell(layer, \
-		global_coords, tile, \
-		Vector2i.ZERO, rotation
-		)
+			global_coords, tile, \
+			Vector2i.ZERO, rotation
+			)
+
+func set_item(layer:int, global_coords:Vector2i, tile:int):
+	var local_coords = global2local(global_coords)
+	
+	world_items[local_coords.z][local_coords.x + local_coords.y * chunk_size] = tile
+	self.set_cell(layer, \
+			global_coords, tile, \
+			Vector2i.ZERO, rotation
+			)
 
 func debug_marker(global_coords:Vector2i, color:Color):
 	var a = Polygon2D.new()
@@ -310,6 +348,34 @@ func debug_marker(global_coords:Vector2i, color:Color):
 func clear_markers():
 	for node in $Debug.get_children():
 		$Debug.remove_child(node)
+
+#endregion
+
+# Setup
+#region
+
+func setup():
+	make_tileset_exist(tileset)
+	ResourceSaver.save(tileset, "res://generated_tileset.tres")
+	self.tile_set = tileset
+	
+	world_size = json.json["world_size"]
+	chunk_size = json.json["chunk_size"]
+	bounds = Rect2i(0, 0, world_size * chunk_size, world_size * chunk_size)
+	
+	chunk_area = pow(chunk_size, 2)
+	world_tiles = load_tiles()
+	world_items = load_items()
+	world_tiledata = load_tiledata()
+	
+	for i in bounds.size.x:
+		var a = []
+		a.resize(bounds.size.y)
+		a.fill(false)
+		used_tiles.append(a)
+	
+	
+	set_tilemap(world_tiles, world_tiledata)
 
 func set_tilemap(world_tiles, world_tiledata):
 	for c in len(world_tiles):
@@ -340,6 +406,20 @@ func load_tiles():
 	
 	return world
 
+func load_items():
+	var world = []
+	print("loading items")
+	for i in len(json.json["chunks"]):
+		world.append(PackedInt32Array(json.json["chunks"][i]["items"]))
+
+	var a:PackedInt32Array = []
+	a.resize(pow(chunk_size, 2))
+	a.fill(0)
+	for i in pow(world_size, 2) - len(world):
+		world.append(a)
+	
+	return world
+
 func load_tiledata():
 	var world = []
 	print("loading tiledata")
@@ -357,10 +437,7 @@ func load_tiledata():
 	
 	return world
 
-func _on_selection_changed(selected_tile, tile_rotation):
-	self.selected_tile = selected_tile
-	self.tile_rotation = tile_rotation
-	
+
 func make_tileset_exist(ts: TileSet):
 	var id = 0
 	var path = "res://assets/tiles/"
@@ -371,8 +448,8 @@ func make_tileset_exist(ts: TileSet):
 	
 	if dir:
 		dir.list_dir_begin()
-		var file_name = dir.get_next()
-		while file_name != "":
+		#var file_name = dir.get_next()
+		for file_name in dir.get_files():
 			if dir.current_is_dir():
 				print("Found directory: " + file_name)
 			elif file_name.ends_with(".png"):
@@ -393,28 +470,28 @@ func make_tileset_exist(ts: TileSet):
 				
 				source.get_tile_data(Vector2i(0,0), 3).transpose = true
 				
+				# temp solution
+				if file_name == "3-balancer.png":
+					source.get_tile_data(Vector2i(0,0), 1).flip_h = true
+					source.get_tile_data(Vector2i(0,0), 1).transpose = true
+					
+					source.get_tile_data(Vector2i(0,0), 2).flip_v = false
+					source.get_tile_data(Vector2i(0,0), 2).transpose = true
+					
+					source.get_tile_data(Vector2i(0,0), 3).flip_v = true
+					source.get_tile_data(Vector2i(0,0), 3).transpose = true
+					
 				
 				ts.add_source(source)
 			file_name = dir.get_next()
+		dir.list_dir_end()
 	else:
 		print("An error occurred when trying to access the path.")
 	
 
-#	ts.tile_set_name()
-#	ts.tile_set_texture(id, ...)
-#	ts.tile_set_region(id, ...)
+#endregion
 
-func dir_contents(path):
-	var dir = DirAccess.open("res://assets/tiles")
-	if dir:
-		dir.list_dir_begin()
-		var file_name = dir.get_next()
-		while file_name != "":
-			if dir.current_is_dir():
-				print("Found directory: " + file_name)
-			else:
-				print("Found file: " + file_name)
-			file_name = dir.get_next()
-	else:
-		print("An error occurred when trying to access the path.")
+func _on_selection_changed(selected_tile, tile_rotation):
+	self.selected_tile = selected_tile
+	self.tile_rotation = tile_rotation
 
