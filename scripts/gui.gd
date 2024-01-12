@@ -38,5 +38,5 @@ func update_selection():
 	selection_changed.emit(selected_tile, tile_rotation)
 
 func alert(text:String):
-	alert_label.text = text
+	alert_label.text = "[center]" + text
 	

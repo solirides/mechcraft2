@@ -7,6 +7,10 @@ extends TileMap
 @export var gui:CanvasLayer = null
 @export var debug_dot:Polygon2D = null
 
+var running = false
+var last_tick = 0
+var tps:float = 3
+
 var world_tiles = []
 var world_tiledata = []
 var world_items = []
@@ -39,17 +43,18 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	#for line in result:
-		#if is_resource_on_conveyor(line):
-			#print("Resource ID 6 is on a conveyor line")
-	pass
+	var p = get_global_mouse_position()
+	var gc = Vector2i(floor(p.x / 16), floor(p.y / 16))
+	var lc = global2local(gc)
+	gui.alert(str(gc.x) + " " + str(gc.y) + "\n" + str(lc.x) + " " + str(lc.y) + " " + str(lc.z))
+	
 
-#func is_resource_on_conveyor(line):
-	#for coord in line:
-		#var local_coords = global2local(Vector2i(floor(p.x / 16), floor(p.y / 16)))
-		#var index = local2index(Vector2i(local_coords.x, local_coords.y))
-		#if tile == 6:
-			#return true
+func _physics_process(delta):
+	#print(last_tick)
+	last_tick += delta
+	if running == true and last_tick >= (1.0 / tps):
+		last_tick = 0
+		do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement()
 
 func _input(event):
 	
@@ -101,6 +106,9 @@ func _input(event):
 	if event.is_action_pressed("tick"):
 		print("tick")
 		do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement()
+	if event.is_action_pressed("pause"):
+		running = !running
+		
 
 # Detecting conveyor lines:
 #region
@@ -156,13 +164,17 @@ func detect_connections(gc:Vector2i, p:int, start_dir:int, recurse:bool):
 		split = false
 		tile = n_tile
 		dir =  n_dir
+		print(tile)
 		for b:int in range(4):
 			var facing_gc:Vector2i = tile + sides[(b + dir + 2) % 4]
 			var facing_lc:Vector3i = global2local(facing_gc)
-			print(facing_lc)
-			if not bounds.has_point(Vector2i(facing_lc.x,facing_lc.y)) or used_tiles[facing_lc.x][facing_lc.y] == true:
+			#print(facing_lc)
+			print(facing_gc)
+			if not bounds.has_point(Vector2i(facing_lc.x,facing_lc.y)) or used_tiles[facing_gc.x][facing_gc.y]:
 				# out of bounds
 				print("a")
+				#print(bounds.has_point(Vector2i(facing_lc.x,facing_lc.y)))
+				#print(used_tiles[facing_lc.x][facing_lc.y])
 				continue
 			var c = facing_lc.z
 			var facing_idx = local2index(Vector2i(facing_lc.x,facing_lc.y))
@@ -170,7 +182,7 @@ func detect_connections(gc:Vector2i, p:int, start_dir:int, recurse:bool):
 			var facing_tile = world_tiles[c][facing_idx]
 			
 			match int(world_tiles[c][facing_idx]):
-				1:
+				1: # conveyor
 					if facing_rot == (b + dir) % 4:
 						used_tiles[facing_gc.x][facing_gc.y] = true
 						# create new line
@@ -349,7 +361,7 @@ func setup():
 	
 	world_size = json.json["world_size"]
 	chunk_size = json.json["chunk_size"]
-	bounds = Rect2i(0, 0,world_size * chunk_size, world_size * chunk_size)
+	bounds = Rect2i(0, 0, world_size * chunk_size, world_size * chunk_size)
 	
 	chunk_area = pow(chunk_size, 2)
 	world_tiles = load_tiles()
