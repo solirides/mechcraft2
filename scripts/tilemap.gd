@@ -22,6 +22,7 @@ var result:Array[Array]
 var lines_global:Array[Array] = []
 var priorities_global:Array[int] = []
 var priorities_index:Array[Array] = []
+var infinite_loop:Array[Array] = []
 var max_priority:int = 0
 var used_tiles:Array[Array] = []
 
@@ -129,7 +130,7 @@ func detect_world_tiles():
 #				print(gc)
 				debug_marker(gc, Color(1, 0, 1, 0.7))
 				used_tiles[gc.x][gc.y] == true
-				var a = detect_connections(gc, 1, 0, true)
+				var a = detect_connections(gc, world_tiles[c][index], 1, 0, true)
 				lines_global.append_array(a[0])
 				priorities_global.append_array(a[1])
 	
@@ -142,7 +143,13 @@ func detect_world_tiles():
 	
 	return null
 
-func detect_connections(gc:Vector2i, p:int, start_dir:int, recurse:bool):
+func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool):
+	# gc = global coords of starting tile
+	# id = id of starting tile
+	# p = priority of current line
+	# start_dir = rotation of starting tile
+	# these variables are getting complicated
+	
 	var tile = gc
 	var dir:int = start_dir
 	var loop = true
@@ -159,14 +166,25 @@ func detect_connections(gc:Vector2i, p:int, start_dir:int, recurse:bool):
 	var priorities:Array[int] = []
 	var result = []
 	var line:Array[Vector2i] = [gc]
+	
+	var neighbors:Array[int] = [] # clockwise offset from current rotation
+	match int(id):
+		2:
+			neighbors = [1, 3]
+		3:
+			neighbors = [2, 3]
+		_:
+			neighbors = [1, 2, 3]
+	
 	while loop:
 		loop = false
 		split = false
 		tile = n_tile
 		dir =  n_dir
 		print(tile)
-		for b:int in range(4):
-			var facing_gc:Vector2i = tile + sides[(b + dir + 2) % 4]
+		for b:int in neighbors:
+			var neighbor_dir = (b + dir) % 4 # direction to neighbor from current tile
+			var facing_gc:Vector2i = tile + sides[(b + dir) % 4]
 			var facing_lc:Vector3i = global2local(facing_gc)
 			#print(facing_lc)
 			print(facing_gc)
@@ -177,22 +195,43 @@ func detect_connections(gc:Vector2i, p:int, start_dir:int, recurse:bool):
 				#print(used_tiles[facing_lc.x][facing_lc.y])
 				continue
 			var c = facing_lc.z
-			var facing_idx = local2index(Vector2i(facing_lc.x,facing_lc.y))
-			var facing_rot = world_tiledata[c]["rotation"][facing_idx]
-			var facing_tile = world_tiles[c][facing_idx]
+			var facing_idx:int = local2index(Vector2i(facing_lc.x,facing_lc.y))
+			var facing_rot:int = world_tiledata[c]["rotation"][facing_idx]
+			var facing_tile:int = world_tiles[c][facing_idx]
 			
-			match int(world_tiles[c][facing_idx]):
+			match facing_tile:
 				1: # conveyor
-					if facing_rot == (b + dir) % 4:
+					if facing_rot == (neighbor_dir + 2) % 4:
 						used_tiles[facing_gc.x][facing_gc.y] = true
 						# create new line
 						if split:
 							#result.append(line)
 							#priorities.append(priority)
-							var a = detect_connections(facing_gc, priority + 1, dir, true)
+							var a = detect_connections(facing_gc, facing_tile, priority + 1, facing_rot, true)
 							result.append_array(a[0])
 							priorities.append_array(a[1])
 							continue
+						
+						# extend line
+						debug_marker(facing_gc, color)
+						line.append(facing_gc)
+						
+						n_tile = facing_gc
+						n_dir = facing_rot
+						loop = true
+						split = true
+				2:
+					if facing_rot == (neighbor_dir + 2) % 4:
+						used_tiles[facing_gc.x][facing_gc.y] = true
+						# create new line
+						if split:
+							#result.append(line)
+							#priorities.append(priority)
+							var a = detect_connections(facing_gc, facing_tile, priority + 1, facing_rot, true)
+							result.append_array(a[0])
+							priorities.append_array(a[1])
+							continue
+						
 						# extend line
 						debug_marker(facing_gc, color)
 						line.append(facing_gc)
@@ -202,19 +241,24 @@ func detect_connections(gc:Vector2i, p:int, start_dir:int, recurse:bool):
 						loop = true
 						split = true
 				3: # sketchy
-					if facing_rot == (b + dir) % 4 or facing_rot == (b + dir - 1) % 4:
-						# start new line
-						#line.append(facing_gc) # might not be needed
-						#result.append(line)
-						#priorities.append(priority)
-						
+					if facing_rot == (neighbor_dir + 2) % 4 or facing_rot == (neighbor_dir + 1) % 4:
 						used_tiles[facing_gc.x][facing_gc.y] = true
-						n_tile = facing_gc
-						n_dir = facing_rot
-						if recurse:
-							var a = detect_connections(facing_gc, priority + 1, dir, true)
+						
+						
+						if split:
+							var a = detect_connections(facing_gc, facing_tile, priority + 1, facing_rot, true)
 							result.append_array(a[0])
 							priorities.append_array(a[1])
+							continue
+						
+						debug_marker(facing_gc, color)
+						line.append(facing_gc)
+						
+						n_tile = facing_gc
+						n_dir = facing_rot
+						loop = true
+						split = true
+						
 						
 	result.append(line)
 	priorities.append(priority)
