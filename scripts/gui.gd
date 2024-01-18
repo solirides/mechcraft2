@@ -5,8 +5,10 @@ signal selection_changed
 
 @export var selection_label:RichTextLabel = null
 @export var alert_label:RichTextLabel = null
+@export var resources_label:RichTextLabel = null
 var selected_tile = 1
 var tile_rotation = 0
+var resource_count = 0
 
 func _ready():
 	pass # Replace with function body.
@@ -40,3 +42,11 @@ func update_selection():
 func alert(text:String):
 	alert_label.text = "[center]" + text
 	
+
+func resources(text:String):
+	resources_label.text = "[right]" + text
+	
+
+func add_resource(i:int):
+	resource_count += i
+	resources(str(resource_count))

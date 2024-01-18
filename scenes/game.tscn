@@ -105,11 +105,12 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(1, 0.156863, 0.568627, 1)
 
-[node name="GUI" type="CanvasLayer" parent="Camera2D" node_paths=PackedStringArray("selection_label", "alert_label")]
+[node name="GUI" type="CanvasLayer" parent="Camera2D" node_paths=PackedStringArray("selection_label", "alert_label", "resources_label")]
 layer = 10
 script = ExtResource("10_ocoff")
 selection_label = NodePath("GUI/Selection")
 alert_label = NodePath("GUI/CenterContainer/Alert")
+resources_label = NodePath("GUI/Resources")
 
 [node name="GUI" type="Control" parent="Camera2D/GUI"]
 layout_mode = 3
@@ -130,6 +131,19 @@ theme = ExtResource("13_clh56")
 theme_override_fonts/normal_font = SubResource("SystemFont_rtmsu")
 theme_override_font_sizes/normal_font_size = 20
 text = "hello"
+
+[node name="Resources" type="RichTextLabel" parent="Camera2D/GUI/GUI"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("13_clh56")
+theme_override_fonts/normal_font = SubResource("SystemFont_rtmsu")
+theme_override_font_sizes/normal_font_size = 20
+bbcode_enabled = true
+text = "[right]what"
 
 [node name="CenterContainer" type="CenterContainer" parent="Camera2D/GUI/GUI"]
 layout_mode = 1

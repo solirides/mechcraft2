@@ -123,7 +123,7 @@ func detect_world_tiles():
 #		print(world_tiles[0][index])
 		# one chunk
 		match int(world_tiles[c][index]):
-			5: # line includes miners and storage
+			5: # line includes storage
 				print("5")
 				var gc = local2global(index2local(index, c))
 #				print(Vector3i(index % chunk_size, floor(index / chunk_size), c))
@@ -131,6 +131,9 @@ func detect_world_tiles():
 				debug_marker(gc, Color(1, 0, 1, 0.7))
 				used_tiles[gc.x][gc.y] == true
 				var a = detect_connections(gc, world_tiles[c][index], 1, 0, true)
+				# add self to line
+				a[0][0].push_front(gc)
+				
 				lines_global.append_array(a[0])
 				priorities_global.append_array(a[1])
 	
@@ -283,6 +286,12 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 						1:
 							var dir = world_tiledata[lc.z]["rotation"][index]
 							move_resource(gc, dir)
+						5:# storage recieves item
+							print("item recieved")
+							gui.add_resource(1)
+							# item go bye bye
+							set_item(1, gc, 0)
+							
 
 #func initiate_resource_movement(tile_pos):
 	#var local_coords = global2local(tile_pos)
