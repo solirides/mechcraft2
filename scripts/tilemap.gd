@@ -263,6 +263,10 @@ func move_resource(gc:Vector2i, direction:int):
 	var next_tile = gc + sides[direction]
 	var id = world_items[lc.z][idx]
 	
+	if next_tile == 5:
+		# Increment the resource count
+		$ResourceLabel.increment_resource_count()
+	
 	set_item(1, gc, 0)
 	set_item(1, next_tile, id)
 	
