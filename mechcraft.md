@@ -1,30 +1,57 @@
-~~Coding~~ ~~Designing~~ Doing anything that makes progress for this is gonna be ~~really~~ mildly annoying.
+<style>
+  /* just some css injection
+  */
+  .span {
+    margin:auto;
+  }
+  p {
+    white-space: pre-line;
+  }
+</style>
+
+
+This is a doc of technical stuff
+
+**Overall game design is here**:
+https://docs.google.com/document/d/1_mchctExyfANMstbnlfEHbj8GiNQbtsnMjGoqCRgeic/edit?usp=sharing
 
 ## General stuff about making the game not crash
 
-The game will process every tile in the world every tick. There will probably like 5 ticks every second or something.  
+The game will process every tile in the world every tick. There will probably like 5 ticks every second or something.
+It doesn't need to be very fast (because the items would go flying otherwise).
 
-🌎 world update order:
+🌎world update order:
 - for each storage tile
-  - process conveyor lines ending at it (while recursively processing line connecting to those)
-- process remaining lines and tiles (the random unconnected ones)
+  - process conveyor lines ending at it
+    - process lines connecting to those
+- process remaining lines and tiles
 - miner storage replenishes
-- whatever else there is (winning objectives)
 
-🌟singular item storage (for conveyors and stuff)
+🌟**singular item storage** (for every tile unless specified)
 - simplifies code and rules
 - speed upgrades not viable
 - alternate objective like organization
 
 🌟output items to empty tiles and storage overflow items are deleted
 
-merger, splitter, and launcher have been combined into conveyor balancer
+merger, splitter, intersection have been combined into conveyor balancer
 
-## Item costs?
 
-idk
+## Rocket
+
+End game goal.
+Can't be destroyed.
+
+## Noise score
+
+Every tile has a noise score. If the noise score of a tile is too high, a sandworm or something eats the surrounding tiles, destroying tiles and collapsing the ground.
+- Collapsed tiles cannot be built on and slowly regenerate into normal tiles.
+- There is only 1 sandworm in the game, attacks can't happen simultaneously
+- Attacks have a minimum grace period (so the worm isn't eating your entire factory)
 
 ## Conveyor
+
+The one and only.
 
 - Has exactly one input and one output across it.
 - If output isn't pointing at an input, items are deleted instead of moved
@@ -32,7 +59,8 @@ idk
 
 ## Conveyor Balancer
 
-Basically it merges or splits two inputs and outputs
+Makes stuff work out depending on the number of inputs and outputs connected.
+It's basically a **splitter and merger and intersection** combined into one.
 
 - Has 2 adjacent inputs and 2 adjacent outputs
 - Has a selected input and output (when needed)
@@ -45,23 +73,21 @@ Basically it merges or splits two inputs and outputs
 - If 1 input and 1 output are connected
   - uhhh, it doesn't do anything?
 
-outputs are `rotation` and `rotation + 1`
-
 ## Conveyor Line
 
-A list of tiles used for calculations
+Not an actual tile.
 
+- A list of tiles used for calculations
 - One path of conveyors defined by a start tile (miner) and an end tile (merger, splitter, storage, basically everything that isn't a conveyor)
 - No weird loops cause that would make the code way more complicated.
 - Processes from end tile to first conveyor
 
 ## Miner
 
-Where stuff spawns
+Pulls resources from the ground every [insert random number].
 
-- Has a small internal storage
+- No extra internal storage (just the regular single item one)
 - Adds resources to internal storage every tick
-- 
 
 ## Storage
 
@@ -69,8 +95,17 @@ Where stuff spawns
 
 ## Constructor
 
-Makes stuff
+Makes new things out of things.
 
-- Has 2 adjacent inputs and 1 output (2 layouts ignoring rotation)
+- Has 2 inputs opposite of each other and 1 output
 - Takes two input items to make one output item
+
+## Launcher?
+
+probably not going to be added
+
+- Launches item 3 or 4 tiles without collision
+- Larger delay
+- More "noise"
+
 
