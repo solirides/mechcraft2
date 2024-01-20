@@ -2,10 +2,10 @@
   /* just some css injection
   */
   .span {
-    margin:auto;
+	margin:auto;
   }
   p {
-    white-space: pre-line;
+	white-space: pre-line;
   }
 </style>
 
@@ -23,7 +23,7 @@ It doesn't need to be very fast (because the items would go flying otherwise).
 🌎world update order:
 - for each storage tile
   - process conveyor lines ending at it
-    - process lines connecting to those
+	- process lines connecting to those
 - process remaining lines and tiles
 - miner storage replenishes
 

@@ -26,7 +26,7 @@ var infinite_loop:Array[Array] = []
 var max_priority:int = 0
 var used_tiles:Array[Array] = []
 
-const sides = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
+const SIDES = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 
 var selected_tile = 1
 var tile_rotation = 0
@@ -187,7 +187,7 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 		print(tile)
 		for b:int in neighbors:
 			var neighbor_dir = (b + dir) % 4 # direction to neighbor from current tile
-			var facing_gc:Vector2i = tile + sides[(b + dir) % 4]
+			var facing_gc:Vector2i = tile + SIDES[(b + dir) % 4]
 			var facing_lc:Vector3i = global2local(facing_gc)
 			#print(facing_lc)
 			print(facing_gc)
@@ -275,23 +275,53 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 #region
 
 func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement():
-	for p in priorities_index:
-		for p2 in p:
-			for gc in lines_global[p2]:
-				var lc = global2local(gc)
-				var index = local2index(Vector2i(lc.x, lc.y))
-				if world_items[lc.z][index] != 0:
-					# doesn't work with balancers yet
-					match world_tiles[lc.z][index]:
-						1:
-							var dir = world_tiledata[lc.z]["rotation"][index]
-							move_resource(gc, dir)
-						5:# storage recieves item
-							print("item recieved")
-							gui.add_resource(1)
-							# item go bye bye
-							set_item(1, gc, 0)
-							
+	for p in priorities_index: # p = array of lines of the same priority
+			for p2 in p: # i = index of one line
+				if len(p) != 0:
+					#var last_gc = lines_global[p2][0]
+					#var last_lc = global2local(last_gc)
+					#var last_index = local2index(Vector2i(last_lc.x, last_lc.y))
+					#
+					## process first tile
+					## same as one in for loop
+					#if world_items[last_lc.z][last_index] != 0:
+						## doesn't work with balancers yet
+						#match world_tiles[last_lc.z][last_index]:
+							#1:
+								#var dir = world_tiledata[last_lc.z]["rotation"][last_index]
+								## the "last" vars are what the current conveyor points to (since the line's array is reversed)
+								#var idk = global2local(last_gc + SIDES[0])
+								#if (world_items[idk.z][local2index(Vector2i(idk.x, idk.y))] == 0):
+									## move if space
+									#move_resource(last_gc, dir)
+							#5:# storage recieves item
+								#print("item recieved")
+								#gui.add_resource(1)
+								## item go bye bye
+								#set_item(1, last_gc, 0)
+					
+					# process rest of the line
+					for gc in lines_global[p2]:
+						var lc = global2local(gc)
+						var index = local2index(Vector2i(lc.x, lc.y))
+						if world_items[lc.z][index] != 0:
+							# doesn't work with balancers yet
+							match world_tiles[lc.z][index]:
+								1:
+									var dir = world_tiledata[lc.z]["rotation"][index]
+									# the "last" vars are what the current conveyor points to (since the line's array is reversed)
+									#if (world_items[last_lc.z][last_index] == 0):
+									move_resource(gc, dir)
+								5:# storage recieves item
+									print("item recieved")
+									gui.add_resource(1)
+									# item go bye bye
+									set_item(1, gc, 0)
+						#last_gc = gc
+						#last_lc = lc
+						#last_index = index
+		
+		
 
 #func initiate_resource_movement(tile_pos):
 	#var local_coords = global2local(tile_pos)
@@ -313,11 +343,15 @@ func move_resource(gc:Vector2i, direction:int):
 	var lc = global2local(gc)
 	var idx = local2index(Vector2i(lc.x, lc.y))
 	var current_tile = world_tiles[lc.z][idx]
-	var next_tile = gc + sides[direction]
+	var next_gc = gc + SIDES[direction]
+	var next_lc = global2local(next_gc)
+	var next_idx = local2index(Vector2i(next_lc.x, next_lc.y))
 	var id = world_items[lc.z][idx]
 	
-	set_item(1, gc, 0)
-	set_item(1, next_tile, id)
+	
+	if (world_items[next_lc.z][next_idx] == 0):
+		set_item(1, gc, 0)
+		set_item(1, next_gc, id)
 	
 	#if next_tile and world_tiles[next_tile.z][local2index(Vector2i(next_tile.x, next_tile.y))] == 6:
 		#print("Moving resource from ", tile_pos, " to ", next_tile)
@@ -337,7 +371,7 @@ func rotate_conveyor(tile_pos):
 	set_cell(0, tile_pos, tile, Vector2i(0, 0), rotation)
 
 func neighbor(gc:Vector2i, dir:int):
-	var tile = gc + sides[dir]
+	var tile = gc + SIDES[dir]
 	if bounds.has_point(tile):
 		return tile
 	return null
