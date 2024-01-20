@@ -6,6 +6,9 @@ signal selection_changed
 @export var selection_label:RichTextLabel = null
 @export var alert_label:RichTextLabel = null
 @export var resources_label:RichTextLabel = null
+@export var music_toggle:CheckButton = null
+@export var music_player:AudioStreamPlayer = null
+
 var selected_tile = 1
 var tile_rotation = 0
 var resource_count = 0
@@ -50,3 +53,10 @@ func resources(text:String):
 func add_resource(i:int):
 	resource_count += i
 	resources(str(resource_count))
+
+
+func _on_music_toggled(toggled_on):
+	if (music_toggle.button_pressed == true):
+		music_player.play()
+	else:
+		music_player.stop()

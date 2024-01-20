@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://wbpqro6tssd5"]
+[gd_scene load_steps=25 format=3 uid="uid://wbpqro6tssd5"]
 
 [ext_resource type="Script" path="res://scripts/json.gd" id="1_3pqby"]
 [ext_resource type="Script" path="res://scripts/tilemap.gd" id="2_e3udp"]
@@ -14,6 +14,7 @@
 [ext_resource type="Shader" path="res://assets/shaders/test.gdshader" id="10_shcmx"]
 [ext_resource type="Script" path="res://scripts/background.gd" id="10_y4vju"]
 [ext_resource type="Theme" uid="uid://b4us1mhl0qxjp" path="res://assets/theme.tres" id="13_clh56"]
+[ext_resource type="AudioStream" uid="uid://cmygilbmp72r3" path="res://assets/audio/music1.ogg" id="14_agi1x"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tbejw"]
 texture = ExtResource("2_obwd8")
@@ -105,12 +106,14 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(1, 0.156863, 0.568627, 1)
 
-[node name="GUI" type="CanvasLayer" parent="Camera2D" node_paths=PackedStringArray("selection_label", "alert_label", "resources_label")]
+[node name="GUI" type="CanvasLayer" parent="Camera2D" node_paths=PackedStringArray("selection_label", "alert_label", "resources_label", "music_toggle", "music_player")]
 layer = 10
 script = ExtResource("10_ocoff")
 selection_label = NodePath("GUI/Selection")
-alert_label = NodePath("GUI/CenterContainer/Alert")
+alert_label = NodePath("GUI/TopBar/Alert")
 resources_label = NodePath("GUI/Resources")
+music_toggle = NodePath("GUI/BottomBar/Music")
+music_player = NodePath("GUI/AudioStreamPlayer")
 
 [node name="GUI" type="Control" parent="Camera2D/GUI"]
 layout_mode = 3
@@ -145,14 +148,14 @@ theme_override_font_sizes/normal_font_size = 20
 bbcode_enabled = true
 text = "[right]what"
 
-[node name="CenterContainer" type="CenterContainer" parent="Camera2D/GUI/GUI"]
+[node name="TopBar" type="CenterContainer" parent="Camera2D/GUI/GUI"]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_bottom = 31.0
 grow_horizontal = 2
 
-[node name="Alert" type="RichTextLabel" parent="Camera2D/GUI/GUI/CenterContainer"]
+[node name="Alert" type="RichTextLabel" parent="Camera2D/GUI/GUI/TopBar"]
 clip_contents = false
 custom_minimum_size = Vector2(600, 0)
 layout_mode = 2
@@ -161,6 +164,23 @@ bbcode_enabled = true
 text = "[center]alert text"
 fit_content = true
 scroll_active = false
+
+[node name="BottomBar" type="CenterContainer" parent="Camera2D/GUI/GUI"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -24.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Music" type="CheckButton" parent="Camera2D/GUI/GUI/BottomBar"]
+layout_mode = 2
+text = "Music!"
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Camera2D/GUI/GUI"]
+stream = ExtResource("14_agi1x")
 
 [node name="Classes" type="Node" parent="."]
 script = ExtResource("4_mms3p")
@@ -186,3 +206,5 @@ environment = SubResource("Environment_tiixt")
 scale = Vector2(4, 4)
 color = Color(1, 0, 0.713726, 0.584314)
 polygon = PackedVector2Array(1, 1, -1, 1, -1, -1, 1, -1)
+
+[connection signal="toggled" from="Camera2D/GUI/GUI/BottomBar/Music" to="Camera2D/GUI" method="_on_music_toggled"]
