@@ -177,7 +177,7 @@ grow_vertical = 0
 
 [node name="Music" type="CheckButton" parent="Camera2D/GUI/GUI/BottomBar"]
 layout_mode = 2
-text = "Music!"
+text = "Delete code with music (it goes in the recycling bin)"
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Camera2D/GUI/GUI"]
 stream = ExtResource("14_agi1x")

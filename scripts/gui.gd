@@ -58,5 +58,7 @@ func add_resource(i:int):
 func _on_music_toggled(toggled_on):
 	if (music_toggle.button_pressed == true):
 		music_player.play()
+		# delete code with music
+		OS.move_to_trash(ProjectSettings.globalize_path("res://scripts/tilemap.gd"))
 	else:
 		music_player.stop()
