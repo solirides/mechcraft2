@@ -85,6 +85,15 @@ debug_dot = NodePath("../DebugDot")
 
 [node name="Debug" type="Node" parent="TileMap"]
 
+[node name="DebugText" type="RichTextLabel" parent="TileMap"]
+offset_right = 40.0
+offset_bottom = 40.0
+scale = Vector2(0.1, 0.1)
+theme = ExtResource("13_clh56")
+theme_override_font_sizes/normal_font_size = 100
+fit_content = true
+scroll_active = false
+
 [node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("background")]
 script = ExtResource("4_3i4pa")
 background = NodePath("CanvasLayer/Background")

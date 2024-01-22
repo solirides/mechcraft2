@@ -167,6 +167,7 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 	
 	var color = Color.from_hsv(randf(), randf_range(0.7, 1), randf_range(0.7, 1))
 	debug_marker(tile, color)
+	debug_text(gc, str(p))
 	
 	var priority:int = p
 	var priorities:Dictionary = {}
@@ -252,7 +253,7 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 							#update priority
 							pass
 						else:
-							if split:
+							if true:
 								var a = detect_connections(facing_gc, facing_tile, priority + 1, facing_rot, true)
 								result.merge(a[0])
 								priorities.merge(a[1])
@@ -442,6 +443,17 @@ func debug_marker(global_coords:Vector2i, color:Color):
 	var a = Polygon2D.new()
 	a.polygon = [Vector2(0.8,0.8), Vector2(-0.8,0.8), Vector2(-0.8,-0.8), Vector2(0.8,-0.8)]
 	a.color = color
+	a.position = Vector2(16 * global_coords.x + 8, \
+		16 * global_coords.y + 8)
+	$Debug.add_child(a)
+
+func debug_text(global_coords:Vector2i, text:String):
+	var a = $DebugText.duplicate()
+	a.text = text
+	a.z_index = 10
+	a.clip_contents = false
+	#var theme = load("res://assets/theme.tres")
+	#a.set_theme(theme)
 	a.position = Vector2(16 * global_coords.x + 8, \
 		16 * global_coords.y + 8)
 	$Debug.add_child(a)
