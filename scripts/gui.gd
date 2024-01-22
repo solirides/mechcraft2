@@ -3,6 +3,7 @@ extends CanvasLayer
 
 signal selection_changed
 
+@export var delete_code_with_music = true
 @export var selection_label:RichTextLabel = null
 @export var alert_label:RichTextLabel = null
 @export var resources_label:RichTextLabel = null
@@ -58,7 +59,9 @@ func add_resource(i:int):
 func _on_music_toggled(toggled_on):
 	if (music_toggle.button_pressed == true):
 		music_player.play()
-		# delete code with music
-		OS.move_to_trash(ProjectSettings.globalize_path("res://scripts/tilemap.gd"))
+		if (delete_code_with_music):
+			# delete code with music
+			OS.move_to_trash(ProjectSettings.globalize_path("res://scripts/tilemap.gd"))
+		
 	else:
 		music_player.stop()

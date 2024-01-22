@@ -19,12 +19,15 @@ var chunk_size:int
 var chunk_area:int
 var result:Array[Array]
 
-var lines_global:Array[Array] = []
-var priorities_global:Array[int] = []
+# these all correspond to each other
+var lines_global:Dictionary = {}
+var priorities_global:Dictionary = {}
 var priorities_index:Array[Array] = []
+
+
 var infinite_loop:Array[Array] = []
 var max_priority:int = 0
-var used_tiles:Array[Array] = []
+var used_tiles:Array[Array] = [] # 0 = unprocessed 1 = completely processed 2 = somewhat processed
 
 const SIDES = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 
@@ -88,13 +91,13 @@ func _input(event):
 		clear_markers()
 		#detect miners and create conveyor lines
 		#var roots:Array = []
-		lines_global = []
-		priorities_global = []
+		lines_global = {}
+		priorities_global = {}
 		priorities_index = []
 		max_priority = 0
 		
 		for i in len(used_tiles):
-			used_tiles[i].fill(false)
+			used_tiles[i].fill(0)
 		
 		detect_world_tiles()
 	
@@ -129,19 +132,19 @@ func detect_world_tiles():
 #				print(Vector3i(index % chunk_size, floor(index / chunk_size), c))
 #				print(gc)
 				debug_marker(gc, Color(1, 0, 1, 0.7))
-				used_tiles[gc.x][gc.y] == true
+				used_tiles[gc.x][gc.y] == 1
 				var a = detect_connections(gc, world_tiles[c][index], 1, 0, true)
 				# add self to line
-				a[0][0].push_front(gc)
+				#a[0][0].push_front(gc)
 				
-				lines_global.append_array(a[0])
-				priorities_global.append_array(a[1])
+				lines_global.merge(a[0])
+				priorities_global.merge(a[1])
 	
 	# sort lines
 	for i in range(max_priority + 1):
 		priorities_index.append([])
 	
-	for i in len(priorities_global):
+	for i in priorities_global.keys():
 		priorities_index[priorities_global[i]].append(i)
 	
 	return null
@@ -166,8 +169,8 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 	debug_marker(tile, color)
 	
 	var priority:int = p
-	var priorities:Array[int] = []
-	var result = []
+	var priorities:Dictionary = {}
+	var result:Dictionary = {}
 	var line:Array[Vector2i] = [gc]
 	
 	var neighbors:Array[int] = [] # clockwise offset from current rotation
@@ -191,7 +194,7 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 			var facing_lc:Vector3i = global2local(facing_gc)
 			#print(facing_lc)
 			print(facing_gc)
-			if not bounds.has_point(Vector2i(facing_lc.x,facing_lc.y)) or used_tiles[facing_gc.x][facing_gc.y]:
+			if not bounds.has_point(Vector2i(facing_lc.x,facing_lc.y)) or used_tiles[facing_gc.x][facing_gc.y] == 1:
 				# out of bounds
 				print("a")
 				#print(bounds.has_point(Vector2i(facing_lc.x,facing_lc.y)))
@@ -205,14 +208,14 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 			match facing_tile:
 				1: # conveyor
 					if facing_rot == (neighbor_dir + 2) % 4:
-						used_tiles[facing_gc.x][facing_gc.y] = true
+						used_tiles[facing_gc.x][facing_gc.y] = 1
 						# create new line
 						if split:
 							#result.append(line)
 							#priorities.append(priority)
 							var a = detect_connections(facing_gc, facing_tile, priority + 1, facing_rot, true)
-							result.append_array(a[0])
-							priorities.append_array(a[1])
+							result.merge(a[0])
+							priorities.merge(a[1])
 							continue
 						
 						# extend line
@@ -225,14 +228,14 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 						split = true
 				2:
 					if facing_rot == (neighbor_dir + 2) % 4:
-						used_tiles[facing_gc.x][facing_gc.y] = true
+						used_tiles[facing_gc.x][facing_gc.y] = 1
 						# create new line
 						if split:
 							#result.append(line)
 							#priorities.append(priority)
 							var a = detect_connections(facing_gc, facing_tile, priority + 1, facing_rot, true)
-							result.append_array(a[0])
-							priorities.append_array(a[1])
+							result.merge(a[0])
+							priorities.merge(a[1])
 							continue
 						
 						# extend line
@@ -245,26 +248,27 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 						split = true
 				3: # sketchy
 					if facing_rot == (neighbor_dir + 2) % 4 or facing_rot == (neighbor_dir + 1) % 4:
-						used_tiles[facing_gc.x][facing_gc.y] = true
+						if (used_tiles[facing_gc.x][facing_gc.y] == 2):
+							#update priority
+							pass
+						else:
+							if split:
+								var a = detect_connections(facing_gc, facing_tile, priority + 1, facing_rot, true)
+								result.merge(a[0])
+								priorities.merge(a[1])
+								continue
+							
+							debug_marker(facing_gc, color)
+							line.append(facing_gc)
+							
+							n_tile = facing_gc
+							n_dir = facing_rot
+							loop = true
+							split = true
 						
 						
-						if split:
-							var a = detect_connections(facing_gc, facing_tile, priority + 1, facing_rot, true)
-							result.append_array(a[0])
-							priorities.append_array(a[1])
-							continue
-						
-						debug_marker(facing_gc, color)
-						line.append(facing_gc)
-						
-						n_tile = facing_gc
-						n_dir = facing_rot
-						loop = true
-						split = true
-						
-						
-	result.append(line)
-	priorities.append(priority)
+	result[gc2string(gc)] = line
+	priorities[gc2string(gc)] = priority
 	
 	max_priority = max(max_priority, priority)
 	return [result, priorities]
@@ -312,6 +316,12 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 									# the "last" vars are what the current conveyor points to (since the line's array is reversed)
 									#if (world_items[last_lc.z][last_index] == 0):
 									move_resource(gc, dir)
+								3:
+									var dir = world_tiledata[lc.z]["rotation"][index]
+									var state = world_tiledata[lc.z]["state"][index]
+									move_resource(gc, dir + int(state))
+									world_tiledata[lc.z]["state"][index] = not world_tiledata[lc.z]["state"][index]
+									
 								5:# storage recieves item
 									print("item recieved")
 									gui.add_resource(1)
@@ -388,6 +398,10 @@ func neighbor(gc:Vector2i, dir:int):
 
 # Coordinate stuff:
 #region
+func gc2string(gc:Vector2i):
+	return str(gc.x) + "," + str(gc.y)
+
+
 func local2index(local_coords:Vector2i):
 	return local_coords.x + local_coords.y * chunk_size
 

@@ -109,6 +109,7 @@ color = Color(1, 0.156863, 0.568627, 1)
 [node name="GUI" type="CanvasLayer" parent="Camera2D" node_paths=PackedStringArray("selection_label", "alert_label", "resources_label", "music_toggle", "music_player")]
 layer = 10
 script = ExtResource("10_ocoff")
+delete_code_with_music = false
 selection_label = NodePath("GUI/Selection")
 alert_label = NodePath("GUI/TopBar/Alert")
 resources_label = NodePath("GUI/Resources")
