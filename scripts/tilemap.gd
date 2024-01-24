@@ -21,6 +21,8 @@ var result:Array[Array]
 
 var central_storage:Dictionary = {}
 
+var constructor_inventory:Dictionary = {}
+
 # these all correspond to each other
 var lines_global:Dictionary = {}
 var priorities_global:Dictionary = {}
@@ -335,6 +337,25 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 									# the "last" vars are what the current conveyor points to (since the line's array is reversed)
 									#if (world_items[last_lc.z][last_index] == 0):
 									move_resource(gc, dir)
+									
+								2: #constructor
+									
+									var item = world_items[lc.z][index]
+									if (item != 0):
+										
+										print("item recieved at constructor")
+										var a = gc2string(gc)
+										if (constructor_inventory.has(a) and constructor_inventory[a] != null):
+											# construct thing
+											set_item(1, gc, 4)
+											move_resource(gc, world_tiledata[lc.z]["rotation"][index])
+											constructor_inventory[a] = null
+										else:
+											constructor_inventory[a] = item
+											set_item(1, gc, 0)
+										# item go bye bye
+										#set_item(1, gc, 0)
+								
 								3:
 									if (world_items[lc.z][index] != 0):
 										var dir = world_tiledata[lc.z]["rotation"][index]
@@ -352,6 +373,7 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 										central_storage[item] += 1
 										# item go bye bye
 										set_item(1, gc, 0)
+								
 						#last_gc = gc
 						#last_lc = lc
 						#last_index = index

@@ -13,7 +13,7 @@
 [ext_resource type="Script" path="res://scripts/gui.gd" id="10_ocoff"]
 [ext_resource type="Shader" path="res://assets/shaders/test.gdshader" id="10_shcmx"]
 [ext_resource type="Script" path="res://scripts/background.gd" id="10_y4vju"]
-[ext_resource type="Theme" uid="uid://b4us1mhl0qxjp" path="res://assets/theme.tres" id="13_clh56"]
+[ext_resource type="Theme" path="res://assets/theme.tres" id="13_clh56"]
 [ext_resource type="AudioStream" uid="uid://cmygilbmp72r3" path="res://assets/audio/music1.ogg" id="14_agi1x"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tbejw"]
