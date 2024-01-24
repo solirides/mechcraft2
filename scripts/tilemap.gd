@@ -19,6 +19,8 @@ var chunk_size:int
 var chunk_area:int
 var result:Array[Array]
 
+var central_storage:Dictionary = {}
+
 # these all correspond to each other
 var lines_global:Dictionary = {}
 var priorities_global:Dictionary = {}
@@ -138,7 +140,13 @@ func detect_world_tiles():
 				#a[0][0].push_front(gc)
 				
 				lines_global.merge(a[0])
-				priorities_global.merge(a[1])
+				#priorities_global.merge(a[1])
+				for k in a[1].keys():
+					if (priorities_global.has(k)):
+						if (priorities_global[k] < a[1][k]):
+							priorities_global[k] = a[1][k]
+					else:
+						priorities_global[k] = a[1][k]
 	
 	# sort lines
 	for i in range(max_priority + 1):
@@ -251,8 +259,17 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 					if facing_rot == (neighbor_dir + 2) % 4 or facing_rot == (neighbor_dir + 1) % 4:
 						if (used_tiles[facing_gc.x][facing_gc.y] == 2):
 							#update priority
+							used_tiles[facing_gc.x][facing_gc.y] = 1
+							var k = gc2string(gc)
+							#priorities_global[gc2string(gc)] = max(priorities_global[gc2string(gc)], priority)
+							if (priorities_global.has(k)):
+								if (priorities_global[k] < priority):
+									priorities_global[k] = priority
+							else:
+								priorities_global[k] = priority
 							pass
 						else:
+							used_tiles[facing_gc.x][facing_gc.y] = 2
 							if true:
 								var a = detect_connections(facing_gc, facing_tile, priority + 1, facing_rot, true)
 								result.merge(a[0])
@@ -309,25 +326,32 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 					for gc in lines_global[p2]:
 						var lc = global2local(gc)
 						var index = local2index(Vector2i(lc.x, lc.y))
-						if world_items[lc.z][index] != 0:
+						var id = world_tiles[lc.z][index]
+						if id != 0:
 							# doesn't work with balancers yet
-							match world_tiles[lc.z][index]:
+							match id:
 								1:
 									var dir = world_tiledata[lc.z]["rotation"][index]
 									# the "last" vars are what the current conveyor points to (since the line's array is reversed)
 									#if (world_items[last_lc.z][last_index] == 0):
 									move_resource(gc, dir)
 								3:
-									var dir = world_tiledata[lc.z]["rotation"][index]
-									var state = world_tiledata[lc.z]["state"][index]
-									move_resource(gc, dir + int(state))
-									world_tiledata[lc.z]["state"][index] = not world_tiledata[lc.z]["state"][index]
+									if (world_items[lc.z][index] != 0):
+										var dir = world_tiledata[lc.z]["rotation"][index]
+										var state = world_tiledata[lc.z]["state"][index]
+										move_resource(gc, dir + int(state))
+										world_tiledata[lc.z]["state"][index] = not world_tiledata[lc.z]["state"][index]
 									
 								5:# storage recieves item
-									print("item recieved")
-									gui.add_resource(1)
-									# item go bye bye
-									set_item(1, gc, 0)
+									var item = world_items[lc.z][index]
+									if (item != 0):
+										print("item recieved")
+										gui.add_resource(1)
+										if (not central_storage.has(item)):
+											central_storage[item] = 1
+										central_storage[item] += 1
+										# item go bye bye
+										set_item(1, gc, 0)
 						#last_gc = gc
 						#last_lc = lc
 						#last_index = index

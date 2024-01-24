@@ -3,8 +3,9 @@
 	"chunk_size":8,
 	"world_size":16,
 	"world_data": {
-		"central_storage_count":[],
-		"central_storage_ids":[]
+		"central_storage":{
+			
+		}
 	},
 	"chunks":[
 		{
