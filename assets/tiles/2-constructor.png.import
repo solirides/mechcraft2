@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://yqteq3q57wm2"
-path="res://.godot/imported/2-construtor.png-010e7f6214889a4e8764164700266b0c.ctex"
+path="res://.godot/imported/2-constructor.png-addf74f3342aff8dad2caac40a16dd72.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/tiles/2-construtor.png"
-dest_files=["res://.godot/imported/2-construtor.png-010e7f6214889a4e8764164700266b0c.ctex"]
+source_file="res://assets/tiles/2-constructor.png"
+dest_files=["res://.godot/imported/2-constructor.png-addf74f3342aff8dad2caac40a16dd72.ctex"]
 
 [params]
 

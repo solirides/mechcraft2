@@ -605,6 +605,11 @@ func make_tileset_exist(ts: TileSet):
 	var blank = TileSetAtlasSource.new()
 	ts.add_source(blank)
 	
+	var file_data = FileAccess.open("res://assets/tiles.json", FileAccess.READ)
+	var json_thing = JSON.new()
+	json_thing.parse(file_data.get_as_text())
+	var tile_metadata = json_thing.get_data()
+	
 	if dir:
 		dir.list_dir_begin()
 		#var file_name = dir.get_next()
@@ -615,33 +620,24 @@ func make_tileset_exist(ts: TileSet):
 				print("Found file: " + file_name)
 				print(path + file_name)
 				var image = Image.load_from_file(path + file_name)
-				var source = TileSetAtlasSource.new()
-				source.texture = ImageTexture.create_from_image(image)
-				source.create_tile(Vector2i(0,0))
 				
-				for i in range(3):
-					source.create_alternative_tile(Vector2i(0,0), -1)
-				
-				source.get_tile_data(Vector2i(0,0), 1).flip_h = true
-				source.get_tile_data(Vector2i(0,0), 1).transpose = true
-				
-				source.get_tile_data(Vector2i(0,0), 2).flip_v = true
-				
-				source.get_tile_data(Vector2i(0,0), 3).transpose = true
-				
-				# temp solution
-				if file_name == "3-balancer.png":
-					source.get_tile_data(Vector2i(0,0), 1).flip_h = true
-					source.get_tile_data(Vector2i(0,0), 1).transpose = true
+				if (tile_metadata.has(file_name.get_basename())):
+					var tile = tile_metadata[file_name.get_basename()]
+					var source = TileSetAtlasSource.new()
+					source.texture = ImageTexture.create_from_image(image)
+					source.create_tile(Vector2i(0,0))
 					
-					source.get_tile_data(Vector2i(0,0), 2).flip_v = false
-					source.get_tile_data(Vector2i(0,0), 2).transpose = true
+					for i in range(3):
+						source.create_alternative_tile(Vector2i(0,0), -1)
 					
-					source.get_tile_data(Vector2i(0,0), 3).flip_v = true
-					source.get_tile_data(Vector2i(0,0), 3).transpose = true
+					for i in tile["flip_h"]:
+						source.get_tile_data(Vector2i(0,0), i).flip_h = true
+					for i in tile["flip_v"]:
+						source.get_tile_data(Vector2i(0,0), i).flip_v = true
+					for i in tile["transpose"]:
+						source.get_tile_data(Vector2i(0,0), i).transpose = true
 					
-				
-				ts.add_source(source)
+					ts.add_source(source, tile["id"])
 			file_name = dir.get_next()
 		dir.list_dir_end()
 	else:

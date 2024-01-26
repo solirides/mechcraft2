@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/json.gd" id="1_3pqby"]
 [ext_resource type="Script" path="res://scripts/tilemap.gd" id="2_e3udp"]
 [ext_resource type="Texture2D" uid="uid://y7usubla6juc" path="res://assets/tiles/1-conveyor.png" id="2_obwd8"]
-[ext_resource type="Texture2D" uid="uid://yqteq3q57wm2" path="res://assets/tiles/2-construtor.png" id="3_adxkv"]
+[ext_resource type="Texture2D" uid="uid://yqteq3q57wm2" path="res://assets/tiles/2-constructor.png" id="3_adxkv"]
 [ext_resource type="Script" path="res://scripts/camera.gd" id="4_3i4pa"]
 [ext_resource type="Script" path="res://scripts/classes.gd" id="4_mms3p"]
 [ext_resource type="Texture2D" uid="uid://dj7h73b0ck0od" path="res://assets/tiles/3-balancer.png" id="4_o0q4j"]
@@ -13,11 +13,12 @@
 [ext_resource type="Script" path="res://scripts/gui.gd" id="10_ocoff"]
 [ext_resource type="Shader" path="res://assets/shaders/test.gdshader" id="10_shcmx"]
 [ext_resource type="Script" path="res://scripts/background.gd" id="10_y4vju"]
-[ext_resource type="Theme" path="res://assets/theme.tres" id="13_clh56"]
+[ext_resource type="Theme" uid="uid://b4us1mhl0qxjp" path="res://assets/theme.tres" id="13_clh56"]
 [ext_resource type="AudioStream" uid="uid://cmygilbmp72r3" path="res://assets/audio/music1.ogg" id="14_agi1x"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tbejw"]
 texture = ExtResource("2_obwd8")
+texture_region_size = Vector2i(8, 8)
 0:0/next_alternative_id = 2
 0:0/0 = 0
 0:0/1 = 1
