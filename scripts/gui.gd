@@ -6,6 +6,7 @@ signal selection_changed
 @export var delete_code_with_music = true
 @export var selection_label:RichTextLabel = null
 @export var alert_label:RichTextLabel = null
+@export var debug_label:RichTextLabel = null
 @export var resources_label:RichTextLabel = null
 @export var music_toggle:CheckButton = null
 @export var music_player:AudioStreamPlayer = null
@@ -45,6 +46,10 @@ func update_selection():
 
 func alert(text:String):
 	alert_label.text = "[center]" + text
+	
+
+func debug(text:String):
+	debug_label.text = "[center]" + text
 	
 
 func resources(text:String):

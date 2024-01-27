@@ -54,7 +54,7 @@ func _process(delta):
 	var p = get_global_mouse_position()
 	var gc = Vector2i(floor(p.x / 16), floor(p.y / 16))
 	var lc = global2local(gc)
-	gui.alert(str(gc.x) + " " + str(gc.y) + "\n" + str(lc.x) + " " + str(lc.y) + " " + str(lc.z))
+	gui.debug(str(gc.x) + " " + str(gc.y) + "\n" + str(lc.x) + " " + str(lc.y) + " " + str(lc.z))
 	
 
 func _physics_process(delta):
@@ -88,7 +88,10 @@ func _input(event):
 	if event.is_action_pressed("right_click"):
 		var p = get_global_mouse_position()
 		print(p);
-		set_tile(0, Vector2i(floor(p.x/16), floor(p.y/16)), 0, 0)
+		if (bounds.has_point(p)):
+			set_tile(0, Vector2i(floor(p.x/16), floor(p.y/16)), 0, 0)
+		else:
+			pass
 	
 	if event.is_action_pressed("reload"):
 		print("recalculate")
@@ -360,7 +363,7 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 									if (world_items[lc.z][index] != 0):
 										var dir = world_tiledata[lc.z]["rotation"][index]
 										var state = world_tiledata[lc.z]["state"][index]
-										move_resource(gc, dir + int(state))
+										move_resource(gc, (dir + int(state)) % 4)
 										world_tiledata[lc.z]["state"][index] = not world_tiledata[lc.z]["state"][index]
 									
 								5:# storage recieves item
@@ -407,8 +410,15 @@ func move_resource(gc:Vector2i, direction:int):
 	
 	
 	if (world_items[next_lc.z][next_idx] == 0):
-		set_item(1, gc, 0)
-		set_item(1, next_gc, id)
+		match int(world_tiles[next_lc.z][next_idx]):
+			3:
+				if ((int(world_tiledata[next_lc.z]["state"][next_idx]) + \
+				world_tiledata[next_lc.z]["rotation"][next_idx]) % 4 == direction):
+					set_item(1, gc, 0)
+					set_item(1, next_gc, id)
+			_:
+				set_item(1, gc, 0)
+				set_item(1, next_gc, id)
 	
 	#if next_tile and world_tiles[next_tile.z][local2index(Vector2i(next_tile.x, next_tile.y))] == 6:
 		#print("Moving resource from ", tile_pos, " to ", next_tile)

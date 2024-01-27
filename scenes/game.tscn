@@ -116,12 +116,13 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(1, 0.156863, 0.568627, 1)
 
-[node name="GUI" type="CanvasLayer" parent="Camera2D" node_paths=PackedStringArray("selection_label", "alert_label", "resources_label", "music_toggle", "music_player")]
+[node name="GUI" type="CanvasLayer" parent="Camera2D" node_paths=PackedStringArray("selection_label", "alert_label", "debug_label", "resources_label", "music_toggle", "music_player")]
 layer = 10
 script = ExtResource("10_ocoff")
 delete_code_with_music = false
 selection_label = NodePath("GUI/Selection")
-alert_label = NodePath("GUI/TopBar/Alert")
+alert_label = NodePath("GUI/Center/Alert")
+debug_label = NodePath("GUI/TopBar/Debug")
 resources_label = NodePath("GUI/Resources")
 music_toggle = NodePath("GUI/BottomBar/Music")
 music_player = NodePath("GUI/AudioStreamPlayer")
@@ -166,7 +167,26 @@ anchor_right = 1.0
 offset_bottom = 31.0
 grow_horizontal = 2
 
-[node name="Alert" type="RichTextLabel" parent="Camera2D/GUI/GUI/TopBar"]
+[node name="Debug" type="RichTextLabel" parent="Camera2D/GUI/GUI/TopBar"]
+clip_contents = false
+custom_minimum_size = Vector2(600, 0)
+layout_mode = 2
+theme = ExtResource("13_clh56")
+bbcode_enabled = true
+text = "[center]alert text"
+fit_content = true
+scroll_active = false
+
+[node name="Center" type="CenterContainer" parent="Camera2D/GUI/GUI"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Alert" type="RichTextLabel" parent="Camera2D/GUI/GUI/Center"]
 clip_contents = false
 custom_minimum_size = Vector2(600, 0)
 layout_mode = 2
@@ -188,6 +208,7 @@ grow_vertical = 0
 
 [node name="Music" type="CheckButton" parent="Camera2D/GUI/GUI/BottomBar"]
 layout_mode = 2
+focus_mode = 0
 text = "Delete code with music (it goes in the recycling bin)"
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Camera2D/GUI/GUI"]
