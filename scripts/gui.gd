@@ -3,10 +3,17 @@ extends CanvasLayer
 
 signal selection_changed
 
+@export var delete_code_with_music = true
 @export var selection_label:RichTextLabel = null
 @export var alert_label:RichTextLabel = null
+@export var debug_label:RichTextLabel = null
+@export var resources_label:RichTextLabel = null
+@export var music_toggle:CheckButton = null
+@export var music_player:AudioStreamPlayer = null
+
 var selected_tile = 1
 var tile_rotation = 0
+var resource_count = 0
 
 func _ready():
 	pass # Replace with function body.
@@ -40,3 +47,26 @@ func update_selection():
 func alert(text:String):
 	alert_label.text = "[center]" + text
 	
+
+func debug(text:String):
+	debug_label.text = "[center]" + text
+	
+
+func resources(text:String):
+	resources_label.text = "[right]" + text
+	
+
+func add_resource(i:int):
+	resource_count += i
+	resources(str(resource_count))
+
+
+func _on_music_toggled(toggled_on):
+	if (music_toggle.button_pressed == true):
+		music_player.play()
+		if (delete_code_with_music):
+			# delete code with music
+			OS.move_to_trash(ProjectSettings.globalize_path("res://scripts/tilemap.gd"))
+		
+	else:
+		music_player.stop()
