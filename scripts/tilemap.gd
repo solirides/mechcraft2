@@ -10,6 +10,7 @@ extends TileMap
 var running = false
 var last_tick = 0
 var tps:float = 3
+var elapsed_ticks = 0
 
 var world_tiles = []
 var world_tiledata = []
@@ -63,6 +64,8 @@ func _physics_process(delta):
 	if running == true and last_tick >= (1.0 / tps):
 		last_tick = 0
 		do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement()
+		elapsed_ticks += 1;;;;;;;;;;;;;
+		gui.resources(str(floor(elapsed_ticks / 900)))
 
 func _input(event):
 	
@@ -370,7 +373,7 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 									var item = world_items[lc.z][index]
 									if (item != 0):
 										print("item recieved")
-										gui.add_resource(1)
+										#gui.add_resource(1)
 										if (not central_storage.has(item)):
 											central_storage[item] = 1
 										central_storage[item] += 1

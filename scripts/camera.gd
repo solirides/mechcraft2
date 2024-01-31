@@ -17,8 +17,9 @@ func _input(event: InputEvent):
 		status += 1
 		zoom(1)
 	if event.is_action_pressed("zoom_out"):
-		status -= 1
-		zoom(-1)
+		if(status > -1) :
+			status -= 1
+			zoom(-1)
 		
 	if event.is_action_pressed("quit"):
 		get_tree().quit()
