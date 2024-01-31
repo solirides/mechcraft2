@@ -412,7 +412,7 @@ func move_resource(gc:Vector2i, direction:int):
 	if (world_items[next_lc.z][next_idx] == 0):
 		match int(world_tiles[next_lc.z][next_idx]):
 			3:
-				if ((int(world_tiledata[next_lc.z]["state"][next_idx]) + \
+				if (int(world_tiledata[next_lc.z]["state"][next_idx] + \
 				world_tiledata[next_lc.z]["rotation"][next_idx]) % 4 == direction):
 					set_item(1, gc, 0)
 					set_item(1, next_gc, id)
