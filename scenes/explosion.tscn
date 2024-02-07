@@ -1,0 +1,38 @@
+[gd_scene load_steps=7 format=3 uid="uid://bj0bk6v1kl11r"]
+
+[ext_resource type="Material" uid="uid://cavmokip0do8s" path="res://assets/particles/explosion1.tres" id="1_2pj41"]
+[ext_resource type="Material" uid="uid://cd4xldnsdpb6p" path="res://assets/particles/explosion2.tres" id="2_vgy3m"]
+
+[sub_resource type="Gradient" id="Gradient_cdgjf"]
+colors = PackedColorArray(0.63501, 0.350153, 0.264596, 1, 0.958295, 0.74561, 0.459311, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_ht38o"]
+gradient = SubResource("Gradient_cdgjf")
+width = 8
+height = 8
+
+[sub_resource type="Gradient" id="Gradient_ud8p1"]
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_kc022"]
+gradient = SubResource("Gradient_ud8p1")
+width = 2
+height = 2
+
+[node name="Explosion" type="Node2D"]
+
+[node name="GPUParticles2D" type="GPUParticles2D" parent="."]
+position = Vector2(182, 103)
+amount = 40
+process_material = ExtResource("1_2pj41")
+texture = SubResource("GradientTexture2D_ht38o")
+explosiveness = 1.0
+
+[node name="GPUParticles2D2" type="GPUParticles2D" parent="."]
+position = Vector2(182, 103)
+amount = 40
+process_material = ExtResource("2_vgy3m")
+texture = SubResource("GradientTexture2D_kc022")
+lifetime = 3.0
+explosiveness = 1.0
+trail_enabled = true
