@@ -81,7 +81,7 @@ layer_1/name = "Items"
 layer_1/z_index = -3
 layer_1/tile_data = PackedInt32Array()
 script = ExtResource("2_e3udp")
-gui = NodePath("../Camera2D/GUI")
+gui = NodePath("../Camera/Camera2D/GUI")
 debug_dot = NodePath("../DebugDot")
 
 [node name="Debug" type="Node" parent="TileMap"]
@@ -95,19 +95,29 @@ theme_override_font_sizes/normal_font_size = 100
 fit_content = true
 scroll_active = false
 
-[node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("background")]
+[node name="Camera" type="Node2D" parent="." node_paths=PackedStringArray("background", "camera")]
+script = ExtResource("4_3i4pa")
+background = NodePath("Camera2D/CanvasLayer/Background")
+camera = NodePath("Camera2D")
+
+[node name="ShakeFrequency" type="Timer" parent="Camera"]
+
+[node name="ShakeDuration" type="Timer" parent="Camera"]
+
+[node name="Camera2D" type="Camera2D" parent="Camera" node_paths=PackedStringArray("background", "camera")]
 script = ExtResource("4_3i4pa")
 background = NodePath("CanvasLayer/Background")
+camera = NodePath(".")
 
-[node name="CanvasLayer" type="CanvasLayer" parent="Camera2D"]
+[node name="CanvasLayer" type="CanvasLayer" parent="Camera/Camera2D"]
 layer = -1
 
-[node name="Background" type="Node2D" parent="Camera2D/CanvasLayer"]
+[node name="Background" type="Node2D" parent="Camera/Camera2D/CanvasLayer"]
 script = ExtResource("10_y4vju")
 
-[node name="Shaders" type="CanvasLayer" parent="Camera2D"]
+[node name="Shaders" type="CanvasLayer" parent="Camera/Camera2D"]
 
-[node name="ColorRect" type="ColorRect" parent="Camera2D/Shaders"]
+[node name="ColorRect" type="ColorRect" parent="Camera/Camera2D/Shaders"]
 material = SubResource("ShaderMaterial_tfcjj")
 anchors_preset = 15
 anchor_right = 1.0
@@ -116,7 +126,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(1, 0.156863, 0.568627, 1)
 
-[node name="GUI" type="CanvasLayer" parent="Camera2D" node_paths=PackedStringArray("selection_label", "alert_label", "debug_label", "resources_label", "music_toggle", "music_player")]
+[node name="GUI" type="CanvasLayer" parent="Camera/Camera2D" node_paths=PackedStringArray("selection_label", "alert_label", "debug_label", "resources_label", "music_toggle", "music_player")]
 layer = 10
 script = ExtResource("10_ocoff")
 delete_code_with_music = false
@@ -127,7 +137,7 @@ resources_label = NodePath("GUI/Resources")
 music_toggle = NodePath("GUI/BottomBar/Music")
 music_player = NodePath("GUI/AudioStreamPlayer")
 
-[node name="GUI" type="Control" parent="Camera2D/GUI"]
+[node name="GUI" type="Control" parent="Camera/Camera2D/GUI"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -135,7 +145,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Selection" type="RichTextLabel" parent="Camera2D/GUI/GUI"]
+[node name="Selection" type="RichTextLabel" parent="Camera/Camera2D/GUI/GUI"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -147,7 +157,7 @@ theme_override_fonts/normal_font = SubResource("SystemFont_rtmsu")
 theme_override_font_sizes/normal_font_size = 20
 text = "hello"
 
-[node name="Resources" type="RichTextLabel" parent="Camera2D/GUI/GUI"]
+[node name="Resources" type="RichTextLabel" parent="Camera/Camera2D/GUI/GUI"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -160,14 +170,14 @@ theme_override_font_sizes/normal_font_size = 20
 bbcode_enabled = true
 text = "[right]what"
 
-[node name="TopBar" type="CenterContainer" parent="Camera2D/GUI/GUI"]
+[node name="TopBar" type="CenterContainer" parent="Camera/Camera2D/GUI/GUI"]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_bottom = 31.0
 grow_horizontal = 2
 
-[node name="Debug" type="RichTextLabel" parent="Camera2D/GUI/GUI/TopBar"]
+[node name="Debug" type="RichTextLabel" parent="Camera/Camera2D/GUI/GUI/TopBar"]
 clip_contents = false
 custom_minimum_size = Vector2(600, 0)
 layout_mode = 2
@@ -177,7 +187,7 @@ text = "[center]alert text"
 fit_content = true
 scroll_active = false
 
-[node name="Center" type="CenterContainer" parent="Camera2D/GUI/GUI"]
+[node name="Center" type="CenterContainer" parent="Camera/Camera2D/GUI/GUI"]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -186,7 +196,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Alert" type="RichTextLabel" parent="Camera2D/GUI/GUI/Center"]
+[node name="Alert" type="RichTextLabel" parent="Camera/Camera2D/GUI/GUI/Center"]
 clip_contents = false
 custom_minimum_size = Vector2(600, 0)
 layout_mode = 2
@@ -196,7 +206,7 @@ text = "[center]alert text"
 fit_content = true
 scroll_active = false
 
-[node name="BottomBar" type="CenterContainer" parent="Camera2D/GUI/GUI"]
+[node name="BottomBar" type="CenterContainer" parent="Camera/Camera2D/GUI/GUI"]
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
@@ -206,12 +216,12 @@ offset_top = -24.0
 grow_horizontal = 2
 grow_vertical = 0
 
-[node name="Music" type="CheckButton" parent="Camera2D/GUI/GUI/BottomBar"]
+[node name="Music" type="CheckButton" parent="Camera/Camera2D/GUI/GUI/BottomBar"]
 layout_mode = 2
 focus_mode = 0
 text = "Delete code with music (it goes in the recycling bin)"
 
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Camera2D/GUI/GUI"]
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Camera/Camera2D/GUI/GUI"]
 stream = ExtResource("14_agi1x")
 
 [node name="Classes" type="Node" parent="."]
@@ -239,4 +249,6 @@ scale = Vector2(4, 4)
 color = Color(1, 0, 0.713726, 0.584314)
 polygon = PackedVector2Array(1, 1, -1, 1, -1, -1, 1, -1)
 
-[connection signal="toggled" from="Camera2D/GUI/GUI/BottomBar/Music" to="Camera2D/GUI" method="_on_music_toggled"]
+[connection signal="timeout" from="Camera/ShakeFrequency" to="Camera" method="_on_shake_frequency_timeout"]
+[connection signal="timeout" from="Camera/ShakeDuration" to="Camera" method="_on_shake_duration_timeout"]
+[connection signal="toggled" from="Camera/Camera2D/GUI/GUI/BottomBar/Music" to="Camera/Camera2D/GUI" method="_on_music_toggled"]
