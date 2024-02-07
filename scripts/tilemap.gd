@@ -12,6 +12,7 @@ var last_tick = 0
 var tps:float = 3
 var elapsed_ticks = 0
 
+var world_noise = []
 var world_tiles = []
 var world_tiledata = []
 var world_items = []
@@ -120,6 +121,10 @@ func _input(event):
 	if event.is_action_pressed("tick"):
 		print("tick")
 		do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement()
+		#for i in world_noise:
+			#prints(i)
+		print(world_noise[0])
+		
 	if event.is_action_pressed("pause"):
 		running = !running
 		
@@ -308,27 +313,7 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 	for p in priorities_index: # p = array of lines of the same priority
 			for p2 in p: # i = index of one line
 				if len(p) != 0:
-					#var last_gc = lines_global[p2][0]
-					#var last_lc = global2local(last_gc)
-					#var last_index = local2index(Vector2i(last_lc.x, last_lc.y))
-					#
-					## process first tile
-					## same as one in for loop
-					#if world_items[last_lc.z][last_index] != 0:
-						## doesn't work with balancers yet
-						#match world_tiles[last_lc.z][last_index]:
-							#1:
-								#var dir = world_tiledata[last_lc.z]["rotation"][last_index]
-								## the "last" vars are what the current conveyor points to (since the line's array is reversed)
-								#var idk = global2local(last_gc + SIDES[0])
-								#if (world_items[idk.z][local2index(Vector2i(idk.x, idk.y))] == 0):
-									## move if space
-									#move_resource(last_gc, dir)
-							#5:# storage recieves item
-								#print("item recieved")
-								#gui.add_resource(1)
-								## item go bye bye
-								#set_item(1, last_gc, 0)
+					pass
 					
 					# process rest of the line
 					for gc in lines_global[p2]:
@@ -339,13 +324,14 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 							# doesn't work with balancers yet
 							match id:
 								1:
+									world_noise[lc.z][index] += 2
 									var dir = world_tiledata[lc.z]["rotation"][index]
 									# the "last" vars are what the current conveyor points to (since the line's array is reversed)
 									#if (world_items[last_lc.z][last_index] == 0):
 									move_resource(gc, dir)
 									
 								2: #constructor
-									
+									world_noise[lc.z][index] += 2
 									var item = world_items[lc.z][index]
 									if (item != 0):
 										
@@ -353,6 +339,7 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 										var a = gc2string(gc)
 										if (constructor_inventory.has(a) and constructor_inventory[a] != null):
 											# construct thing
+											world_noise[lc.z][index] += 5
 											set_item(1, gc, 4)
 											move_resource(gc, world_tiledata[lc.z]["rotation"][index])
 											constructor_inventory[a] = null
@@ -363,6 +350,7 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 										#set_item(1, gc, 0)
 								
 								3:
+									world_noise[lc.z][index] += 3
 									if (world_items[lc.z][index] != 0):
 										var dir = world_tiledata[lc.z]["rotation"][index]
 										var state = world_tiledata[lc.z]["state"][index]
@@ -379,7 +367,9 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 										central_storage[item] += 1
 										# item go bye bye
 										set_item(1, gc, 0)
-								
+						
+						world_noise[lc.z][index] = max(world_noise[lc.z][index] - 5, 0)
+						
 						#last_gc = gc
 						#last_lc = lc
 						#last_index = index
@@ -415,13 +405,16 @@ func move_resource(gc:Vector2i, direction:int):
 	if (world_items[next_lc.z][next_idx] == 0):
 		match int(world_tiles[next_lc.z][next_idx]):
 			3:
-				if (int(world_tiledata[next_lc.z]["state"][next_idx] + \
+				if (int(int(world_tiledata[next_lc.z]["state"][next_idx]) + \
 				world_tiledata[next_lc.z]["rotation"][next_idx]) % 4 == direction):
 					set_item(1, gc, 0)
 					set_item(1, next_gc, id)
 			_:
 				set_item(1, gc, 0)
 				set_item(1, next_gc, id)
+	else: # clogged
+		pass
+		world_noise[lc.z][idx] += 5
 	
 	#if next_tile and world_tiles[next_tile.z][local2index(Vector2i(next_tile.x, next_tile.y))] == 6:
 		#print("Moving resource from ", tile_pos, " to ", next_tile)
@@ -539,6 +532,7 @@ func setup():
 	world_tiles = load_tiles()
 	world_items = load_items()
 	world_tiledata = load_tiledata()
+	world_noise = load_noise()
 	
 	for i in bounds.size.x:
 		var a = []
@@ -609,6 +603,22 @@ func load_tiledata():
 	
 	return world
 
+func load_noise():
+	var world = []
+	print("loading noise")
+	for i in len(json.json["chunks"]):
+#		print(json.json["chunks"][i]["tiles"])
+		world.append(PackedInt32Array(json.json["chunks"][i]["noise"]))
+#		print(world[0])
+	
+	# fill missing chunks
+	var a:PackedInt32Array = []
+	a.resize(pow(chunk_size, 2))
+	a.fill(0)
+	for i in pow(world_size, 2) - len(world):
+		world.append(a)
+	
+	return world
 
 func make_tileset_exist(ts: TileSet):
 	var id = 0
