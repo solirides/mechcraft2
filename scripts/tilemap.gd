@@ -6,6 +6,7 @@ extends TileMap
 @onready var json = get_node("../Json")
 @export var gui:CanvasLayer = null
 @export var debug_dot:Polygon2D = null
+@export var explosion:Node = null
 
 var running = false
 var last_tick = 0
@@ -56,6 +57,12 @@ func _process(delta):
 	var p = get_global_mouse_position()
 	var gc = Vector2i(floor(p.x / 16), floor(p.y / 16))
 	var lc = global2local(gc)
+	var idx = local2index(Vector2i(lc.x, lc.y))
+	var lc2 = index2local(idx, lc.z)
+	var gc2 = local2global(lc2)
+	#gui.debug(str(gc.x) + " " + str(gc.y) + "\n" + str(lc.x) + " " + str(lc.y) + " " + str(lc.z) + \
+		#"\n" + str(idx) + "\n" + str(lc2.x) + " " + str(lc2.y) + " " + str(lc2.z) + \
+		#"\n" + str(gc2.x) + " " + str(gc2.y))
 	gui.debug(str(gc.x) + " " + str(gc.y) + "\n" + str(lc.x) + " " + str(lc.y) + " " + str(lc.z))
 	
 
@@ -72,13 +79,12 @@ func _input(event):
 	
 	if event.is_action_pressed("left_click"):
 		var p = get_global_mouse_position()
+		var gc = Vector2i(floor(p.x/16), floor(p.y/16))
+		print(p)
+		print(gc)
+		if (bounds.has_point(gc)):
+			set_tile(0, gc, selected_tile, tile_rotation)
 		
-		print(p);
-		set_tile(0, Vector2i(floor(p.x/16), floor(p.y/16)), selected_tile, tile_rotation)
-#		var c = Vector2i(int(p.x) / 16, int(p.y) / 16)
-#		self.set_cell(0, c, selected_tile, Vector2i.ZERO, tile_rotation)
-#		world_tiles[0][c.x + c.y * chunk_size] = selected_tile
-#		world_tiledata[0]["rotation"][c.x + c.y * chunk_size] = tile_rotation
 	if event.is_action_pressed("middle_click"):
 		var p = get_global_mouse_position()
 		var tile_pos = Vector2i(floor(p.x / 16), floor(p.y / 16))
@@ -91,11 +97,10 @@ func _input(event):
 	
 	if event.is_action_pressed("right_click"):
 		var p = get_global_mouse_position()
+		var gc = Vector2i(floor(p.x/16), floor(p.y/16))
 		print(p);
-		if (bounds.has_point(p)):
-			set_tile(0, Vector2i(floor(p.x/16), floor(p.y/16)), 0, 0)
-		else:
-			pass
+		if (bounds.has_point(gc)):
+			set_tile(0, gc, 0, 0)
 	
 	if event.is_action_pressed("reload"):
 		print("recalculate")
@@ -116,7 +121,10 @@ func _input(event):
 		var p = get_global_mouse_position()
 		print(p);
 		var c = Vector2i(int(p.x) / 16, int(p.y) / 16)
+		var gc = Vector2i(floor(p.x/16), floor(p.y/16))
+		var lc = global2local(gc)
 		print("PING " + " " + str(c) + " " + str(global2local(Vector2i(floor(p.x/16), floor(p.y/16)))) )
+		summon_the_sandworm_from_the_depths_of_the_dunes(gc, lc, local2index(Vector2i(lc.x, lc.y)))
 		
 	if event.is_action_pressed("tick"):
 		print("tick")
@@ -197,6 +205,8 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 	
 	var neighbors:Array[int] = [] # clockwise offset from current rotation
 	match int(id):
+		0:
+			neighbors = []
 		2:
 			neighbors = [1, 3]
 		3:
@@ -209,13 +219,13 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 		split = false
 		tile = n_tile
 		dir =  n_dir
-		print(tile)
+		print(str(tile) + " tile")
 		for b:int in neighbors:
 			var neighbor_dir = (b + dir) % 4 # direction to neighbor from current tile
 			var facing_gc:Vector2i = tile + SIDES[(b + dir) % 4]
 			var facing_lc:Vector3i = global2local(facing_gc)
 			#print(facing_lc)
-			print(facing_gc)
+			print(str(facing_gc) + " gc")
 			if not bounds.has_point(Vector2i(facing_lc.x,facing_lc.y)) or used_tiles[facing_gc.x][facing_gc.y] == 1:
 				# out of bounds
 				print("a")
@@ -226,7 +236,7 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 			var facing_idx:int = local2index(Vector2i(facing_lc.x,facing_lc.y))
 			var facing_rot:int = world_tiledata[c]["rotation"][facing_idx]
 			var facing_tile:int = world_tiles[c][facing_idx]
-			
+			print(str(facing_tile) + " facing tile")
 			match facing_tile:
 				1: # conveyor
 					if facing_rot == (neighbor_dir + 2) % 4:
@@ -235,6 +245,7 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 						if split:
 							#result.append(line)
 							#priorities.append(priority)
+							print(split)
 							var a = detect_connections(facing_gc, facing_tile, priority + 1, facing_rot, true)
 							result.merge(a[0])
 							priorities.merge(a[1])
@@ -297,7 +308,6 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 							loop = true
 							split = true
 						
-						
 	result[gc2string(gc)] = line
 	priorities[gc2string(gc)] = priority
 	
@@ -321,7 +331,6 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 						var index = local2index(Vector2i(lc.x, lc.y))
 						var id = world_tiles[lc.z][index]
 						if id != 0:
-							# doesn't work with balancers yet
 							match id:
 								1:
 									world_noise[lc.z][index] += 2
@@ -369,12 +378,19 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 										set_item(1, gc, 0)
 						
 						world_noise[lc.z][index] = max(world_noise[lc.z][index] - 5, 0)
+						if world_noise[lc.z][index] >= 5:
+							summon_the_sandworm_from_the_depths_of_the_dunes(gc, lc, index)
+							
 						
 						#last_gc = gc
 						#last_lc = lc
 						#last_index = index
 		
 		
+
+func summon_the_sandworm_from_the_depths_of_the_dunes(gc:Vector2i, lc:Vector3i, index:int):
+	explosion.position = gc * 16
+	explosion.explode()
 
 #func initiate_resource_movement(tile_pos):
 	#var local_coords = global2local(tile_pos)
@@ -413,8 +429,7 @@ func move_resource(gc:Vector2i, direction:int):
 				set_item(1, gc, 0)
 				set_item(1, next_gc, id)
 	else: # clogged
-		pass
-		world_noise[lc.z][idx] += 5
+		world_noise[lc.z][idx] += 6
 	
 	#if next_tile and world_tiles[next_tile.z][local2index(Vector2i(next_tile.x, next_tile.y))] == 6:
 		#print("Moving resource from ", tile_pos, " to ", next_tile)
@@ -473,10 +488,13 @@ func global2local(global_coords:Vector2i):
 func set_tile(layer:int, global_coords:Vector2i, tile:int, rotation:int):
 #	no storage data yet
 	var local_coords = global2local(global_coords)
+	var index = local2index(Vector2i(local_coords.x, local_coords.y))
 	
 #	world_tiledata[local_coords.z]["storage"][local_coords.x + local_coords.y * chunk_size] = null
-	world_tiles[local_coords.z][local_coords.x + local_coords.y * chunk_size] = tile
-	world_tiledata[local_coords.z]["rotation"][local_coords.x + local_coords.y * chunk_size] = rotation
+	world_tiles[local_coords.z][index] = tile
+	world_tiledata[local_coords.z]["rotation"][index] = rotation
+	print(global_coords)
+	print(local_coords)
 	self.set_cell(layer, \
 			global_coords, tile, \
 			Vector2i.ZERO, rotation
@@ -534,11 +552,12 @@ func setup():
 	world_tiledata = load_tiledata()
 	world_noise = load_noise()
 	
+	var a = []
+	a.resize(bounds.size.y)
+	a.fill(0)
 	for i in bounds.size.x:
-		var a = []
-		a.resize(bounds.size.y)
-		a.fill(false)
-		used_tiles.append(a)
+		# make duplicate or else everything decides to use the same array
+		used_tiles.append(a.duplicate())
 	
 	
 	set_tilemap(world_tiles, world_tiledata)
@@ -568,7 +587,7 @@ func load_tiles():
 	a.resize(pow(chunk_size, 2))
 	a.fill(0)
 	for i in pow(world_size, 2) - len(world):
-		world.append(a)
+		world.append(a.duplicate())
 	
 	return world
 
@@ -582,7 +601,7 @@ func load_items():
 	a.resize(pow(chunk_size, 2))
 	a.fill(0)
 	for i in pow(world_size, 2) - len(world):
-		world.append(a)
+		world.append(a.duplicate())
 	
 	return world
 
@@ -599,7 +618,7 @@ func load_tiledata():
 	a.fill(0)
 	var d:Dictionary = {"storage": a, "rotation": a, "state": a}
 	for i in pow(world_size, 2) - len(world):
-		world.append(d)
+		world.append(d.duplicate())
 	
 	return world
 
@@ -616,7 +635,7 @@ func load_noise():
 	a.resize(pow(chunk_size, 2))
 	a.fill(0)
 	for i in pow(world_size, 2) - len(world):
-		world.append(a)
+		world.append(a.duplicate())
 	
 	return world
 
