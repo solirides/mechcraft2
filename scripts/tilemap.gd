@@ -7,6 +7,7 @@ extends TileMap
 @export var gui:CanvasLayer = null
 @export var debug_dot:Polygon2D = null
 @export var explosion:Node = null
+@export var camera:Node = null
 
 var running = false
 var last_tick = 0
@@ -100,7 +101,11 @@ func _input(event):
 		var gc = Vector2i(floor(p.x/16), floor(p.y/16))
 		print(p);
 		if (bounds.has_point(gc)):
+			explosion.position = gc*16
+			explosion.explode()
+			camera.camera_shake(100, 16, 50, 10)
 			set_tile(0, gc, 0, 0)
+			
 	
 	if event.is_action_pressed("reload"):
 		print("recalculate")
@@ -391,6 +396,8 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 func summon_the_sandworm_from_the_depths_of_the_dunes(gc:Vector2i, lc:Vector3i, index:int):
 	explosion.position = gc * 16
 	explosion.explode()
+	set_tile(0, gc, 0, 0)
+	
 
 #func initiate_resource_movement(tile_pos):
 	#var local_coords = global2local(tile_pos)
@@ -646,7 +653,7 @@ func make_tileset_exist(ts: TileSet):
 	
 	var blank = TileSetAtlasSource.new()
 	ts.add_source(blank)
-	
+	ts.tile_size = Vector2i(16,16)
 	var file_data = FileAccess.open("res://assets/tiles.json", FileAccess.READ)
 	var json_thing = JSON.new()
 	json_thing.parse(file_data.get_as_text())
@@ -691,4 +698,3 @@ func make_tileset_exist(ts: TileSet):
 func _on_selection_changed(selected_tile, tile_rotation):
 	self.selected_tile = selected_tile
 	self.tile_rotation = tile_rotation
-
