@@ -141,7 +141,7 @@ selection_label = NodePath("GUI/Selection")
 alert_label = NodePath("GUI/Center/Alert")
 debug_label = NodePath("GUI/TopBar/Debug")
 resources_label = NodePath("GUI/Resources")
-music_toggle = NodePath("GUI/BottomBar/Music")
+music_toggle = NodePath("GUI/BottomBar/VBoxContainer/Music")
 music_player = NodePath("GUI/AudioStreamPlayer")
 
 [node name="GUI" type="Control" parent="Camera/Camera2D/GUI"]
@@ -223,10 +223,18 @@ offset_top = -24.0
 grow_horizontal = 2
 grow_vertical = 0
 
-[node name="Music" type="CheckButton" parent="Camera/Camera2D/GUI/GUI/BottomBar"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Camera/Camera2D/GUI/GUI/BottomBar"]
+layout_mode = 2
+
+[node name="Music" type="CheckButton" parent="Camera/Camera2D/GUI/GUI/BottomBar/VBoxContainer"]
 layout_mode = 2
 focus_mode = 0
 text = "Delete code with music (it goes in the recycling bin)"
+
+[node name="Music2" type="CheckButton" parent="Camera/Camera2D/GUI/GUI/BottomBar/VBoxContainer"]
+layout_mode = 2
+focus_mode = 0
+text = "Shut down computer with music"
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Camera/Camera2D/GUI/GUI"]
 stream = ExtResource("14_agi1x")
@@ -258,4 +266,5 @@ polygon = PackedVector2Array(1, 1, -1, 1, -1, -1, 1, -1)
 
 [connection signal="timeout" from="Camera/ShakeFrequency" to="Camera" method="_on_shake_frequency_timeout"]
 [connection signal="timeout" from="Camera/ShakeDuration" to="Camera" method="_on_shake_duration_timeout"]
-[connection signal="toggled" from="Camera/Camera2D/GUI/GUI/BottomBar/Music" to="Camera/Camera2D/GUI" method="_on_music_toggled"]
+[connection signal="toggled" from="Camera/Camera2D/GUI/GUI/BottomBar/VBoxContainer/Music" to="Camera/Camera2D/GUI" method="_on_music_toggled"]
+[connection signal="toggled" from="Camera/Camera2D/GUI/GUI/BottomBar/VBoxContainer/Music2" to="Camera/Camera2D/GUI" method="_on_music_2_toggled"]

