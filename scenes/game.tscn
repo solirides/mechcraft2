@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://wbpqro6tssd5"]
+[gd_scene load_steps=29 format=3 uid="uid://wbpqro6tssd5"]
 
 [ext_resource type="Script" path="res://scripts/json.gd" id="1_3pqby"]
 [ext_resource type="Script" path="res://scripts/tilemap.gd" id="2_e3udp"]
@@ -14,6 +14,7 @@
 [ext_resource type="Shader" path="res://assets/shaders/test.gdshader" id="10_shcmx"]
 [ext_resource type="Script" path="res://scripts/background.gd" id="10_y4vju"]
 [ext_resource type="Theme" uid="uid://b4us1mhl0qxjp" path="res://assets/theme.tres" id="13_clh56"]
+[ext_resource type="Shader" path="res://assets/shaders/grain.gdshader" id="13_xq4xh"]
 [ext_resource type="AudioStream" uid="uid://cmygilbmp72r3" path="res://assets/audio/music1.ogg" id="14_agi1x"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tbejw"]
@@ -57,8 +58,22 @@ shader_parameter/strength = 0.003
 shader_parameter/variation = 0.001
 shader_parameter/frequency = 0.4
 
-[sub_resource type="SystemFont" id="SystemFont_rtmsu"]
-generate_mipmaps = true
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_0oh36"]
+noise_type = 0
+fractal_octaves = 4
+fractal_lacunarity = 5.0
+fractal_gain = 2.0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_3vi5g"]
+seamless = true
+noise = SubResource("FastNoiseLite_0oh36")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_hjsx2"]
+shader = ExtResource("13_xq4xh")
+shader_parameter/color = Color(1, 1, 1, 1)
+shader_parameter/noise_size = 512.0
+shader_parameter/amount = 0.8
+shader_parameter/noise = SubResource("NoiseTexture2D_3vi5g")
 
 [sub_resource type="Environment" id="Environment_tiixt"]
 background_mode = 3
@@ -133,15 +148,25 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(1, 0.156863, 0.568627, 1)
 
-[node name="GUI" type="CanvasLayer" parent="Camera/Camera2D" node_paths=PackedStringArray("selection_label", "alert_label", "debug_label", "resources_label", "music_toggle", "music_player")]
+[node name="ColorRect2" type="ColorRect" parent="Camera/Camera2D/Shaders"]
+visible = false
+material = SubResource("ShaderMaterial_hjsx2")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 0.156863, 0.568627, 1)
+
+[node name="GUI" type="CanvasLayer" parent="Camera/Camera2D" node_paths=PackedStringArray("selection_label", "alert_label", "debug_label", "resources_label", "menu", "music_player")]
 layer = 10
 script = ExtResource("10_ocoff")
-delete_code_with_music = false
-selection_label = NodePath("GUI/Selection")
+create_chaos_with_music = false
+selection_label = NodePath("GUI/VBoxContainer/Bar2/Selection")
 alert_label = NodePath("GUI/Center/Alert")
-debug_label = NodePath("GUI/TopBar/Debug")
-resources_label = NodePath("GUI/Resources")
-music_toggle = NodePath("GUI/BottomBar/VBoxContainer/Music")
+debug_label = NodePath("GUI/VBoxContainer/Bar2/Debug")
+resources_label = NodePath("GUI/VBoxContainer/Bar2/Resources")
+menu = NodePath("GUI/Menu")
 music_player = NodePath("GUI/AudioStreamPlayer")
 
 [node name="GUI" type="Control" parent="Camera/Camera2D/GUI"]
@@ -152,47 +177,77 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Selection" type="RichTextLabel" parent="Camera/Camera2D/GUI/GUI"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme = ExtResource("13_clh56")
-theme_override_fonts/normal_font = SubResource("SystemFont_rtmsu")
-theme_override_font_sizes/normal_font_size = 20
-text = "hello"
-
-[node name="Resources" type="RichTextLabel" parent="Camera/Camera2D/GUI/GUI"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme = ExtResource("13_clh56")
-theme_override_fonts/normal_font = SubResource("SystemFont_rtmsu")
-theme_override_font_sizes/normal_font_size = 20
-bbcode_enabled = true
-text = "[right]what"
-
-[node name="TopBar" type="CenterContainer" parent="Camera/Camera2D/GUI/GUI"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Camera/Camera2D/GUI/GUI"]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_bottom = 31.0
+offset_bottom = 39.0
 grow_horizontal = 2
 
-[node name="Debug" type="RichTextLabel" parent="Camera/Camera2D/GUI/GUI/TopBar"]
-clip_contents = false
-custom_minimum_size = Vector2(600, 0)
+[node name="Bar1" type="Control" parent="Camera/Camera2D/GUI/GUI/VBoxContainer"]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
+
+[node name="Hotbar" type="HBoxContainer" parent="Camera/Camera2D/GUI/GUI/VBoxContainer/Bar1"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="Menu" type="Button" parent="Camera/Camera2D/GUI/GUI/VBoxContainer/Bar1"]
+layout_mode = 0
+offset_right = 89.0
+offset_bottom = 39.0
+theme = ExtResource("13_clh56")
+text = "⚙️Menu"
+
+[node name="Bar2" type="Control" parent="Camera/Camera2D/GUI/GUI/VBoxContainer"]
+layout_mode = 2
+
+[node name="Selection" type="RichTextLabel" parent="Camera/Camera2D/GUI/GUI/VBoxContainer/Bar2"]
+clip_contents = false
+layout_mode = 1
+offset_right = 1.0
+theme = ExtResource("13_clh56")
+text = "hello"
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+
+[node name="Debug" type="RichTextLabel" parent="Camera/Camera2D/GUI/GUI/VBoxContainer/Bar2"]
+clip_contents = false
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -300.0
+offset_right = 300.0
+offset_bottom = 31.0
+grow_horizontal = 2
 theme = ExtResource("13_clh56")
 bbcode_enabled = true
 text = "[center]alert text"
 fit_content = true
 scroll_active = false
+
+[node name="Resources" type="RichTextLabel" parent="Camera/Camera2D/GUI/GUI/VBoxContainer/Bar2"]
+clip_contents = false
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -49.0
+offset_bottom = 28.0
+grow_horizontal = 0
+theme = ExtResource("13_clh56")
+bbcode_enabled = true
+text = "[right]what"
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
 
 [node name="Center" type="CenterContainer" parent="Camera/Camera2D/GUI/GUI"]
 visible = false
@@ -239,6 +294,44 @@ text = "Shut down computer with music"
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Camera/Camera2D/GUI/GUI"]
 stream = ExtResource("14_agi1x")
 
+[node name="Menu" type="CenterContainer" parent="Camera/Camera2D/GUI/GUI"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Camera/Camera2D/GUI/GUI/Menu"]
+layout_mode = 2
+mouse_filter = 0
+
+[node name="Button1" type="Button" parent="Camera/Camera2D/GUI/GUI/Menu/VBoxContainer"]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+theme = ExtResource("13_clh56")
+text = "Resume"
+
+[node name="Button2" type="Button" parent="Camera/Camera2D/GUI/GUI/Menu/VBoxContainer"]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+theme = ExtResource("13_clh56")
+text = "Something"
+
+[node name="Button3" type="Button" parent="Camera/Camera2D/GUI/GUI/Menu/VBoxContainer"]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+theme = ExtResource("13_clh56")
+text = "Options"
+
+[node name="Button4" type="Button" parent="Camera/Camera2D/GUI/GUI/Menu/VBoxContainer"]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+theme = ExtResource("13_clh56")
+text = "Main Menu"
+
 [node name="Classes" type="Node" parent="."]
 script = ExtResource("4_mms3p")
 
@@ -266,5 +359,6 @@ polygon = PackedVector2Array(1, 1, -1, 1, -1, -1, 1, -1)
 
 [connection signal="timeout" from="Camera/ShakeFrequency" to="Camera" method="_on_shake_frequency_timeout"]
 [connection signal="timeout" from="Camera/ShakeDuration" to="Camera" method="_on_shake_duration_timeout"]
+[connection signal="pressed" from="Camera/Camera2D/GUI/GUI/VBoxContainer/Bar1/Menu" to="Camera/Camera2D/GUI" method="_on_menu_pressed"]
 [connection signal="toggled" from="Camera/Camera2D/GUI/GUI/BottomBar/VBoxContainer/Music" to="Camera/Camera2D/GUI" method="_on_music_toggled"]
 [connection signal="toggled" from="Camera/Camera2D/GUI/GUI/BottomBar/VBoxContainer/Music2" to="Camera/Camera2D/GUI" method="_on_music_2_toggled"]

