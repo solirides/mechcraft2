@@ -35,9 +35,10 @@ func _input(event: InputEvent):
 		zoom(1)
 	if event.is_action_pressed("zoom_out"):
 		#camera_shake(1, 18, 30, 10)
-		if(status > -1) :
-			status -= 1
-			zoom(-1)
+		#if(status > -1) :
+		status -= 1
+		zoom(-1)
+		pass
 		
 	if event.is_action_pressed("quit"):
 		get_tree().quit()
@@ -89,6 +90,7 @@ func shake():
 func _on_tween_finished():
 	#print("tween")
 	tween.kill()
+	self.position = Vector2.ZERO
 
 func _on_frequency_timer_timeout():
 	shake()
