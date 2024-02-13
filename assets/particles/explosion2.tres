@@ -1,0 +1,16 @@
+[gd_resource type="ParticleProcessMaterial" format=3 uid="uid://cd4xldnsdpb6p"]
+
+[resource]
+particle_flag_disable_z = true
+emission_shape = 1
+emission_sphere_radius = 45.58
+angle_max = 360.0
+spread = 180.0
+angular_velocity_max = 380.22
+orbit_velocity_min = 0.809
+orbit_velocity_max = 1.686
+radial_velocity_min = 44.95
+radial_velocity_max = 112.37
+gravity = Vector3(0, 0, 0)
+damping_min = 28.088
+damping_max = 41.572

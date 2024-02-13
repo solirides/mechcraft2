@@ -1,4 +1,9 @@
-[gd_resource type="Theme" format=3 uid="uid://b4us1mhl0qxjp"]
+[gd_resource type="Theme" load_steps=2 format=3 uid="uid://b4us1mhl0qxjp"]
+
+[sub_resource type="SystemFont" id="SystemFont_u3853"]
+hinting = 2
 
 [resource]
+Button/font_sizes/font_size = 22
 RichTextLabel/font_sizes/normal_font_size = 22
+RichTextLabel/fonts/normal_font = SubResource("SystemFont_u3853")
