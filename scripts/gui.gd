@@ -90,3 +90,7 @@ func _on_music_2_toggled(toggled_on):
 func _on_menu_pressed():
 	print(menu)
 	menu.visible = not menu.visible
+
+
+func _on_title_screen_pressed():
+	get_tree().change_scene_to_file("res://scenes/title_screen.tscn")

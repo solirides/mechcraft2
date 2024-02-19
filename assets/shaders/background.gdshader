@@ -15,9 +15,9 @@ void fragment() {
 	else {
 		COLOR = color2;
 	}
-	if (mod(SCREEN_UV.x / SCREEN_PIXEL_SIZE.x - SCREEN_UV.y / SCREEN_PIXEL_SIZE.y / 4.0 - TIME * 10.0, 8) >= 3.0 + sin(TIME)) {
-		COLOR = color1;
-	}
+	//if (mod(SCREEN_UV.x / SCREEN_PIXEL_SIZE.x - SCREEN_UV.y / SCREEN_PIXEL_SIZE.y / 4.0 - TIME * 10.0, 8) >= 3.0 + sin(TIME)) {
+		//COLOR = color1;
+	//}
 }
 
 //void light() {

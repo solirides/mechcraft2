@@ -385,3 +385,4 @@ polygon = PackedVector2Array(1, 1, -1, 1, -1, -1, 1, -1)
 [connection signal="pressed" from="Camera/Camera2D/GUI/GUI/VBoxContainer/Bar1/Menu" to="Camera/Camera2D/GUI" method="_on_menu_pressed"]
 [connection signal="toggled" from="Camera/Camera2D/GUI/GUI/BottomBar/VBoxContainer/Music" to="Camera/Camera2D/GUI" method="_on_music_toggled"]
 [connection signal="toggled" from="Camera/Camera2D/GUI/GUI/BottomBar/VBoxContainer/Music2" to="Camera/Camera2D/GUI" method="_on_music_2_toggled"]
+[connection signal="pressed" from="Camera/Camera2D/GUI/GUI/Menu/VBoxContainer/Button4" to="Camera/Camera2D/GUI" method="_on_title_screen_pressed"]
