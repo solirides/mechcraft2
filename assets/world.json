@@ -3,6 +3,7 @@
 	"chunk_size":8,
 	"world_size":16,
 	"world_data": {
+		"elapsed_ticks":12,
 		"central_storage":{
 			
 		}
