@@ -3,10 +3,12 @@ extends TileMap
 
 
 
+var explosion = preload("res://scenes/explosion.tscn")
+
 @onready var json = get_node("../Json")
 @export var gui:CanvasLayer = null
 @export var debug_dot:Polygon2D = null
-@export var explosion:Node = null
+
 @export var camera:Node = null
 @export var tile_size = 16
 
@@ -102,8 +104,10 @@ func _input(event):
 		var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
 		print(p);
 		if (bounds.has_point(gc)):
-			explosion.position = gc*tile_size
-			explosion.explode()
+			var e = explosion.instantiate()
+			add_child(e)
+			e.position = gc * tile_size
+			e.explode()
 			camera.camera_shake(0.4, 16, 50, 10)
 			set_tile(0, gc, 0, 0)
 			
@@ -427,8 +431,10 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 		
 
 func summon_the_sandworm_from_the_depths_of_the_dunes(gc:Vector2i, lc:Vector3i, index:int):
-	explosion.position = gc * tile_size
-	explosion.explode()
+	var e = explosion.instantiate()
+	add_child(e)
+	e.position = gc * tile_size
+	e.explode()
 	set_tile(0, gc, 0, 0)
 	
 
