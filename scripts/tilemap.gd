@@ -13,10 +13,12 @@ var explosion = preload("res://scenes/explosion.tscn")
 @export var tile_size = 16
 
 var running = false
-var last_tick = 0
 var tps:float = 3
-var elapsed_ticks = 0
 
+
+# these vars are all from the world save file
+var last_tick = 0
+var elapsed_ticks = 0
 var world_noise = []
 var world_tiles = []
 var world_tiledata = []
@@ -38,7 +40,7 @@ var priorities_index:Array[Array] = []
 
 var infinite_loop:Array[Array] = []
 var max_priority:int = 0
-var used_tiles:Array[Array] = [] # 0 = unprocessed 1 = completely processed 2 = somewhat processed
+var used_tiles:Array[Array] = [] # 0 = unprocessed; 1 = completely processed; 2 = somewhat processed
 
 const SIDES = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 
@@ -593,10 +595,15 @@ func setup():
 	bounds = Rect2i(0, 0, world_size * chunk_size, world_size * chunk_size)
 	
 	chunk_area = pow(chunk_size, 2)
-	world_tiles = load_tiles()
-	world_items = load_items()
+	#world_tiles = load_tiles()
+	#world_items = load_items()
+	#world_noise = load_noise()
+	world_tiles = load_data_int("tiles", 0)
+	world_items = load_data_int("items", 0)
+	world_noise = load_data_int("noise", 0)
+	
 	world_tiledata = load_tiledata()
-	world_noise = load_noise()
+	
 	
 	var a = []
 	a.resize(bounds.size.y)
@@ -620,36 +627,21 @@ func set_tilemap(world_tiles, world_tiledata):
 			)
 #		world_tiledata[c]["rotation"][i]
 
-func load_tiles():
-	var world = []
+
+func load_data_int(property:String, default_value:int = 0):
+	var data = []
 	print("loading tiles")
 	for i in len(json.json["chunks"]):
-#		print(json.json["chunks"][i]["tiles"])
-		world.append(PackedInt32Array(json.json["chunks"][i]["tiles"]))
-#		print(world[0])
+		data.append(PackedInt32Array(json.json["chunks"][i][property]))
 	
 	# fill missing chunks
 	var a:PackedInt32Array = []
 	a.resize(pow(chunk_size, 2))
-	a.fill(0)
-	for i in pow(world_size, 2) - len(world):
-		world.append(a.duplicate())
+	a.fill(default_value)
+	for i in pow(world_size, 2) - len(data):
+		data.append(a.duplicate())
 	
-	return world
-
-func load_items():
-	var world = []
-	print("loading items")
-	for i in len(json.json["chunks"]):
-		world.append(PackedInt32Array(json.json["chunks"][i]["items"]))
-
-	var a:PackedInt32Array = []
-	a.resize(pow(chunk_size, 2))
-	a.fill(0)
-	for i in pow(world_size, 2) - len(world):
-		world.append(a.duplicate())
-	
-	return world
+	return data
 
 func load_tiledata():
 	var world = []
@@ -665,23 +657,6 @@ func load_tiledata():
 	#var d:Dictionary = {"storage": a, "rotation": a, "state": a}
 	for i in pow(world_size, 2) - len(world):
 		world.append({"storage": a.duplicate(), "rotation": a.duplicate(), "state": a.duplicate()})
-	
-	return world
-
-func load_noise():
-	var world = []
-	print("loading noise")
-	for i in len(json.json["chunks"]):
-#		print(json.json["chunks"][i]["tiles"])
-		world.append(PackedInt32Array(json.json["chunks"][i]["noise"]))
-#		print(world[0])
-	
-	# fill missing chunks
-	var a:PackedInt32Array = []
-	a.resize(pow(chunk_size, 2))
-	a.fill(0)
-	for i in pow(world_size, 2) - len(world):
-		world.append(a.duplicate())
 	
 	return world
 
