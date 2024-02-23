@@ -91,14 +91,14 @@ glow_hdr_threshold = 0.87
 [node name="Json" type="Node" parent="."]
 script = ExtResource("1_3pqby")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Marketing" type="Sprite2D" parent="."]
 self_modulate = Color(1, 1, 1, 0.247059)
 z_index = -10
 position = Vector2(1024, 1024)
 scale = Vector2(2, 2)
 texture = ExtResource("10_1k22r")
 
-[node name="ColorRect" type="ColorRect" parent="."]
+[node name="WorldBackground" type="ColorRect" parent="."]
 z_index = -11
 custom_minimum_size = Vector2(2048, 2048)
 offset_right = 2048.0
@@ -351,7 +351,7 @@ layout_mode = 2
 theme = ExtResource("13_clh56")
 text = "Main Menu"
 
-[node name="Classes" type="Node" parent="."]
+[node name="WorldSave" type="Node" parent="."]
 script = ExtResource("4_mms3p")
 
 [node name="Line2D" type="Line2D" parent="."]
