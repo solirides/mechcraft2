@@ -90,7 +90,7 @@ func shake():
 func _on_tween_finished():
 	#print("tween")
 	tween.kill()
-	self.position = Vector2.ZERO
+	
 
 func _on_frequency_timer_timeout():
 	shake()
@@ -101,3 +101,4 @@ func _on_duration_timer_timeout():
 	camera.offset.y = 0
 	shake_level = 0
 	frequency_timer.stop()
+	self.position = Vector2.ZERO

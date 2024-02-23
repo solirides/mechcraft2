@@ -3,30 +3,36 @@ extends TileMap
 
 
 
+var explosion = preload("res://scenes/explosion.tscn")
+
 @onready var json = get_node("../Json")
 @export var gui:CanvasLayer = null
 @export var debug_dot:Polygon2D = null
-@export var explosion:Node = null
+
 @export var camera:Node = null
 @export var tile_size = 16
 
 var running = false
-var last_tick = 0
 var tps:float = 3
-var elapsed_ticks = 0
+var last_tick = 0
 
-var world_noise = []
-var world_tiles = []
-var world_tiledata = []
-var world_items = []
-var world_size:int
-var chunk_size:int
-var chunk_area:int
+# these vars are all from the world save file
+class WorldSave:
+	var elapsed_ticks = 0
+	var world_size:int # world length in chunks
+	var chunk_size:int # chunk length in tiles
+	var chunk_area:int
+	
+	var noise = []
+	var tiles = []
+	var tiledata = []
+	var items = []
+	var central_storage:Dictionary = {}
+	var tile_storage:Dictionary = {}
+
+var world = WorldSave.new()
+
 var result:Array[Array]
-
-var central_storage:Dictionary = {}
-
-var constructor_inventory:Dictionary = {}
 
 # these all correspond to each other
 var lines_global:Dictionary = {}
@@ -36,7 +42,7 @@ var priorities_index:Array[Array] = []
 
 var infinite_loop:Array[Array] = []
 var max_priority:int = 0
-var used_tiles:Array[Array] = [] # 0 = unprocessed 1 = completely processed 2 = somewhat processed
+var used_tiles:Array[Array] = [] # 0 = unprocessed; 1 = completely processed; 2 = somewhat processed
 
 const SIDES = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 
@@ -74,8 +80,8 @@ func _physics_process(delta):
 	if running == true and last_tick >= (1.0 / tps):
 		last_tick = 0
 		do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement()
-		elapsed_ticks += 1;;;;;;;;;;;;;
-		gui.resources(str(floor(elapsed_ticks / 900)))
+		world.elapsed_ticks += 1;;;;;;;;;;;;;
+		gui.resources(str(floor(world.elapsed_ticks / 900)))
 
 func _input(event):
 	
@@ -102,8 +108,10 @@ func _input(event):
 		var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
 		print(p);
 		if (bounds.has_point(gc)):
-			explosion.position = gc*tile_size
-			explosion.explode()
+			var e = explosion.instantiate()
+			add_child(e)
+			e.position = gc * tile_size
+			e.explode()
 			camera.camera_shake(0.4, 16, 50, 10)
 			set_tile(0, gc, 0, 0)
 			
@@ -135,9 +143,9 @@ func _input(event):
 	if event.is_action_pressed("tick"):
 		print("tick")
 		do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement()
-		#for i in world_noise:
+		#for i in world.noise:
 			#prints(i)
-		print(world_noise[0])
+		print(world.noise[0])
 		
 	if event.is_action_pressed("pause"):
 		running = !running
@@ -147,22 +155,22 @@ func _input(event):
 #region
 func detect_world_tiles():
 #	var cells = self.get_used_cells(0)
-	var d = [chunk_size, 1, -chunk_size, -1]
+	var d = [world.chunk_size, 1, -world.chunk_size, -1]
 	var lines:Array[Vector2i] = []
 	var c = 0
 	
-	for index in chunk_area:
-#		print(world_tiles[0][index])
+	for index in world.chunk_area:
+#		print(world.tiles[0][index])
 		# one chunk
-		match int(world_tiles[c][index]):
+		match int(world.tiles[c][index]):
 			5: # line includes storage
 				print("5")
 				var gc = local2global(index2local(index, c))
-#				print(Vector3i(index % chunk_size, floor(index / chunk_size), c))
+#				print(Vector3i(index % world.chunk_size, floor(index / world.chunk_size), c))
 #				print(gc)
 				debug_marker(gc, Color(1, 0, 1, 0.7))
 				used_tiles[gc.x][gc.y] == 1
-				var a = detect_connections(gc, world_tiles[c][index], 1, 0, true)
+				var a = detect_connections(gc, world.tiles[c][index], 1, 0, true)
 				# add self to line
 				#a[0][0].push_front(gc)
 				
@@ -240,8 +248,8 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 				continue
 			var c = facing_lc.z
 			var facing_idx:int = local2index(Vector2i(facing_lc.x,facing_lc.y))
-			var facing_rot:int = world_tiledata[c]["rotation"][facing_idx]
-			var facing_tile:int = world_tiles[c][facing_idx]
+			var facing_rot:int = world.tiledata[c]["rotation"][facing_idx]
+			var facing_tile:int = world.tiles[c][facing_idx]
 			print(str(facing_tile) + " facing tile")
 			match facing_tile:
 				1: # conveyor
@@ -344,7 +352,7 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 
 #endregion
 
-# Processing tiles
+# Processing world.tiles
 #region
 
 func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement():
@@ -357,66 +365,66 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 					for gc in lines_global[p2]:
 						var lc = global2local(gc)
 						var index = local2index(Vector2i(lc.x, lc.y))
-						var id = world_tiles[lc.z][index]
+						var id = world.tiles[lc.z][index]
 						if id != 0:
 							match id:
 								1:
-									world_noise[lc.z][index] += 2
-									var dir = world_tiledata[lc.z]["rotation"][index]
+									world.noise[lc.z][index] += 2
+									var dir = world.tiledata[lc.z]["rotation"][index]
 									# the "last" vars are what the current conveyor points to (since the line's array is reversed)
 									#if (world_items[last_lc.z][last_index] == 0):
 									move_resource(gc, dir)
 									
 								2: #constructor
-									world_noise[lc.z][index] += 3
-									var item = world_items[lc.z][index]
+									world.noise[lc.z][index] += 3
+									var item = world.items[lc.z][index]
 									if (item != 0):
 										
 										print("item recieved at constructor")
 										var a = gc2string(gc)
-										if (constructor_inventory.has(a) and constructor_inventory[a] != null):
+										if (world.tile_storage.has(a) and world.tile_storage[a] != null):
 											# construct thing
-											world_noise[lc.z][index] += 5
+											world.noise[lc.z][index] += 5
 											set_item(1, gc, 4)
-											move_resource(gc, world_tiledata[lc.z]["rotation"][index])
-											constructor_inventory[a] = null
+											move_resource(gc, world.tiledata[lc.z]["rotation"][index])
+											world.tile_storage[a] = null
 										else:
-											constructor_inventory[a] = item
+											world.tile_storage[a] = item
 											set_item(1, gc, 0)
 										# item go bye bye
 										#set_item(1, gc, 0)
 								
 								3:
-									world_noise[lc.z][index] += 3
-									if (world_items[lc.z][index] != 0):
-										var dir = world_tiledata[lc.z]["rotation"][index]
-										var state = world_tiledata[lc.z]["state"][index]
+									world.noise[lc.z][index] += 3
+									if (world.items[lc.z][index] != 0):
+										var dir = world.tiledata[lc.z]["rotation"][index]
+										var state = world.tiledata[lc.z]["state"][index]
 										move_resource(gc, (dir + int(state)) % 4)
-										world_tiledata[lc.z]["state"][index] = not world_tiledata[lc.z]["state"][index]
+										world.tiledata[lc.z]["state"][index] = not world.tiledata[lc.z]["state"][index]
 								4:
-									world_noise[lc.z][index] += 3
-									var item = world_items[lc.z][index]
+									world.noise[lc.z][index] += 3
+									var item = world.items[lc.z][index]
 									if (item != 0):
-										move_resource(gc, world_tiledata[lc.z]["rotation"][index])
-									if (world_tiledata[lc.z]["state"][index] == 4):
+										move_resource(gc, world.tiledata[lc.z]["rotation"][index])
+									if (world.tiledata[lc.z]["state"][index] == 4):
 										set_item(1, gc, 6)
-										world_tiledata[lc.z]["state"][index] = 1
+										world.tiledata[lc.z]["state"][index] = 1
 									else:
-										world_tiledata[lc.z]["state"][index] += 1
+										world.tiledata[lc.z]["state"][index] += 1
 									
 								5:# storage recieves item
-									var item = world_items[lc.z][index]
+									var item = world.items[lc.z][index]
 									if (item != 0):
 										print("item recieved")
 										#gui.add_resource(1)
-										if (not central_storage.has(item)):
-											central_storage[item] = 1
-										central_storage[item] += 1
+										if (not world.central_storage.has(item)):
+											world.central_storage[item] = 1
+										world.central_storage[item] += 1
 										# item go bye bye
 										set_item(1, gc, 0)
 						
-						world_noise[lc.z][index] = max(world_noise[lc.z][index] - 5, 0)
-						if world_noise[lc.z][index] >= 30:
+						world.noise[lc.z][index] = max(world.noise[lc.z][index] - 5, 0)
+						if world.noise[lc.z][index] >= 30:
 							summon_the_sandworm_from_the_depths_of_the_dunes(gc, lc, index)
 							
 						
@@ -427,17 +435,19 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 		
 
 func summon_the_sandworm_from_the_depths_of_the_dunes(gc:Vector2i, lc:Vector3i, index:int):
-	explosion.position = gc * tile_size
-	explosion.explode()
+	var e = explosion.instantiate()
+	add_child(e)
+	e.position = gc * tile_size
+	e.explode()
 	set_tile(0, gc, 0, 0)
 	
 
 #func initiate_resource_movement(tile_pos):
 	#var local_coords = global2local(tile_pos)
 	#var index = local2index(Vector2i(local_coords.x, local_coords.y))
-	#var rotation = world_tiledata[local_coords.z]["rotation"][index]
+	#var rotation = world.tiledata[local_coords.z]["rotation"][index]
 	#
-	#if world_tiles[local_coords.z][index] == 6:
+	#if world.tiles[local_coords.z][index] == 6:
 		#match rotation:
 			#0:  
 				#move_resource(tile_pos, "up")
@@ -451,27 +461,27 @@ func summon_the_sandworm_from_the_depths_of_the_dunes(gc:Vector2i, lc:Vector3i, 
 func move_resource(gc:Vector2i, direction:int):
 	var lc = global2local(gc)
 	var idx = local2index(Vector2i(lc.x, lc.y))
-	var current_tile = world_tiles[lc.z][idx]
+	var current_tile = world.tiles[lc.z][idx]
 	var next_gc = gc + SIDES[direction]
 	var next_lc = global2local(next_gc)
 	var next_idx = local2index(Vector2i(next_lc.x, next_lc.y))
-	var id = world_items[lc.z][idx]
+	var id = world.items[lc.z][idx]
 	
 	
-	if (world_items[next_lc.z][next_idx] == 0):
-		match int(world_tiles[next_lc.z][next_idx]):
+	if (world.items[next_lc.z][next_idx] == 0):
+		match int(world.tiles[next_lc.z][next_idx]):
 			3:
-				if (int(int(world_tiledata[next_lc.z]["state"][next_idx]) + \
-				world_tiledata[next_lc.z]["rotation"][next_idx]) % 4 == direction):
+				if (int(int(world.tiledata[next_lc.z]["state"][next_idx]) + \
+				world.tiledata[next_lc.z]["rotation"][next_idx]) % 4 == direction):
 					set_item(1, gc, 0)
 					set_item(1, next_gc, id)
 			_:
 				set_item(1, gc, 0)
 				set_item(1, next_gc, id)
 	else: # clogged
-		world_noise[lc.z][idx] += 6
+		world.noise[lc.z][idx] += 6
 	
-	#if next_tile and world_tiles[next_tile.z][local2index(Vector2i(next_tile.x, next_tile.y))] == 6:
+	#if next_tile and world.tiles[next_tile.z][local2index(Vector2i(next_tile.x, next_tile.y))] == 6:
 		#print("Moving resource from ", tile_pos, " to ", next_tile)
 	#else:
 		#print("Cannot move in that direction or no conveyor")
@@ -481,11 +491,11 @@ func move_resource(gc:Vector2i, direction:int):
 func rotate_conveyor(tile_pos): 
 	var local_coords = global2local(tile_pos)
 	var index = local2index(Vector2i(local_coords.x, local_coords.y))
-	var tile = world_tiles[local_coords.z][index]
-	var rotation:int = world_tiledata[local_coords.z]["rotation"][index]
+	var tile = world.tiles[local_coords.z][index]
+	var rotation:int = world.tiledata[local_coords.z]["rotation"][index]
 	
 	rotation = (rotation + 1) % 4
-	world_tiledata[local_coords.z]["rotation"][index] = rotation
+	world.tiledata[local_coords.z]["rotation"][index] = rotation
 	set_cell(0, tile_pos, tile, Vector2i(0, 0), rotation)
 
 func neighbor(gc:Vector2i, dir:int):
@@ -498,8 +508,8 @@ func neighbor(gc:Vector2i, dir:int):
 
 #func neighbor_index(chunk:int, index:int, direction:int):
 #	var location:Vector3
-#	var x:int = index % chunk_size
-#	var y:int = floor(index / chunk_size)
+#	var x:int = index % world.chunk_size
+#	var y:int = floor(index / world.chunk_size)
 #
 #	return location
 
@@ -511,28 +521,28 @@ func gc2string(gc:Vector2i):
 
 
 func local2index(local_coords:Vector2i):
-	return local_coords.x + local_coords.y * chunk_size
+	return local_coords.x + local_coords.y * world.chunk_size
 
 func index2local(index, chunk):
-	return Vector3i(index % chunk_size, floor(index / chunk_size), chunk)
+	return Vector3i(index % world.chunk_size, floor(index / world.chunk_size), chunk)
 
 func local2global(local_coords:Vector3i):
-	var c = Vector2i(local_coords.z % world_size, floor(local_coords.z / world_size))
-	return Vector2i(local_coords.x + c.x * chunk_size, local_coords.y + c.y * chunk_size)
+	var c = Vector2i(local_coords.z % world.world_size, floor(local_coords.z / world.world_size))
+	return Vector2i(local_coords.x + c.x * world.chunk_size, local_coords.y + c.y * world.chunk_size)
 
 func global2local(global_coords:Vector2i):
-	return Vector3i(global_coords.x % chunk_size, \
-		global_coords.y % chunk_size, \
-		floor(global_coords.x / chunk_size) + world_size*floor(global_coords.y/chunk_size))
+	return Vector3i(global_coords.x % world.chunk_size, \
+		global_coords.y % world.chunk_size, \
+		floor(global_coords.x / world.chunk_size) + world.world_size*floor(global_coords.y/world.chunk_size))
 
 func set_tile(layer:int, global_coords:Vector2i, tile:int, rotation:int):
 #	no storage data yet
 	var local_coords = global2local(global_coords)
 	var index = local2index(Vector2i(local_coords.x, local_coords.y))
 	
-#	world_tiledata[local_coords.z]["storage"][local_coords.x + local_coords.y * chunk_size] = null
-	world_tiles[local_coords.z][index] = tile
-	world_tiledata[local_coords.z]["rotation"][index] = rotation
+#	world.tiledata[local_coords.z]["storage"][local_coords.x + local_coords.y * world.chunk_size] = null
+	world.tiles[local_coords.z][index] = tile
+	world.tiledata[local_coords.z]["rotation"][index] = rotation
 	print(global_coords)
 	print(local_coords)
 	self.set_cell(layer, \
@@ -543,7 +553,7 @@ func set_tile(layer:int, global_coords:Vector2i, tile:int, rotation:int):
 func set_item(layer:int, global_coords:Vector2i, tile:int):
 	var local_coords = global2local(global_coords)
 	
-	world_items[local_coords.z][local_coords.x + local_coords.y * chunk_size] = tile
+	world.items[local_coords.z][local_coords.x + local_coords.y * world.chunk_size] = tile
 	self.set_cell(layer, \
 			global_coords, tile, \
 			Vector2i.ZERO, rotation
@@ -582,15 +592,20 @@ func setup():
 	ResourceSaver.save(tileset, "res://generated_tileset.tres")
 	self.tile_set = tileset
 	
-	world_size = json.json["world_size"]
-	chunk_size = json.json["chunk_size"]
-	bounds = Rect2i(0, 0, world_size * chunk_size, world_size * chunk_size)
+	world.world_size = json.json["world_size"]
+	world.chunk_size = json.json["chunk_size"]
+	bounds = Rect2i(0, 0, world.world_size * world.chunk_size, world.world_size * world.chunk_size)
 	
-	chunk_area = pow(chunk_size, 2)
-	world_tiles = load_tiles()
-	world_items = load_items()
-	world_tiledata = load_tiledata()
-	world_noise = load_noise()
+	world.chunk_area = pow(world.chunk_size, 2)
+	#world.tiles = load_tiles()
+	#world_items = load_items()
+	#world.noise = load_noise()
+	world.tiles = load_data_int("tiles", 0)
+	world.items = load_data_int("items", 0)
+	world.noise = load_data_int("noise", 0)
+	
+	world.tiledata = load_tiledata()
+	
 	
 	var a = []
 	a.resize(bounds.size.y)
@@ -599,85 +614,52 @@ func setup():
 		# make duplicate or else everything decides to use the same array
 		used_tiles.append(a.duplicate())
 	
-	
-	set_tilemap(world_tiles, world_tiledata)
+	set_tilemap()
 
-func set_tilemap(world_tiles, world_tiledata):
-	for c in len(world_tiles):
-		for i in chunk_area:
-			#print(world_tiles[c][i])
+func set_tilemap():
+	for c in len(world.tiles):
+		for i in world.chunk_area:
+			#print(world.tiles[c][i])
 			# left to right, top to bottom
 			self.set_cell(0, \
-				Vector2i(fmod(i, chunk_size) + (c % world_size)*chunk_size, \
-					floor(i / chunk_size) + floor(c / world_size)*chunk_size), world_tiles[c][i], \
-				Vector2i.ZERO, world_tiledata[c]["rotation"][i]
+				Vector2i(fmod(i, world.chunk_size) + (c % world.world_size)*world.chunk_size, \
+					floor(i / world.chunk_size) + floor(c / world.world_size)*world.chunk_size), world.tiles[c][i], \
+				Vector2i.ZERO, world.tiledata[c]["rotation"][i]
 			)
-#		world_tiledata[c]["rotation"][i]
+#		world.tiledata[c]["rotation"][i]
 
-func load_tiles():
-	var world = []
-	print("loading tiles")
+
+func load_data_int(property:String, default_value:int = 0):
+	var data = []
+	print("loading world.tiles")
 	for i in len(json.json["chunks"]):
-#		print(json.json["chunks"][i]["tiles"])
-		world.append(PackedInt32Array(json.json["chunks"][i]["tiles"]))
-#		print(world[0])
+		data.append(PackedInt32Array(json.json["chunks"][i][property]))
 	
 	# fill missing chunks
 	var a:PackedInt32Array = []
-	a.resize(pow(chunk_size, 2))
-	a.fill(0)
-	for i in pow(world_size, 2) - len(world):
-		world.append(a.duplicate())
+	a.resize(pow(world.chunk_size, 2))
+	a.fill(default_value)
+	for i in pow(world.world_size, 2) - len(data):
+		data.append(a.duplicate())
 	
-	return world
-
-func load_items():
-	var world = []
-	print("loading items")
-	for i in len(json.json["chunks"]):
-		world.append(PackedInt32Array(json.json["chunks"][i]["items"]))
-
-	var a:PackedInt32Array = []
-	a.resize(pow(chunk_size, 2))
-	a.fill(0)
-	for i in pow(world_size, 2) - len(world):
-		world.append(a.duplicate())
-	
-	return world
+	return data
 
 func load_tiledata():
-	var world = []
-	print("loading tiledata")
+	var data = []
+	print("loading world.tiledata")
 	for i in len(json.json["chunks"]):
-		world.append(json.json["chunks"][i]["tiledata"])
+		data.append(json.json["chunks"][i]["tiledata"])
 #		print(world[0]["rotation"])
 	
 	# fill missing chunks
 	var a:PackedInt32Array = []
-	a.resize(pow(chunk_size, 2))
+	a.resize(pow(world.chunk_size, 2))
 	a.fill(0)
 	#var d:Dictionary = {"storage": a, "rotation": a, "state": a}
-	for i in pow(world_size, 2) - len(world):
-		world.append({"storage": a.duplicate(), "rotation": a.duplicate(), "state": a.duplicate()})
+	for i in pow(world.world_size, 2) - len(data):
+		data.append({"storage": a.duplicate(), "rotation": a.duplicate(), "state": a.duplicate()})
 	
-	return world
-
-func load_noise():
-	var world = []
-	print("loading noise")
-	for i in len(json.json["chunks"]):
-#		print(json.json["chunks"][i]["tiles"])
-		world.append(PackedInt32Array(json.json["chunks"][i]["noise"]))
-#		print(world[0])
-	
-	# fill missing chunks
-	var a:PackedInt32Array = []
-	a.resize(pow(chunk_size, 2))
-	a.fill(0)
-	for i in pow(world_size, 2) - len(world):
-		world.append(a.duplicate())
-	
-	return world
+	return data
 
 func make_tileset_exist(ts: TileSet):
 	var id = 0

@@ -1,9 +1,8 @@
-[gd_scene load_steps=29 format=3 uid="uid://wbpqro6tssd5"]
+[gd_scene load_steps=30 format=3 uid="uid://wbpqro6tssd5"]
 
 [ext_resource type="Script" path="res://scripts/json.gd" id="1_3pqby"]
 [ext_resource type="Script" path="res://scripts/tilemap.gd" id="2_e3udp"]
 [ext_resource type="Texture2D" uid="uid://y7usubla6juc" path="res://assets/tiles/1-conveyor.png" id="2_obwd8"]
-[ext_resource type="PackedScene" uid="uid://bj0bk6v1kl11r" path="res://scenes/explosion.tscn" id="2_vobb8"]
 [ext_resource type="Texture2D" uid="uid://yqteq3q57wm2" path="res://assets/tiles/2-constructor.png" id="3_adxkv"]
 [ext_resource type="Script" path="res://scripts/camera.gd" id="4_3i4pa"]
 [ext_resource type="Script" path="res://scripts/classes.gd" id="4_mms3p"]
@@ -13,6 +12,7 @@
 [ext_resource type="Script" path="res://scripts/gui.gd" id="10_ocoff"]
 [ext_resource type="Shader" path="res://assets/shaders/test.gdshader" id="10_shcmx"]
 [ext_resource type="Script" path="res://scripts/background.gd" id="10_y4vju"]
+[ext_resource type="Shader" path="res://assets/shaders/background.gdshader" id="12_a6vs3"]
 [ext_resource type="Theme" uid="uid://b4us1mhl0qxjp" path="res://assets/theme.tres" id="13_clh56"]
 [ext_resource type="Shader" path="res://assets/shaders/grain.gdshader" id="13_xq4xh"]
 [ext_resource type="AudioStream" uid="uid://cmygilbmp72r3" path="res://assets/audio/music1.ogg" id="14_agi1x"]
@@ -51,6 +51,11 @@ sources/4 = SubResource("TileSetAtlasSource_w0fur")
 sources/3 = SubResource("TileSetAtlasSource_vmbpx")
 sources/2 = SubResource("TileSetAtlasSource_y1uis")
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_srgol"]
+shader = ExtResource("12_a6vs3")
+shader_parameter/color1 = Color(0.129412, 0.172549, 0.25098, 1)
+shader_parameter/color2 = Color(0.117647, 0.137255, 0.247059, 1)
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_tfcjj"]
 shader = ExtResource("10_shcmx")
 shader_parameter/exponent = 1.0
@@ -59,10 +64,11 @@ shader_parameter/variation = 0.001
 shader_parameter/frequency = 0.4
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_0oh36"]
-noise_type = 0
+noise_type = 2
 fractal_octaves = 4
 fractal_lacunarity = 5.0
 fractal_gain = 2.0
+metadata/_preview_in_3d_space_ = true
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_3vi5g"]
 seamless = true
@@ -88,11 +94,18 @@ script = ExtResource("1_3pqby")
 [node name="Sprite2D" type="Sprite2D" parent="."]
 self_modulate = Color(1, 1, 1, 0.247059)
 z_index = -10
+position = Vector2(1024, 1024)
+scale = Vector2(2, 2)
 texture = ExtResource("10_1k22r")
 
-[node name="Explosion" parent="." instance=ExtResource("2_vobb8")]
+[node name="ColorRect" type="ColorRect" parent="."]
+z_index = -11
+custom_minimum_size = Vector2(2048, 2048)
+offset_right = 2048.0
+offset_bottom = 2048.0
+color = Color(0.117647, 0.141176, 0.164706, 1)
 
-[node name="TileMap" type="TileMap" parent="." node_paths=PackedStringArray("gui", "debug_dot", "explosion", "camera")]
+[node name="TileMap" type="TileMap" parent="." node_paths=PackedStringArray("gui", "debug_dot", "camera")]
 tile_set = SubResource("TileSet_huth1")
 format = 2
 layer_0/name = "Tiles"
@@ -103,7 +116,6 @@ layer_1/tile_data = PackedInt32Array()
 script = ExtResource("2_e3udp")
 gui = NodePath("../Camera/Camera2D/GUI")
 debug_dot = NodePath("../DebugDot")
-explosion = NodePath("../Explosion")
 camera = NodePath("../Camera")
 
 [node name="Debug" type="Node" parent="TileMap"]
@@ -134,6 +146,14 @@ camera = NodePath(".")
 [node name="CanvasLayer" type="CanvasLayer" parent="Camera/Camera2D"]
 layer = -1
 
+[node name="ColorRect" type="ColorRect" parent="Camera/Camera2D/CanvasLayer"]
+material = SubResource("ShaderMaterial_srgol")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
 [node name="Background" type="Node2D" parent="Camera/Camera2D/CanvasLayer"]
 script = ExtResource("10_y4vju")
 
@@ -149,7 +169,6 @@ grow_vertical = 2
 color = Color(1, 0.156863, 0.568627, 1)
 
 [node name="ColorRect2" type="ColorRect" parent="Camera/Camera2D/Shaders"]
-visible = false
 material = SubResource("ShaderMaterial_hjsx2")
 anchors_preset = 15
 anchor_right = 1.0
@@ -362,3 +381,4 @@ polygon = PackedVector2Array(1, 1, -1, 1, -1, -1, 1, -1)
 [connection signal="pressed" from="Camera/Camera2D/GUI/GUI/VBoxContainer/Bar1/Menu" to="Camera/Camera2D/GUI" method="_on_menu_pressed"]
 [connection signal="toggled" from="Camera/Camera2D/GUI/GUI/BottomBar/VBoxContainer/Music" to="Camera/Camera2D/GUI" method="_on_music_toggled"]
 [connection signal="toggled" from="Camera/Camera2D/GUI/GUI/BottomBar/VBoxContainer/Music2" to="Camera/Camera2D/GUI" method="_on_music_2_toggled"]
+[connection signal="pressed" from="Camera/Camera2D/GUI/GUI/Menu/VBoxContainer/Button4" to="Camera/Camera2D/GUI" method="_on_title_screen_pressed"]
