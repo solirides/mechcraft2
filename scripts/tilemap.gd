@@ -12,6 +12,7 @@ var explosion = preload("res://scenes/explosion.tscn")
 @export var camera:Node = null
 @export var tile_size = 16
 
+var world_accepts_input = true
 var running = false
 var tps:float = 3
 var last_tick = 0
@@ -47,6 +48,7 @@ func _ready():
 	setup()
 	
 	gui.selection_changed.connect(_on_selection_changed)
+	gui.world_focused.connect(_on_world_focused)
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -74,75 +76,76 @@ func _physics_process(delta):
 
 func _input(event):
 	
-	if event.is_action_pressed("left_click"):
-		var p = get_global_mouse_position()
-		var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
-		print(p)
-		print(gc)
-		if (world.bounds.has_point(gc)):
-			set_tile(0, gc, selected_tile, tile_rotation)
-		
-	if event.is_action_pressed("middle_click"):
-		var p = get_global_mouse_position()
-		var tile_pos = Vector2i(floor(p.x / tile_size), floor(p.y / tile_size))
-		rotate_conveyor(tile_pos)
-	
-	if event.is_action_pressed("resource"):
-		var p = get_global_mouse_position()
-		print("resource spawned")
-		set_item(1, Vector2i(floor(p.x/tile_size), floor(p.y/tile_size)), 6)
-	
-	if event.is_action_pressed("right_click"):
-		var p = get_global_mouse_position()
-		var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
-		print(p);
-		if (world.bounds.has_point(gc)):
-			var e = explosion.instantiate()
-			add_child(e)
-			e.position = gc * tile_size
-			e.explode()
-			camera.camera_shake(0.4, 16, 50, 10)
-			set_tile(0, gc, 0, 0)
+	if world_accepts_input:
+		if event.is_action_pressed("left_click"):
+			var p = get_global_mouse_position()
+			var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
+			print(p)
+			print(gc)
+			if (world.bounds.has_point(gc)):
+				set_tile(0, gc, selected_tile, tile_rotation)
 			
+		if event.is_action_pressed("middle_click"):
+			var p = get_global_mouse_position()
+			var tile_pos = Vector2i(floor(p.x / tile_size), floor(p.y / tile_size))
+			rotate_conveyor(tile_pos)
 	
-	if event.is_action_pressed("reload"):
-		print("recalculate")
-		clear_markers()
-		#detect miners and create conveyor lines
-		#var roots:Array = []
-		lines_global = {}
-		priorities_global = {}
-		priorities_index = []
-		max_priority = 0
+		if event.is_action_pressed("resource"):
+			var p = get_global_mouse_position()
+			print("resource spawned")
+			set_item(1, Vector2i(floor(p.x/tile_size), floor(p.y/tile_size)), 6)
 		
-		for i in len(used_tiles):
-			used_tiles[i].fill(0)
+		if event.is_action_pressed("right_click"):
+			var p = get_global_mouse_position()
+			var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
+			print(p);
+			if (world.bounds.has_point(gc)):
+				var e = explosion.instantiate()
+				add_child(e)
+				e.position = gc * tile_size
+				e.explode()
+				camera.camera_shake(0.4, 16, 50, 10)
+				set_tile(0, gc, 0, 0)
+			
 		
-		detect_world_tiles()
-	
-	if event.is_action_pressed("ping"):
-		var p = get_global_mouse_position()
-		print(p);
-		var c = Vector2i(int(p.x) / tile_size, int(p.y) / tile_size)
-		var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
-		var lc = global2local(gc)
-		print("PING " + " " + str(c) + " " + str(global2local(Vector2i(floor(p.x/tile_size), floor(p.y/tile_size)))) )
-		summon_the_sandworm_from_the_depths_of_the_dunes(gc, lc, local2index(Vector2i(lc.x, lc.y)))
+		if event.is_action_pressed("reload"):
+			print("recalculate")
+			clear_markers()
+			#detect miners and create conveyor lines
+			#var roots:Array = []
+			lines_global = {}
+			priorities_global = {}
+			priorities_index = []
+			max_priority = 0
+			
+			for i in len(used_tiles):
+				used_tiles[i].fill(0)
+			
+			detect_world_tiles()
 		
-	if event.is_action_pressed("tick"):
-		print("tick")
-		do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement()
-		#for i in world.noise:
-			#prints(i)
-		print(world.noise[0])
+		if event.is_action_pressed("ping"):
+			var p = get_global_mouse_position()
+			print(p);
+			var c = Vector2i(int(p.x) / tile_size, int(p.y) / tile_size)
+			var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
+			var lc = global2local(gc)
+			print("PING " + " " + str(c) + " " + str(global2local(Vector2i(floor(p.x/tile_size), floor(p.y/tile_size)))) )
+			summon_the_sandworm_from_the_depths_of_the_dunes(gc, lc, local2index(Vector2i(lc.x, lc.y)))
+			
+		if event.is_action_pressed("tick"):
+			print("tick")
+			do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement()
+			#for i in world.noise:
+				#prints(i)
+			print(world.noise[0])
+			
+		if event.is_action_pressed("pause"):
+			running = !running
 		
-	if event.is_action_pressed("pause"):
-		running = !running
-	
-	if Input.is_action_just_pressed("save"):
-		print("write to save file")
-		json.write_save()
-		json.write_data("res://assets/world_2.json")
+		if Input.is_action_just_pressed("save"):
+			print("write to save file")
+			json.write_save()
+			json.write_data("res://assets/world_2.json")
 
 # Detecting conveyor lines:
 #region
@@ -671,3 +674,6 @@ func make_tileset_exist(ts: TileSet):
 func _on_selection_changed(selected_tile, tile_rotation):
 	self.selected_tile = selected_tile
 	self.tile_rotation = tile_rotation
+
+func _on_world_focused(state):
+	world_accepts_input = state

@@ -2,13 +2,14 @@ extends CanvasLayer
 
 
 signal selection_changed
+signal world_focused(state)
 
 @export var create_chaos_with_music = true
 @export var selection_label:RichTextLabel = null
 @export var alert_label:RichTextLabel = null
 @export var debug_label:RichTextLabel = null
 @export var resources_label:RichTextLabel = null
-@export var menu:CenterContainer = null
+@export var menu:Control = null
 @export var music_player:AudioStreamPlayer = null
 
 var selected_tile = 1
@@ -88,9 +89,15 @@ func _on_music_2_toggled(toggled_on):
 		music_player.stop()
 
 func _on_menu_pressed():
-	print(menu)
+	#print(menu)
 	menu.visible = not menu.visible
+	world_focused.emit(not menu.visible)
 
 
 func _on_title_screen_pressed():
 	get_tree().change_scene_to_file("res://scenes/title_screen.tscn")
+
+
+func _on_resume_pressed():
+	menu.visible = false
+	world_focused.emit(true)

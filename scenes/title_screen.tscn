@@ -21,7 +21,6 @@ size = Vector2i(256, 256)
 transient = true
 unresizable = true
 borderless = true
-unfocusable = true
 mouse_passthrough = true
 
 [node name="Camera2D" type="Camera2D" parent="Window"]

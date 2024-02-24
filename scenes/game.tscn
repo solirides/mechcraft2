@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3 uid="uid://wbpqro6tssd5"]
+[gd_scene load_steps=34 format=3 uid="uid://wbpqro6tssd5"]
 
 [ext_resource type="Script" path="res://scripts/json.gd" id="1_3pqby"]
 [ext_resource type="Script" path="res://scripts/tilemap.gd" id="2_e3udp"]
@@ -16,6 +16,7 @@
 [ext_resource type="Theme" uid="uid://b4us1mhl0qxjp" path="res://assets/theme.tres" id="13_clh56"]
 [ext_resource type="Shader" path="res://assets/shaders/grain.gdshader" id="13_xq4xh"]
 [ext_resource type="AudioStream" uid="uid://cmygilbmp72r3" path="res://assets/audio/music1.ogg" id="14_agi1x"]
+[ext_resource type="Shader" path="res://assets/shaders/scanlines.gdshader" id="16_udpk1"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tbejw"]
 texture = ExtResource("2_obwd8")
@@ -80,6 +81,26 @@ shader_parameter/color = Color(1, 1, 1, 1)
 shader_parameter/noise_size = 512.0
 shader_parameter/amount = 0.8
 shader_parameter/noise = SubResource("NoiseTexture2D_3vi5g")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b0gy7"]
+bg_color = Color(0.262745, 0.262745, 0.262745, 0.254902)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jbbp0"]
+bg_color = Color(0.921569, 0.647059, 0.254902, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_2faln"]
+shader = ExtResource("16_udpk1")
+shader_parameter/color1 = Color(0.0745098, 0.0941176, 0.12549, 0.329412)
+shader_parameter/speed = 8.0
+shader_parameter/size = 2.0
 
 [sub_resource type="Environment" id="Environment_tiixt"]
 background_mode = 3
@@ -198,8 +219,11 @@ grow_vertical = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Camera/Camera2D/GUI/GUI"]
 layout_mode = 1
-anchors_preset = 10
+anchors_preset = -1
 anchor_right = 1.0
+offset_left = 20.0
+offset_top = 10.0
+offset_right = -20.0
 offset_bottom = 39.0
 grow_horizontal = 2
 
@@ -224,6 +248,7 @@ theme = ExtResource("13_clh56")
 text = "⚙️Menu"
 
 [node name="Bar2" type="Control" parent="Camera/Camera2D/GUI/GUI/VBoxContainer"]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 
 [node name="Selection" type="RichTextLabel" parent="Camera/Camera2D/GUI/GUI/VBoxContainer/Bar2"]
@@ -267,6 +292,20 @@ text = "[right]what"
 fit_content = true
 scroll_active = false
 autowrap_mode = 0
+
+[node name="Bar3" type="Control" parent="Camera/Camera2D/GUI/GUI/VBoxContainer"]
+layout_mode = 2
+
+[node name="ProgressBar" type="ProgressBar" parent="Camera/Camera2D/GUI/GUI/VBoxContainer/Bar3"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 0
+offset_right = 4.0
+offset_bottom = 27.0
+theme = ExtResource("13_clh56")
+theme_override_styles/background = SubResource("StyleBoxFlat_b0gy7")
+theme_override_styles/fill = SubResource("StyleBoxFlat_jbbp0")
+value = 30.0
+show_percentage = false
 
 [node name="Center" type="CenterContainer" parent="Camera/Camera2D/GUI/GUI"]
 visible = false
@@ -313,7 +352,7 @@ text = "Shut down computer with music"
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Camera/Camera2D/GUI/GUI"]
 stream = ExtResource("14_agi1x")
 
-[node name="Menu" type="CenterContainer" parent="Camera/Camera2D/GUI/GUI"]
+[node name="Menu" type="Control" parent="Camera/Camera2D/GUI/GUI"]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -321,10 +360,30 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
+
+[node name="ColorRect" type="ColorRect" parent="Camera/Camera2D/GUI/GUI/Menu"]
+material = SubResource("ShaderMaterial_2faln")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.827451, 0, 0.521569, 1)
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Camera/Camera2D/GUI/GUI/Menu"]
-layout_mode = 2
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -120.0
+offset_top = -84.0
+offset_right = 120.0
+offset_bottom = 84.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 0
 
 [node name="Button1" type="Button" parent="Camera/Camera2D/GUI/GUI/Menu/VBoxContainer"]
@@ -381,4 +440,5 @@ polygon = PackedVector2Array(1, 1, -1, 1, -1, -1, 1, -1)
 [connection signal="pressed" from="Camera/Camera2D/GUI/GUI/VBoxContainer/Bar1/Menu" to="Camera/Camera2D/GUI" method="_on_menu_pressed"]
 [connection signal="toggled" from="Camera/Camera2D/GUI/GUI/BottomBar/VBoxContainer/Music" to="Camera/Camera2D/GUI" method="_on_music_toggled"]
 [connection signal="toggled" from="Camera/Camera2D/GUI/GUI/BottomBar/VBoxContainer/Music2" to="Camera/Camera2D/GUI" method="_on_music_2_toggled"]
+[connection signal="pressed" from="Camera/Camera2D/GUI/GUI/Menu/VBoxContainer/Button1" to="Camera/Camera2D/GUI" method="_on_resume_pressed"]
 [connection signal="pressed" from="Camera/Camera2D/GUI/GUI/Menu/VBoxContainer/Button4" to="Camera/Camera2D/GUI" method="_on_title_screen_pressed"]
