@@ -198,7 +198,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(1, 0.156863, 0.568627, 1)
 
-[node name="GUI" type="CanvasLayer" parent="Camera/Camera2D" node_paths=PackedStringArray("selection_label", "alert_label", "debug_label", "resources_label", "menu", "music_player")]
+[node name="GUI" type="CanvasLayer" parent="Camera/Camera2D" node_paths=PackedStringArray("selection_label", "alert_label", "debug_label", "resources_label", "menu", "music_player", "noise_bar")]
 layer = 10
 script = ExtResource("10_ocoff")
 create_chaos_with_music = false
@@ -208,6 +208,7 @@ debug_label = NodePath("GUI/VBoxContainer/Bar2/Debug")
 resources_label = NodePath("GUI/VBoxContainer/Bar2/Resources")
 menu = NodePath("GUI/Menu")
 music_player = NodePath("GUI/AudioStreamPlayer")
+noise_bar = NodePath("GUI/VBoxContainer/Bar3/Noise")
 
 [node name="GUI" type="Control" parent="Camera/Camera2D/GUI"]
 layout_mode = 3
@@ -296,7 +297,7 @@ autowrap_mode = 0
 [node name="Bar3" type="Control" parent="Camera/Camera2D/GUI/GUI/VBoxContainer"]
 layout_mode = 2
 
-[node name="ProgressBar" type="ProgressBar" parent="Camera/Camera2D/GUI/GUI/VBoxContainer/Bar3"]
+[node name="Noise" type="ProgressBar" parent="Camera/Camera2D/GUI/GUI/VBoxContainer/Bar3"]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 0
 offset_right = 4.0

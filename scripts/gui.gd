@@ -11,6 +11,7 @@ signal world_focused(state)
 @export var resources_label:RichTextLabel = null
 @export var menu:Control = null
 @export var music_player:AudioStreamPlayer = null
+@export var noise_bar:ProgressBar = null
 
 var selected_tile = 1
 var tile_rotation = 0

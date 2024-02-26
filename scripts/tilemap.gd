@@ -11,11 +11,13 @@ var explosion = preload("res://scenes/explosion.tscn")
 
 @export var camera:Node = null
 @export var tile_size = 16
+@export var sandworm_noise_threshold = 30
 
 var world_accepts_input = true
 var running = false
 var tps:float = 3
 var last_tick = 0
+var highest_noise = 0
 
 # these vars are all from the world save file
 
@@ -48,6 +50,9 @@ func _ready():
 	
 	gui.selection_changed.connect(_on_selection_changed)
 	gui.world_focused.connect(_on_world_focused)
+	
+	gui.noise_bar.max_value = sandworm_noise_threshold * 1.5
+	gui.noise_bar.value = 0
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -351,6 +356,7 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 #region
 
 func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement():
+	highest_noise = 0
 	for p in priorities_index: # p = array of lines of the same priority
 			for p2 in p: # i = index of one line
 				# process rest of the line
@@ -420,10 +426,13 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 									set_item(1, gc, 0)
 					
 					world.noise[lc.z][index] = max(world.noise[lc.z][index] - 5, 0)
-					if world.noise[lc.z][index] >= 30:
+					if world.noise[lc.z][index] >= sandworm_noise_threshold:
 						summon_the_sandworm_from_the_depths_of_the_dunes(gc, lc, index)
 						
 					
+					highest_noise = max(highest_noise, world.noise[lc.z][index])
+					
+					gui.noise_bar.value = highest_noise
 					#last_gc = gc
 					#last_lc = lc
 					#last_index = index
