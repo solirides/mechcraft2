@@ -5,18 +5,27 @@ class_name Json
 var json: Dictionary
 var write_json: Dictionary
 var world = WorldSave.new()
+var recipes: Dictionary
+var tileset:TileSet
 #var bounds:Rect2i = Rect2i()
 
 var world_properties = ["world_size", "chunk_size", "world_name", "elapsed_ticks"]
 
 func _ready():
-	json = read_data("res://assets/world_2.json")
-	load_save()
+	pass
 	#print(json["chunks"][0]["tiles"])
 	
 
-func read_data(file_path):
+func setup(tile_size:int):
+	json = read_json("res://assets/world_2.json")
+	recipes = read_json("res://assets/recipes.json")
 	
+	tileset = make_tileset_exist(tile_size)
+	ResourceSaver.save(tileset, "res://generated_tileset.tres")
+	
+	load_save()
+
+func read_json(file_path):
 	var json_data
 	var file_data = FileAccess.open(file_path, FileAccess.READ)
 	
@@ -36,12 +45,12 @@ func read_data(file_path):
 	return json_data
 
 
-func write_data(file_path):
+func write_save(file_path):
 	var file = FileAccess.open(file_path, FileAccess.WRITE)
 	file.store_string(JSON.stringify(write_json))
 	
 
-func write_save():
+func create_save():
 	for p in world_properties:
 		write_json[p] = world.get(p)
 	write_json["chunks"] = {}
@@ -114,3 +123,53 @@ func load_tiledata():
 		data.append({"storage": a.duplicate(), "rotation": a.duplicate(), "state": a.duplicate()})
 	
 	return data
+
+func make_tileset_exist(tile_size:int):
+	var ts = TileSet.new()
+	var id = 0
+	var path = "res://assets/tiles/"
+	var dir = DirAccess.open(path)
+	
+	var blank = TileSetAtlasSource.new()
+	ts.add_source(blank)
+	ts.tile_size = Vector2i(tile_size,tile_size)
+	var file_data = FileAccess.open("res://assets/tiles.json", FileAccess.READ)
+	var json_thing = JSON.new()
+	json_thing.parse(file_data.get_as_text())
+	var tile_metadata = json_thing.get_data()
+	
+	if dir:
+		dir.list_dir_begin()
+		#var file_name = dir.get_next()
+		for file_name in dir.get_files():
+			if dir.current_is_dir():
+				print("Found directory: " + file_name)
+			elif file_name.ends_with(".png"):
+				print("Found file: " + file_name)
+				print(path + file_name)
+				var image = Image.load_from_file(path + file_name)
+				
+				if (tile_metadata.has(file_name.get_basename())):
+					var tile = tile_metadata[file_name.get_basename()]
+					var source = TileSetAtlasSource.new()
+					source.texture = ImageTexture.create_from_image(image)
+					source.create_tile(Vector2i(0,0))
+					
+					for i in range(3):
+						source.create_alternative_tile(Vector2i(0,0), -1)
+					
+					for i in tile["flip_h"]:
+						source.get_tile_data(Vector2i(0,0), i).flip_h = true
+					for i in tile["flip_v"]:
+						source.get_tile_data(Vector2i(0,0), i).flip_v = true
+					for i in tile["transpose"]:
+						source.get_tile_data(Vector2i(0,0), i).transpose = true
+					
+					ts.add_source(source, tile["id"])
+			file_name = dir.get_next()
+		dir.list_dir_end()
+	else:
+		print("An error occurred when trying to access the path.")
+	
+	return ts
+

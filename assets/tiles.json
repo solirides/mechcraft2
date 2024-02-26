@@ -34,5 +34,12 @@
 		"flip_h": [],
 		"flip_v": [],
 		"transpose": []
+	},
+	"7-generic_thing": {
+		"id": 7,
+		"flip_h": [],
+		"flip_v": [],
+		"transpose": []
 	}
+	
 }

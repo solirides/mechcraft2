@@ -19,7 +19,6 @@ var last_tick = 0
 
 # these vars are all from the world save file
 
-
 var world = WorldSave.new()
 
 var result:Array[Array]
@@ -144,8 +143,8 @@ func _input(event):
 		
 		if Input.is_action_just_pressed("save"):
 			print("write to save file")
-			json.write_save()
-			json.write_data("res://assets/world_2.json")
+			json.create_save()
+			json.write_save("res://assets/world_2.json")
 
 # Detecting conveyor lines:
 #region
@@ -354,79 +353,80 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement():
 	for p in priorities_index: # p = array of lines of the same priority
 			for p2 in p: # i = index of one line
-				if len(p) != 0:
-					pass
-					
-					# process rest of the line
-					for gc in lines_global[p2]:
-						var lc = global2local(gc)
-						var index = local2index(Vector2i(lc.x, lc.y))
-						var id = world.tiles[lc.z][index]
-						if id != 0:
-							match id:
-								1:
-									world.noise[lc.z][index] += 2
-									var dir = world.tiledata[lc.z]["rotation"][index]
-									# the "last" vars are what the current conveyor points to (since the line's array is reversed)
-									#if (world_items[last_lc.z][last_index] == 0):
-									move_resource(gc, dir)
-									
-								2: #constructor
-									world.noise[lc.z][index] += 3
-									var item = world.items[lc.z][index]
-									if (item != 0):
-										
-										print("item recieved at constructor")
-										var a = gc2string(gc)
-										if (world.tile_storage[lc.z][index] != 0):
-											# construct thing
-											world.noise[lc.z][index] += 5
-											set_item(1, gc, 4)
-											move_resource(gc, world.tiledata[lc.z]["rotation"][index])
-											world.tile_storage[lc.z][index] = 0
-										else:
-											world.tile_storage[lc.z][index] = item
-											set_item(1, gc, 0)
-										# item go bye bye
-										#set_item(1, gc, 0)
+				# process rest of the line
+				for gc in lines_global[p2]:
+					var lc = global2local(gc)
+					var index = local2index(Vector2i(lc.x, lc.y))
+					var id = world.tiles[lc.z][index]
+					if id != 0:
+						match id:
+							1:
+								world.noise[lc.z][index] += 2
+								var dir = world.tiledata[lc.z]["rotation"][index]
+								# the "last" vars are what the current conveyor points to (since the line's array is reversed)
+								#if (world_items[last_lc.z][last_index] == 0):
+								move_resource(gc, dir)
 								
-								3:
-									world.noise[lc.z][index] += 3
-									if (world.items[lc.z][index] != 0):
-										var dir = world.tiledata[lc.z]["rotation"][index]
-										var state = world.tiledata[lc.z]["state"][index]
-										move_resource(gc, (dir + int(state)) % 4)
-										world.tiledata[lc.z]["state"][index] = not world.tiledata[lc.z]["state"][index]
-								4:
-									world.noise[lc.z][index] += 3
-									var item = world.items[lc.z][index]
-									if (item != 0):
-										move_resource(gc, world.tiledata[lc.z]["rotation"][index])
-									if (world.tiledata[lc.z]["state"][index] == 4):
-										set_item(1, gc, 6)
-										world.tiledata[lc.z]["state"][index] = 1
+							2: #constructor
+								world.noise[lc.z][index] += 3
+								var item = world.items[lc.z][index]
+								if (item != 0):
+									#print("item recieved at constructor")
+									var a = gc2string(gc)
+									if (world.tile_storage[lc.z][index] != 0):
+										# construct thing
+										world.noise[lc.z][index] += 5
+										var key = str(world.tile_storage[lc.z][index]) + "," + str(item)
+										if json.recipes.has(key):
+											set_item(1, gc, json.recipes[key])
+											move_resource(gc, world.tiledata[lc.z]["rotation"][index])
+										else:
+											set_item(1, gc, 0)
+											
+										world.tile_storage[lc.z][index] = 0
 									else:
-										world.tiledata[lc.z]["state"][index] += 1
-									
-								5:# storage recieves item
-									var item = world.items[lc.z][index]
-									if (item != 0):
-										print("item recieved")
-										#gui.add_resource(1)
-										if (not world.central_storage.has(item)):
-											world.central_storage[item] = 1
-										world.central_storage[item] += 1
-										# item go bye bye
+										world.tile_storage[lc.z][index] = item
 										set_item(1, gc, 0)
-						
-						world.noise[lc.z][index] = max(world.noise[lc.z][index] - 5, 0)
-						if world.noise[lc.z][index] >= 30:
-							summon_the_sandworm_from_the_depths_of_the_dunes(gc, lc, index)
+									# item go bye bye
+									#set_item(1, gc, 0)
 							
+							3:
+								world.noise[lc.z][index] += 3
+								if (world.items[lc.z][index] != 0):
+									var dir = world.tiledata[lc.z]["rotation"][index]
+									var state = world.tiledata[lc.z]["state"][index]
+									move_resource(gc, (dir + int(state)) % 4)
+									world.tiledata[lc.z]["state"][index] = not world.tiledata[lc.z]["state"][index]
+							4:
+								world.noise[lc.z][index] += 3
+								var item = world.items[lc.z][index]
+								if (item != 0):
+									move_resource(gc, world.tiledata[lc.z]["rotation"][index])
+								if (world.tiledata[lc.z]["state"][index] == 4):
+									set_item(1, gc, 6)
+									world.tiledata[lc.z]["state"][index] = 1
+								else:
+									world.tiledata[lc.z]["state"][index] += 1
+								
+							5:# storage recieves item
+								var item = world.items[lc.z][index]
+								if (item != 0):
+									#print("item recieved")
+									#gui.add_resource(1)
+									if (not world.central_storage.has(item)):
+										world.central_storage[item] = 1
+									world.central_storage[item] += 1
+									# item go bye bye
+									set_item(1, gc, 0)
+					
+					world.noise[lc.z][index] = max(world.noise[lc.z][index] - 5, 0)
+					if world.noise[lc.z][index] >= 30:
+						summon_the_sandworm_from_the_depths_of_the_dunes(gc, lc, index)
 						
-						#last_gc = gc
-						#last_lc = lc
-						#last_index = index
+					
+					#last_gc = gc
+					#last_lc = lc
+					#last_index = index
 		
 		
 
@@ -584,9 +584,8 @@ func clear_markers():
 #region
 
 func setup():
-	make_tileset_exist(tileset)
-	ResourceSaver.save(tileset, "res://generated_tileset.tres")
-	self.tile_set = tileset
+	json.setup(tile_size)
+	self.tile_set = json.tileset
 	
 	self.world = json.world
 	
@@ -622,52 +621,6 @@ func set_tilemap_items():
 				Vector2i.ZERO, 0
 			)
 
-func make_tileset_exist(ts: TileSet):
-	var id = 0
-	var path = "res://assets/tiles/"
-	var dir = DirAccess.open(path)
-	
-	var blank = TileSetAtlasSource.new()
-	ts.add_source(blank)
-	ts.tile_size = Vector2i(tile_size,tile_size)
-	var file_data = FileAccess.open("res://assets/tiles.json", FileAccess.READ)
-	var json_thing = JSON.new()
-	json_thing.parse(file_data.get_as_text())
-	var tile_metadata = json_thing.get_data()
-	
-	if dir:
-		dir.list_dir_begin()
-		#var file_name = dir.get_next()
-		for file_name in dir.get_files():
-			if dir.current_is_dir():
-				print("Found directory: " + file_name)
-			elif file_name.ends_with(".png"):
-				print("Found file: " + file_name)
-				print(path + file_name)
-				var image = Image.load_from_file(path + file_name)
-				
-				if (tile_metadata.has(file_name.get_basename())):
-					var tile = tile_metadata[file_name.get_basename()]
-					var source = TileSetAtlasSource.new()
-					source.texture = ImageTexture.create_from_image(image)
-					source.create_tile(Vector2i(0,0))
-					
-					for i in range(3):
-						source.create_alternative_tile(Vector2i(0,0), -1)
-					
-					for i in tile["flip_h"]:
-						source.get_tile_data(Vector2i(0,0), i).flip_h = true
-					for i in tile["flip_v"]:
-						source.get_tile_data(Vector2i(0,0), i).flip_v = true
-					for i in tile["transpose"]:
-						source.get_tile_data(Vector2i(0,0), i).transpose = true
-					
-					ts.add_source(source, tile["id"])
-			file_name = dir.get_next()
-		dir.list_dir_end()
-	else:
-		print("An error occurred when trying to access the path.")
-	
 
 #endregion
 
