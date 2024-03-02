@@ -1,4 +1,4 @@
-[gd_scene load_steps=34 format=3 uid="uid://wbpqro6tssd5"]
+[gd_scene load_steps=37 format=3 uid="uid://wbpqro6tssd5"]
 
 [ext_resource type="Script" path="res://scripts/json.gd" id="1_3pqby"]
 [ext_resource type="Script" path="res://scripts/tilemap.gd" id="2_e3udp"]
@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://scripts/classes.gd" id="4_mms3p"]
 [ext_resource type="Texture2D" uid="uid://dj7h73b0ck0od" path="res://assets/tiles/3-balancer.png" id="4_o0q4j"]
 [ext_resource type="Texture2D" uid="uid://eg1scyadfujp" path="res://assets/tiles/5-storage.png" id="6_y2sc0"]
+[ext_resource type="Script" path="res://scripts/world_gen.gd" id="9_vsps7"]
 [ext_resource type="Texture2D" uid="uid://5am0arvmxore" path="res://assets/factorygame3.png" id="10_1k22r"]
 [ext_resource type="Script" path="res://scripts/gui.gd" id="10_ocoff"]
 [ext_resource type="Shader" path="res://assets/shaders/test.gdshader" id="10_shcmx"]
@@ -51,6 +52,16 @@ sources/5 = SubResource("TileSetAtlasSource_c0vm1")
 sources/4 = SubResource("TileSetAtlasSource_w0fur")
 sources/3 = SubResource("TileSetAtlasSource_vmbpx")
 sources/2 = SubResource("TileSetAtlasSource_y1uis")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_e0op7"]
+noise_type = 2
+frequency = 0.0236
+fractal_octaves = 3
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_frn44"]
+width = 128
+height = 128
+noise = SubResource("FastNoiseLite_e0op7")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_srgol"]
 shader = ExtResource("12_a6vs3")
@@ -149,6 +160,19 @@ theme = ExtResource("13_clh56")
 theme_override_font_sizes/normal_font_size = 100
 fit_content = true
 scroll_active = false
+
+[node name="WorldGen" type="Node2D" parent="TileMap" node_paths=PackedStringArray("noise_sprite", "tilemap")]
+script = ExtResource("9_vsps7")
+noise_sprite = NodePath("Noise")
+tilemap = NodePath("..")
+
+[node name="Noise" type="Sprite2D" parent="TileMap/WorldGen"]
+visible = false
+modulate = Color(1, 1, 0, 0.270588)
+texture_filter = 1
+scale = Vector2(16, 16)
+texture = SubResource("NoiseTexture2D_frn44")
+centered = false
 
 [node name="Camera" type="Node2D" parent="." node_paths=PackedStringArray("background", "camera")]
 script = ExtResource("4_3i4pa")

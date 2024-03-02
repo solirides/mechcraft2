@@ -11,7 +11,6 @@ var explosion = preload("res://scenes/explosion.tscn")
 
 @export var camera:Node = null
 @export var tile_size = 16
-@export var sandworm_noise_threshold = 30
 
 var world_accepts_input = true
 var running = false
@@ -51,7 +50,7 @@ func _ready():
 	gui.selection_changed.connect(_on_selection_changed)
 	gui.world_focused.connect(_on_world_focused)
 	
-	gui.noise_bar.max_value = sandworm_noise_threshold * 1.5
+	gui.noise_bar.max_value = world.sandworm_noise_threshold * 1.5
 	gui.noise_bar.value = 0
 
 
@@ -73,10 +72,7 @@ func _physics_process(delta):
 	#print(last_tick)
 	last_tick += delta
 	if running == true and last_tick >= (1.0 / tps):
-		last_tick = 0
-		do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement()
-		world.elapsed_ticks += 1;;;;;;;;;;;;;
-		gui.resources(str(floor(world.elapsed_ticks / 900)))
+		tick()
 
 func _input(event):
 	
@@ -426,8 +422,9 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 									set_item(1, gc, 0)
 					
 					world.noise[lc.z][index] = max(world.noise[lc.z][index] - 5, 0)
-					if world.noise[lc.z][index] >= sandworm_noise_threshold:
+					if world.noise[lc.z][index] >= world.sandworm_noise_threshold and world.sandworm_current_cooldown <= 0:
 						summon_the_sandworm_from_the_depths_of_the_dunes(gc, lc, index)
+						world.sandworm_current_cooldown = world.sandworm_attack_cooldown
 						
 					
 					highest_noise = max(highest_noise, world.noise[lc.z][index])
@@ -436,15 +433,22 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 					#last_gc = gc
 					#last_lc = lc
 					#last_index = index
-		
-		
+
+func tick():
+	last_tick = 0
+	do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement()
+	world.elapsed_ticks += 1;;;;;;;;;;;;;
+	world.sandworm_current_cooldown = max(0, world.sandworm_current_cooldown - 1)
+	gui.resources(str(floor(world.elapsed_ticks / 900)))
 
 func summon_the_sandworm_from_the_depths_of_the_dunes(gc:Vector2i, lc:Vector3i, index:int):
 	var e = explosion.instantiate()
 	add_child(e)
 	e.position = gc * tile_size
 	e.explode()
-	set_tile(0, gc, 0, 0)
+	for x in range(3):
+		for y in range(3):
+			set_tile(0, gc + Vector2i(x - 2, y - 2), 0, 0)
 	
 
 #func initiate_resource_movement(tile_pos):

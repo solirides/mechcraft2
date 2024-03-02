@@ -16,3 +16,8 @@ var noise = []
 var tiles = []
 var items = []
 var tile_storage = []
+
+var sandworm_noise_threshold = 30
+var sandworm_attack_cooldown = 50
+var sandworm_current_cooldown = 0
+
