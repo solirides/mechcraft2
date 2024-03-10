@@ -40,6 +40,12 @@
 		"flip_h": [],
 		"flip_v": [],
 		"transpose": []
+	},
+	"1001-sand": {
+		"id": 1001,
+		"flip_h": [1,2],
+		"flip_v": [2,3],
+		"transpose": [1,3]
 	}
 	
 }

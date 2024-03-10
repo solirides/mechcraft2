@@ -4,6 +4,7 @@ extends Node
 class_name WorldSave
 
 var elapsed_ticks = 0
+var seed = 0
 var world_name:String
 var world_size:int # world length in chunks
 var chunk_size:int # chunk length in tiles
@@ -15,6 +16,7 @@ var tiledata = []
 var noise = []
 var tiles = []
 var items = []
+var terrain = []
 var tile_storage = []
 
 var sandworm_noise_threshold = 30

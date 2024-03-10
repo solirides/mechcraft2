@@ -9,7 +9,8 @@ var recipes: Dictionary
 var tileset:TileSet
 #var bounds:Rect2i = Rect2i()
 
-var world_properties = ["world_size", "chunk_size", "world_name", "elapsed_ticks"]
+var world_properties = ["seed", "world_size", "chunk_size", "world_name", "elapsed_ticks", "sandworm_noise_threshold", "sandworm_attack_cooldown", "sandworm_current_cooldown"]
+var world_data_int = ["tiles", "items", "noise", "terrain", "tile_storage"]
 
 func _ready():
 	pass
@@ -17,7 +18,7 @@ func _ready():
 	
 
 func setup(tile_size:int):
-	json = read_json("res://assets/world_2.json")
+	json = read_json("res://assets/world.json")
 	recipes = read_json("res://assets/recipes.json")
 	
 	tileset = make_tileset_exist(tile_size)
@@ -58,10 +59,13 @@ func create_save():
 	for i in world.world_size**2:
 		write_json["chunks"][i] = {}
 	
-	save_data_int("tiles")
-	save_data_int("items")
-	save_data_int("noise")
-	save_data_int("tile_storage")
+	for p in world_data_int:
+		save_data_int(p)
+	
+	#save_data_int("tiles")
+	#save_data_int("items")
+	#save_data_int("noise")
+	#save_data_int("tile_storage")
 	save_tiledata()
 	
 	#print(write_json)
@@ -83,10 +87,14 @@ func load_save():
 	world.bounds = Rect2i(0, 0, world.world_size * world.chunk_size, world.world_size * world.chunk_size)
 	world.chunk_area = pow(world.chunk_size, 2)
 	
-	world.tiles = load_data_int("tiles", 0)
-	world.items = load_data_int("items", 0)
-	world.noise = load_data_int("noise", 0)
-	world.tile_storage = load_data_int("tile_storage", 0)
+	
+	for p in world_data_int:
+		world.set(p, load_data_int(p, 0))
+	
+	#world.tiles = load_data_int("tiles", 0)
+	#world.items = load_data_int("items", 0)
+	#world.noise = load_data_int("noise", 0)
+	#world.tile_storage = load_data_int("tile_storage", 0)
 	world.tiledata = load_tiledata()
 
 func load_data_int(property:String, default_value:int = 0):
@@ -95,7 +103,7 @@ func load_data_int(property:String, default_value:int = 0):
 	for i in len(json["chunks"]):
 		#print(i)
 		#print(property)
-		data.append(PackedInt32Array(json["chunks"][str(i)][property]))
+		data.append(PackedInt32Array(json["chunks"][i][property]))
 	
 	# fill missing chunks
 	var a:PackedInt32Array = []
@@ -111,7 +119,7 @@ func load_tiledata():
 	print("loading world tiledata")
 	#print(json["chunks"][0])
 	for i in len(json["chunks"]):
-		data.append(json["chunks"][str(i)]["tiledata"])
+		data.append(json["chunks"][i]["tiledata"])
 #		print(world[0]["rotation"])
 	
 	# fill missing chunks
@@ -153,7 +161,13 @@ func make_tileset_exist(tile_size:int):
 					var tile = tile_metadata[file_name.get_basename()]
 					var source = TileSetAtlasSource.new()
 					source.texture = ImageTexture.create_from_image(image)
+					
+					if tile["id"] == 1001:
+						source.texture_region_size = Vector2i(32, 32)
+						#source.texture
+					
 					source.create_tile(Vector2i(0,0))
+					
 					
 					for i in range(3):
 						source.create_alternative_tile(Vector2i(0,0), -1)

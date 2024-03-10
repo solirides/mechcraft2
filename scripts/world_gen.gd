@@ -11,8 +11,21 @@ func _ready():
 	noise_sprite.texture.width = a
 	noise_sprite.texture.height = a
 	
+	noise_sprite.texture.noise.seed = tilemap.world.seed
 	#noise_sprite.scale = Vector2(16,16)
-	
+	generate_world()
+
+func generate_world():
+	var a = tilemap.world.chunk_size * tilemap.world.world_size
+	for x:float in a:
+		for y:float in a:
+			var value = noise_sprite.texture.noise.get_noise_2d(x, y)
+			#print(value)
+			if value > -0.5:
+				#print("terrain")
+				tilemap.set_terrain(2, Vector2i(x, y), 6)
+			else:
+				tilemap.set_terrain(2, Vector2i(x, y), 1001)
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

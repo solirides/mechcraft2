@@ -568,6 +568,15 @@ func set_item(layer:int, global_coords:Vector2i, tile:int):
 			Vector2i.ZERO, rotation
 			)
 
+func set_terrain(layer:int, global_coords:Vector2i, tile:int):
+	var local_coords = global2local(global_coords)
+	
+	world.terrain[local_coords.z][local_coords.x + local_coords.y * world.chunk_size] = tile
+	self.set_cell(layer, \
+			global_coords, tile, \
+			Vector2i.ZERO, rotation
+			)
+
 func debug_marker(global_coords:Vector2i, color:Color):
 	var a = Polygon2D.new()
 	a.polygon = [Vector2(0.8,0.8), Vector2(-0.8,0.8), Vector2(-0.8,-0.8), Vector2(0.8,-0.8)]

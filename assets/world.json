@@ -1,9 +1,13 @@
 {
 	"world_name":"test",
+	"seed":123,
 	"chunk_size":8,
 	"world_size":16,
 	"elapsed_ticks":12,
 	"central_storage":{},
+	"sandworm_attack_cooldown":30,
+	"sandworm_noise_threshold":50,
+	"sandworm_current_cooldown":0,
 	"chunks":[
 		{
 			"stale":0,
@@ -28,6 +32,16 @@
 				0,0,0,0,0,0,0,0
 			],
 			"items":[
+				0,0,0,0,0,0,0,0,
+				0,0,0,0,0,0,0,0,
+				0,0,0,0,0,0,0,0,
+				0,0,0,0,0,0,0,0,
+				0,0,0,0,0,0,0,0,
+				0,0,0,0,0,0,0,0,
+				0,0,0,0,0,0,0,0,
+				0,0,0,0,0,0,0,0
+			],
+			"terrain":[
 				0,0,0,0,0,0,0,0,
 				0,0,0,0,0,0,0,0,
 				0,0,0,0,0,0,0,0,
