@@ -228,17 +228,18 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(1, 0.156863, 0.568627, 1)
 
-[node name="GUI" type="CanvasLayer" parent="Camera/Camera2D" node_paths=PackedStringArray("selection_label", "alert_label", "debug_label", "resources_label", "menu", "music_player", "noise_bar")]
+[node name="GUI" type="CanvasLayer" parent="Camera/Camera2D" node_paths=PackedStringArray("selection_label", "alert_label", "debug_label", "resources_label", "menu", "music_player", "noise_bar", "hotbar")]
 layer = 10
 script = ExtResource("10_ocoff")
 create_chaos_with_music = false
-selection_label = NodePath("GUI/VBoxContainer/Bar2/Selection")
+selection_label = NodePath("GUI/TopBar/Bar2/Selection")
 alert_label = NodePath("GUI/Center/Alert")
-debug_label = NodePath("GUI/VBoxContainer/Bar2/Debug")
-resources_label = NodePath("GUI/VBoxContainer/Bar2/Resources")
+debug_label = NodePath("GUI/TopBar/Bar2/Debug")
+resources_label = NodePath("GUI/TopBar/Bar2/Resources")
 menu = NodePath("GUI/Menu")
 music_player = NodePath("GUI/AudioStreamPlayer")
-noise_bar = NodePath("GUI/VBoxContainer/Bar3/Noise")
+noise_bar = NodePath("GUI/TopBar/Bar3/Noise")
+hotbar = NodePath("GUI/BottomBar/Panel/Hotbar")
 
 [node name="GUI" type="Control" parent="Camera/Camera2D/GUI"]
 layout_mode = 3
@@ -248,41 +249,31 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Camera/Camera2D/GUI/GUI"]
+[node name="TopBar" type="VBoxContainer" parent="Camera/Camera2D/GUI/GUI"]
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 1.0
 offset_left = 20.0
 offset_top = 10.0
 offset_right = -20.0
-offset_bottom = 39.0
 grow_horizontal = 2
 
-[node name="Bar1" type="Control" parent="Camera/Camera2D/GUI/GUI/VBoxContainer"]
+[node name="Bar1" type="Control" parent="Camera/Camera2D/GUI/GUI/TopBar"]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 
-[node name="Hotbar" type="HBoxContainer" parent="Camera/Camera2D/GUI/GUI/VBoxContainer/Bar1"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-alignment = 1
-
-[node name="Menu" type="Button" parent="Camera/Camera2D/GUI/GUI/VBoxContainer/Bar1"]
+[node name="Menu" type="Button" parent="Camera/Camera2D/GUI/GUI/TopBar/Bar1"]
 layout_mode = 0
 offset_right = 89.0
 offset_bottom = 39.0
 theme = ExtResource("13_clh56")
 text = "⚙️Menu"
 
-[node name="Bar2" type="Control" parent="Camera/Camera2D/GUI/GUI/VBoxContainer"]
+[node name="Bar2" type="Control" parent="Camera/Camera2D/GUI/GUI/TopBar"]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 
-[node name="Selection" type="RichTextLabel" parent="Camera/Camera2D/GUI/GUI/VBoxContainer/Bar2"]
+[node name="Selection" type="RichTextLabel" parent="Camera/Camera2D/GUI/GUI/TopBar/Bar2"]
 clip_contents = false
 layout_mode = 1
 offset_right = 1.0
@@ -292,7 +283,7 @@ fit_content = true
 scroll_active = false
 autowrap_mode = 0
 
-[node name="Debug" type="RichTextLabel" parent="Camera/Camera2D/GUI/GUI/VBoxContainer/Bar2"]
+[node name="Debug" type="RichTextLabel" parent="Camera/Camera2D/GUI/GUI/TopBar/Bar2"]
 clip_contents = false
 layout_mode = 1
 anchors_preset = 5
@@ -308,7 +299,7 @@ text = "[center]alert text"
 fit_content = true
 scroll_active = false
 
-[node name="Resources" type="RichTextLabel" parent="Camera/Camera2D/GUI/GUI/VBoxContainer/Bar2"]
+[node name="Resources" type="RichTextLabel" parent="Camera/Camera2D/GUI/GUI/TopBar/Bar2"]
 clip_contents = false
 layout_mode = 1
 anchors_preset = 1
@@ -324,10 +315,10 @@ fit_content = true
 scroll_active = false
 autowrap_mode = 0
 
-[node name="Bar3" type="Control" parent="Camera/Camera2D/GUI/GUI/VBoxContainer"]
+[node name="Bar3" type="Control" parent="Camera/Camera2D/GUI/GUI/TopBar"]
 layout_mode = 2
 
-[node name="Noise" type="ProgressBar" parent="Camera/Camera2D/GUI/GUI/VBoxContainer/Bar3"]
+[node name="Noise" type="ProgressBar" parent="Camera/Camera2D/GUI/GUI/TopBar/Bar3"]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 0
 offset_right = 4.0
@@ -357,28 +348,29 @@ text = "[center]alert text"
 fit_content = true
 scroll_active = false
 
-[node name="BottomBar" type="CenterContainer" parent="Camera/Camera2D/GUI/GUI"]
+[node name="BottomBar" type="VBoxContainer" parent="Camera/Camera2D/GUI/GUI"]
 layout_mode = 1
-anchors_preset = 12
+anchors_preset = -1
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -24.0
+offset_left = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
 grow_horizontal = 2
 grow_vertical = 0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Camera/Camera2D/GUI/GUI/BottomBar"]
+[node name="Panel" type="Panel" parent="Camera/Camera2D/GUI/GUI/BottomBar"]
+custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
 
-[node name="Music" type="CheckButton" parent="Camera/Camera2D/GUI/GUI/BottomBar/VBoxContainer"]
-layout_mode = 2
-focus_mode = 0
-text = "Delete code with music (it goes in the recycling bin)"
-
-[node name="Music2" type="CheckButton" parent="Camera/Camera2D/GUI/GUI/BottomBar/VBoxContainer"]
-layout_mode = 2
-focus_mode = 0
-text = "Shut down computer with music"
+[node name="Hotbar" type="HBoxContainer" parent="Camera/Camera2D/GUI/GUI/BottomBar/Panel"]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 1
+offset_top = -4.0
+offset_right = 1152.0
+offset_bottom = -4.0
+alignment = 1
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Camera/Camera2D/GUI/GUI"]
 stream = ExtResource("14_agi1x")
@@ -441,6 +433,18 @@ layout_mode = 2
 theme = ExtResource("13_clh56")
 text = "Main Menu"
 
+[node name="Music" type="CheckButton" parent="Camera/Camera2D/GUI/GUI/Menu/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 4
+focus_mode = 0
+text = "Delete code with music (it goes in the recycling bin)"
+
+[node name="Music2" type="CheckButton" parent="Camera/Camera2D/GUI/GUI/Menu/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 4
+focus_mode = 0
+text = "Shut down computer with music"
+
 [node name="WorldSave" type="Node" parent="."]
 script = ExtResource("4_mms3p")
 
@@ -468,8 +472,8 @@ polygon = PackedVector2Array(1, 1, -1, 1, -1, -1, 1, -1)
 
 [connection signal="timeout" from="Camera/ShakeFrequency" to="Camera" method="_on_shake_frequency_timeout"]
 [connection signal="timeout" from="Camera/ShakeDuration" to="Camera" method="_on_shake_duration_timeout"]
-[connection signal="pressed" from="Camera/Camera2D/GUI/GUI/VBoxContainer/Bar1/Menu" to="Camera/Camera2D/GUI" method="_on_menu_pressed"]
-[connection signal="toggled" from="Camera/Camera2D/GUI/GUI/BottomBar/VBoxContainer/Music" to="Camera/Camera2D/GUI" method="_on_music_toggled"]
-[connection signal="toggled" from="Camera/Camera2D/GUI/GUI/BottomBar/VBoxContainer/Music2" to="Camera/Camera2D/GUI" method="_on_music_2_toggled"]
+[connection signal="pressed" from="Camera/Camera2D/GUI/GUI/TopBar/Bar1/Menu" to="Camera/Camera2D/GUI" method="_on_menu_pressed"]
 [connection signal="pressed" from="Camera/Camera2D/GUI/GUI/Menu/VBoxContainer/Button1" to="Camera/Camera2D/GUI" method="_on_resume_pressed"]
 [connection signal="pressed" from="Camera/Camera2D/GUI/GUI/Menu/VBoxContainer/Button4" to="Camera/Camera2D/GUI" method="_on_title_screen_pressed"]
+[connection signal="toggled" from="Camera/Camera2D/GUI/GUI/Menu/VBoxContainer/Music" to="Camera/Camera2D/GUI" method="_on_music_toggled"]
+[connection signal="toggled" from="Camera/Camera2D/GUI/GUI/Menu/VBoxContainer/Music2" to="Camera/Camera2D/GUI" method="_on_music_2_toggled"]

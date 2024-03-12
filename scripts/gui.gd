@@ -12,10 +12,13 @@ signal world_focused(state)
 @export var menu:Control = null
 @export var music_player:AudioStreamPlayer = null
 @export var noise_bar:ProgressBar = null
+@export var hotbar:HBoxContainer = null
 
 var selected_tile = 1
 var tile_rotation = 0
 var resource_count = 0
+
+var gui_item = preload("res://scenes/gui_item.tscn")
 
 func _ready():
 	pass # Replace with function body.
@@ -45,6 +48,23 @@ func update_selection():
 	selection_label.text = str(selected_tile) + " " + str(tile_rotation)
 	
 	selection_changed.emit(selected_tile, tile_rotation)
+
+func update_hotbar(world:WorldSave):
+	var i = 0
+	for k in world.central_storage.keys():
+		var a = gui_item.instantiate()
+		a.get_child(0).text = str(world.central_storage[k])
+		a.slot = i
+		a.clicked.connect(_on_hotbar_item_clicked)
+		hotbar.add_child(a)
+		
+		print("hotbar item")
+		i += 1
+
+
+func _on_hotbar_item_clicked(slot):
+	print(slot)
+
 
 func alert(text:String):
 	alert_label.text = "[center]" + text

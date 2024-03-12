@@ -1,0 +1,29 @@
+[gd_scene load_steps=3 format=3 uid="uid://ormdmnipbrco"]
+
+[ext_resource type="Texture2D" uid="uid://bew1l4udajlnu" path="res://assets/tiles/6-iron.png" id="1_ydcbi"]
+[ext_resource type="Script" path="res://scripts/gui_item.gd" id="2_03o5m"]
+
+[node name="GuiItem" type="TextureRect"]
+custom_minimum_size = Vector2(64, 64)
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("1_ydcbi")
+script = ExtResource("2_03o5m")
+
+[node name="Count" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -40.0
+offset_top = -23.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 24
+text = "42"
+horizontal_alignment = 2
+vertical_alignment = 2
+
+[connection signal="gui_input" from="." to="." method="_on_gui_input"]

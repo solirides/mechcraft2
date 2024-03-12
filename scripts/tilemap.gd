@@ -123,6 +123,9 @@ func _input(event):
 			
 			detect_world_tiles()
 		
+		if event.is_action_pressed("update_gui"):
+			gui.update_hotbar(world)
+		
 		if event.is_action_pressed("ping"):
 			var p = get_global_mouse_position()
 			print(p);
