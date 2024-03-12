@@ -77,37 +77,6 @@ func _physics_process(delta):
 func _input(event):
 	
 	if world_accepts_input:
-		if event.is_action_pressed("left_click"):
-			var p = get_global_mouse_position()
-			var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
-			print(p)
-			print(gc)
-			if (world.bounds.has_point(gc)):
-				set_tile(0, gc, selected_tile, tile_rotation)
-			
-		if event.is_action_pressed("middle_click"):
-			var p = get_global_mouse_position()
-			var tile_pos = Vector2i(floor(p.x / tile_size), floor(p.y / tile_size))
-			rotate_conveyor(tile_pos)
-	
-		if event.is_action_pressed("resource"):
-			var p = get_global_mouse_position()
-			print("resource spawned")
-			set_item(1, Vector2i(floor(p.x/tile_size), floor(p.y/tile_size)), 6)
-		
-		if event.is_action_pressed("right_click"):
-			var p = get_global_mouse_position()
-			var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
-			print(p);
-			if (world.bounds.has_point(gc)):
-				var e = explosion.instantiate()
-				add_child(e)
-				e.position = gc * tile_size
-				e.explode()
-				camera.camera_shake(0.4, 16, 50, 10)
-				set_tile(0, gc, 0, 0)
-			
-		
 		if event.is_action_pressed("reload"):
 			print("recalculate")
 			clear_markers()
@@ -148,7 +117,40 @@ func _input(event):
 		if Input.is_action_just_pressed("save"):
 			print("write to save file")
 			json.create_save()
-			json.write_save("res://assets/world_2.json")
+			json.write_save()
+
+func _unhandled_input(event):
+	if world_accepts_input:
+		if event.is_action_pressed("left_click"):
+			var p = get_global_mouse_position()
+			var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
+			print(p)
+			print(gc)
+			if (world.bounds.has_point(gc)):
+				set_tile(0, gc, selected_tile, tile_rotation)
+			
+		if event.is_action_pressed("middle_click"):
+			var p = get_global_mouse_position()
+			var tile_pos = Vector2i(floor(p.x / tile_size), floor(p.y / tile_size))
+			rotate_conveyor(tile_pos)
+	
+		if event.is_action_pressed("resource"):
+			var p = get_global_mouse_position()
+			print("resource spawned")
+			set_item(1, Vector2i(floor(p.x/tile_size), floor(p.y/tile_size)), 6)
+		
+		if event.is_action_pressed("right_click"):
+			var p = get_global_mouse_position()
+			var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
+			print(p);
+			if (world.bounds.has_point(gc)):
+				var e = explosion.instantiate()
+				add_child(e)
+				e.position = gc * tile_size
+				e.explode()
+				camera.camera_shake(0.4, 16, 50, 10)
+				set_tile(0, gc, 0, 0)
+		
 
 # Detecting conveyor lines:
 #region
@@ -418,9 +420,9 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 								if (item != 0):
 									#print("item recieved")
 									#gui.add_resource(1)
-									if (not world.central_storage.has(item)):
-										world.central_storage[item] = 1
-									world.central_storage[item] += 1
+									if (not world.central_storage.has(str(item))):
+										world.central_storage[str(item)] = 1
+									world.central_storage[str(item)] += 1
 									# item go bye bye
 									set_item(1, gc, 0)
 					
@@ -650,8 +652,8 @@ func set_tilemap_items():
 #endregion
 
 func _on_selection_changed(selected_tile, tile_rotation):
-	self.selected_tile = selected_tile
-	self.tile_rotation = tile_rotation
+	self.selected_tile = int(selected_tile)
+	self.tile_rotation = int(tile_rotation)
 
 func _on_world_focused(state):
 	world_accepts_input = state

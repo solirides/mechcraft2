@@ -2,8 +2,9 @@ extends TextureRect
 
 
 var slot = -1
+var tile_id = -1
 
-signal clicked(slot)
+signal clicked(slot, id, count)
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -17,4 +18,4 @@ func _process(delta):
 
 func _on_gui_input(event):
 	if event.is_action_pressed("left_click"):
-		self.clicked.emit(slot)
+		self.clicked.emit(slot, tile_id, int($Count.text))

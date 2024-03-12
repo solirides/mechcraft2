@@ -2,14 +2,19 @@ extends Node
 
 class_name Json
 
+
+@export var saving_path:String = "res://assets/world_2.json"
+@export var loading_path:String = "res://assets/world_2.json"
+
 var json: Dictionary
 var write_json: Dictionary
 var world = WorldSave.new()
 var recipes: Dictionary
 var tileset:TileSet
+var tile_textures:Dictionary = {}
 #var bounds:Rect2i = Rect2i()
 
-var world_properties = ["seed", "world_size", "chunk_size", "world_name", "elapsed_ticks", "sandworm_noise_threshold", "sandworm_attack_cooldown", "sandworm_current_cooldown"]
+var world_properties = ["seed", "world_size", "chunk_size", "world_name", "elapsed_ticks", "central_storage", "sandworm_noise_threshold", "sandworm_attack_cooldown", "sandworm_current_cooldown"]
 var world_data_int = ["tiles", "items", "noise", "terrain", "tile_storage"]
 
 func _ready():
@@ -18,7 +23,7 @@ func _ready():
 	
 
 func setup(tile_size:int):
-	json = read_json("res://assets/world.json")
+	json = read_json()
 	recipes = read_json("res://assets/recipes.json")
 	
 	tileset = make_tileset_exist(tile_size)
@@ -26,7 +31,7 @@ func setup(tile_size:int):
 	
 	load_save()
 
-func read_json(file_path):
+func read_json(file_path:String = loading_path):
 	var json_data
 	var file_data = FileAccess.open(file_path, FileAccess.READ)
 	
@@ -46,7 +51,7 @@ func read_json(file_path):
 	return json_data
 
 
-func write_save(file_path):
+func write_save(file_path:String = saving_path):
 	var file = FileAccess.open(file_path, FileAccess.WRITE)
 	file.store_string(JSON.stringify(write_json))
 	
@@ -103,7 +108,8 @@ func load_data_int(property:String, default_value:int = 0):
 	for i in len(json["chunks"]):
 		#print(i)
 		#print(property)
-		data.append(PackedInt32Array(json["chunks"][i][property]))
+		if json["chunks"][str(i)].has(property):
+			data.append(PackedInt32Array(json["chunks"][str(i)][property]))
 	
 	# fill missing chunks
 	var a:PackedInt32Array = []
@@ -119,7 +125,7 @@ func load_tiledata():
 	print("loading world tiledata")
 	#print(json["chunks"][0])
 	for i in len(json["chunks"]):
-		data.append(json["chunks"][i]["tiledata"])
+		data.append(json["chunks"][str(i)]["tiledata"])
 #		print(world[0]["rotation"])
 	
 	# fill missing chunks
@@ -180,6 +186,7 @@ func make_tileset_exist(tile_size:int):
 						source.get_tile_data(Vector2i(0,0), i).transpose = true
 					
 					ts.add_source(source, tile["id"])
+					tile_textures[int(tile["id"])] = file_name.get_basename()
 			file_name = dir.get_next()
 		dir.list_dir_end()
 	else:

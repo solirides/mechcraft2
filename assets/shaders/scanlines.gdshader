@@ -1,6 +1,7 @@
 shader_type canvas_item;
 
 uniform vec4 color1 : source_color = vec4(0.0, 0.0, 0.0, 1.0);
+uniform vec4 color2 : source_color = vec4(1.0, 0.0, 0.0, 1.0);
 uniform float speed = 8.0;
 uniform float size = 1.0;
 
@@ -9,7 +10,7 @@ void vertex() {
 }
 
 void fragment() {
-	COLOR = vec4(color1.rgb, sin(TIME * speed + (SCREEN_UV.y / SCREEN_PIXEL_SIZE.y) / size) * color1.a);
+	COLOR = mix(color1, color2, sin(TIME * speed + (SCREEN_UV.y / SCREEN_PIXEL_SIZE.y) / size) * color1.a);
 	//if (mod(SCREEN_UV.x / SCREEN_PIXEL_SIZE.x - SCREEN_UV.y / SCREEN_PIXEL_SIZE.y / 4.0 - TIME * 10.0, 8) >= 3.0 + sin(TIME)) {
 		//COLOR = color1;
 	//}

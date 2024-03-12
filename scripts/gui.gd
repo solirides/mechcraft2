@@ -1,9 +1,10 @@
 extends CanvasLayer
 
 
-signal selection_changed
+signal selection_changed(selected_tile, tile_rotation)
 signal world_focused(state)
 
+@export var json:Node = null
 @export var create_chaos_with_music = true
 @export var selection_label:RichTextLabel = null
 @export var alert_label:RichTextLabel = null
@@ -55,6 +56,9 @@ func update_hotbar(world:WorldSave):
 		var a = gui_item.instantiate()
 		a.get_child(0).text = str(world.central_storage[k])
 		a.slot = i
+		a.tile_id = k
+		a.texture = ImageTexture.create_from_image(Image.load_from_file("res://assets/tiles/" + json.tile_textures[int(k)] + ".png"))
+		print("res://assets/tiles/" + json.tile_textures[int(k)] + ".png")
 		a.clicked.connect(_on_hotbar_item_clicked)
 		hotbar.add_child(a)
 		
@@ -62,8 +66,10 @@ func update_hotbar(world:WorldSave):
 		i += 1
 
 
-func _on_hotbar_item_clicked(slot):
-	print(slot)
+func _on_hotbar_item_clicked(slot, id, count):
+	selected_tile = id
+	self.selection_changed.emit(selected_tile, tile_rotation)
+	print(id)
 
 
 func alert(text:String):
