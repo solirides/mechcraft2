@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3 uid="uid://wbpqro6tssd5"]
+[gd_scene load_steps=38 format=3 uid="uid://wbpqro6tssd5"]
 
 [ext_resource type="Script" path="res://scripts/json.gd" id="1_3pqby"]
 [ext_resource type="Script" path="res://scripts/tilemap.gd" id="2_e3udp"]
@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://scripts/classes.gd" id="4_mms3p"]
 [ext_resource type="Texture2D" uid="uid://dj7h73b0ck0od" path="res://assets/tiles/3-balancer.png" id="4_o0q4j"]
 [ext_resource type="Texture2D" uid="uid://eg1scyadfujp" path="res://assets/tiles/5-storage.png" id="6_y2sc0"]
+[ext_resource type="Script" path="res://scripts/world_gen.gd" id="9_vsps7"]
 [ext_resource type="Texture2D" uid="uid://5am0arvmxore" path="res://assets/factorygame3.png" id="10_1k22r"]
 [ext_resource type="Script" path="res://scripts/gui.gd" id="10_ocoff"]
 [ext_resource type="Shader" path="res://assets/shaders/test.gdshader" id="10_shcmx"]
@@ -16,6 +17,7 @@
 [ext_resource type="Theme" uid="uid://b4us1mhl0qxjp" path="res://assets/theme.tres" id="13_clh56"]
 [ext_resource type="Shader" path="res://assets/shaders/grain.gdshader" id="13_xq4xh"]
 [ext_resource type="AudioStream" uid="uid://cmygilbmp72r3" path="res://assets/audio/music1.ogg" id="14_agi1x"]
+[ext_resource type="Shader" path="res://assets/shaders/scanlines.gdshader" id="16_udpk1"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tbejw"]
 texture = ExtResource("2_obwd8")
@@ -45,11 +47,29 @@ texture = ExtResource("6_y2sc0")
 0:0/0 = 0
 
 [sub_resource type="TileSet" id="TileSet_huth1"]
+tile_size = Vector2i(32, 32)
 sources/1 = SubResource("TileSetAtlasSource_tbejw")
 sources/5 = SubResource("TileSetAtlasSource_c0vm1")
 sources/4 = SubResource("TileSetAtlasSource_w0fur")
 sources/3 = SubResource("TileSetAtlasSource_vmbpx")
 sources/2 = SubResource("TileSetAtlasSource_y1uis")
+
+[sub_resource type="Gradient" id="Gradient_k1d5f"]
+interpolation_mode = 1
+offsets = PackedFloat32Array(0, 0.132075)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_e0op7"]
+noise_type = 2
+frequency = 0.0236
+fractal_octaves = 3
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_frn44"]
+width = 128
+height = 128
+generate_mipmaps = false
+normalize = false
+color_ramp = SubResource("Gradient_k1d5f")
+noise = SubResource("FastNoiseLite_e0op7")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_srgol"]
 shader = ExtResource("12_a6vs3")
@@ -81,6 +101,27 @@ shader_parameter/noise_size = 512.0
 shader_parameter/amount = 0.8
 shader_parameter/noise = SubResource("NoiseTexture2D_3vi5g")
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b0gy7"]
+bg_color = Color(0.262745, 0.262745, 0.262745, 0.254902)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jbbp0"]
+bg_color = Color(0.921569, 0.647059, 0.254902, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_2faln"]
+shader = ExtResource("16_udpk1")
+shader_parameter/color1 = Color(0.211765, 0.337255, 0.788235, 0.407843)
+shader_parameter/color2 = Color(0.0666667, 0.101961, 0.223529, 0.784314)
+shader_parameter/speed = 8.0
+shader_parameter/size = 2.0
+
 [sub_resource type="Environment" id="Environment_tiixt"]
 background_mode = 3
 glow_enabled = true
@@ -91,16 +132,16 @@ glow_hdr_threshold = 0.87
 [node name="Json" type="Node" parent="."]
 script = ExtResource("1_3pqby")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Marketing" type="Sprite2D" parent="."]
 self_modulate = Color(1, 1, 1, 0.247059)
 z_index = -10
-position = Vector2(1024, 1024)
-scale = Vector2(2, 2)
+scale = Vector2(4, 4)
 texture = ExtResource("10_1k22r")
+centered = false
 
-[node name="ColorRect" type="ColorRect" parent="."]
+[node name="WorldBackground" type="ColorRect" parent="."]
 z_index = -11
-custom_minimum_size = Vector2(2048, 2048)
+custom_minimum_size = Vector2(4096, 4096)
 offset_right = 2048.0
 offset_bottom = 2048.0
 color = Color(0.117647, 0.141176, 0.164706, 1)
@@ -113,10 +154,14 @@ layer_0/z_index = -5
 layer_1/name = "Items"
 layer_1/z_index = -3
 layer_1/tile_data = PackedInt32Array()
+layer_2/name = "Terrain"
+layer_2/z_index = -8
+layer_2/tile_data = PackedInt32Array()
 script = ExtResource("2_e3udp")
 gui = NodePath("../Camera/Camera2D/GUI")
 debug_dot = NodePath("../DebugDot")
 camera = NodePath("../Camera")
+tile_size = 32
 
 [node name="Debug" type="Node" parent="TileMap"]
 
@@ -128,6 +173,19 @@ theme = ExtResource("13_clh56")
 theme_override_font_sizes/normal_font_size = 100
 fit_content = true
 scroll_active = false
+
+[node name="WorldGen" type="Node2D" parent="TileMap" node_paths=PackedStringArray("noise_sprite", "tilemap")]
+script = ExtResource("9_vsps7")
+noise_sprite = NodePath("Noise")
+tilemap = NodePath("..")
+
+[node name="Noise" type="Sprite2D" parent="TileMap/WorldGen"]
+visible = false
+modulate = Color(1, 1, 0, 0.270588)
+texture_filter = 1
+scale = Vector2(32, 32)
+texture = SubResource("NoiseTexture2D_frn44")
+centered = false
 
 [node name="Camera" type="Node2D" parent="." node_paths=PackedStringArray("background", "camera")]
 script = ExtResource("4_3i4pa")
@@ -166,6 +224,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(1, 0.156863, 0.568627, 1)
 
 [node name="ColorRect2" type="ColorRect" parent="Camera/Camera2D/Shaders"]
@@ -175,18 +234,22 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(1, 0.156863, 0.568627, 1)
 
-[node name="GUI" type="CanvasLayer" parent="Camera/Camera2D" node_paths=PackedStringArray("selection_label", "alert_label", "debug_label", "resources_label", "menu", "music_player")]
+[node name="GUI" type="CanvasLayer" parent="Camera/Camera2D" node_paths=PackedStringArray("json", "selection_label", "alert_label", "debug_label", "resources_label", "menu", "music_player", "noise_bar", "hotbar")]
 layer = 10
 script = ExtResource("10_ocoff")
+json = NodePath("../../../Json")
 create_chaos_with_music = false
-selection_label = NodePath("GUI/VBoxContainer/Bar2/Selection")
+selection_label = NodePath("GUI/TopBar/Bar2/Selection")
 alert_label = NodePath("GUI/Center/Alert")
-debug_label = NodePath("GUI/VBoxContainer/Bar2/Debug")
-resources_label = NodePath("GUI/VBoxContainer/Bar2/Resources")
+debug_label = NodePath("GUI/TopBar/Bar2/Debug")
+resources_label = NodePath("GUI/TopBar/Bar2/Resources")
 menu = NodePath("GUI/Menu")
 music_player = NodePath("GUI/AudioStreamPlayer")
+noise_bar = NodePath("GUI/TopBar/Bar3/Noise")
+hotbar = NodePath("GUI/BottomBar/Panel/Hotbar")
 
 [node name="GUI" type="Control" parent="Camera/Camera2D/GUI"]
 layout_mode = 3
@@ -195,48 +258,46 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Camera/Camera2D/GUI/GUI"]
+[node name="TopBar" type="VBoxContainer" parent="Camera/Camera2D/GUI/GUI"]
 layout_mode = 1
-anchors_preset = 10
+anchors_preset = -1
 anchor_right = 1.0
-offset_bottom = 39.0
+offset_left = 20.0
+offset_top = 10.0
+offset_right = -20.0
 grow_horizontal = 2
 
-[node name="Bar1" type="Control" parent="Camera/Camera2D/GUI/GUI/VBoxContainer"]
+[node name="Bar1" type="Control" parent="Camera/Camera2D/GUI/GUI/TopBar"]
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
+mouse_filter = 1
 
-[node name="Hotbar" type="HBoxContainer" parent="Camera/Camera2D/GUI/GUI/VBoxContainer/Bar1"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-alignment = 1
-
-[node name="Menu" type="Button" parent="Camera/Camera2D/GUI/GUI/VBoxContainer/Bar1"]
+[node name="Menu" type="Button" parent="Camera/Camera2D/GUI/GUI/TopBar/Bar1"]
 layout_mode = 0
 offset_right = 89.0
 offset_bottom = 39.0
 theme = ExtResource("13_clh56")
 text = "⚙️Menu"
 
-[node name="Bar2" type="Control" parent="Camera/Camera2D/GUI/GUI/VBoxContainer"]
+[node name="Bar2" type="Control" parent="Camera/Camera2D/GUI/GUI/TopBar"]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
+mouse_filter = 1
 
-[node name="Selection" type="RichTextLabel" parent="Camera/Camera2D/GUI/GUI/VBoxContainer/Bar2"]
+[node name="Selection" type="RichTextLabel" parent="Camera/Camera2D/GUI/GUI/TopBar/Bar2"]
 clip_contents = false
 layout_mode = 1
 offset_right = 1.0
+mouse_filter = 1
 theme = ExtResource("13_clh56")
 text = "hello"
 fit_content = true
 scroll_active = false
 autowrap_mode = 0
 
-[node name="Debug" type="RichTextLabel" parent="Camera/Camera2D/GUI/GUI/VBoxContainer/Bar2"]
+[node name="Debug" type="RichTextLabel" parent="Camera/Camera2D/GUI/GUI/TopBar/Bar2"]
 clip_contents = false
 layout_mode = 1
 anchors_preset = 5
@@ -246,13 +307,14 @@ offset_left = -300.0
 offset_right = 300.0
 offset_bottom = 31.0
 grow_horizontal = 2
+mouse_filter = 1
 theme = ExtResource("13_clh56")
 bbcode_enabled = true
 text = "[center]alert text"
 fit_content = true
 scroll_active = false
 
-[node name="Resources" type="RichTextLabel" parent="Camera/Camera2D/GUI/GUI/VBoxContainer/Bar2"]
+[node name="Resources" type="RichTextLabel" parent="Camera/Camera2D/GUI/GUI/TopBar/Bar2"]
 clip_contents = false
 layout_mode = 1
 anchors_preset = 1
@@ -261,12 +323,28 @@ anchor_right = 1.0
 offset_left = -49.0
 offset_bottom = 28.0
 grow_horizontal = 0
+mouse_filter = 1
 theme = ExtResource("13_clh56")
 bbcode_enabled = true
 text = "[right]what"
 fit_content = true
 scroll_active = false
 autowrap_mode = 0
+
+[node name="Bar3" type="Control" parent="Camera/Camera2D/GUI/GUI/TopBar"]
+layout_mode = 2
+mouse_filter = 1
+
+[node name="Noise" type="ProgressBar" parent="Camera/Camera2D/GUI/GUI/TopBar/Bar3"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 0
+offset_right = 4.0
+offset_bottom = 27.0
+theme = ExtResource("13_clh56")
+theme_override_styles/background = SubResource("StyleBoxFlat_b0gy7")
+theme_override_styles/fill = SubResource("StyleBoxFlat_jbbp0")
+value = 30.0
+show_percentage = false
 
 [node name="Center" type="CenterContainer" parent="Camera/Camera2D/GUI/GUI"]
 visible = false
@@ -281,39 +359,41 @@ grow_vertical = 2
 clip_contents = false
 custom_minimum_size = Vector2(600, 0)
 layout_mode = 2
+mouse_filter = 1
 theme = ExtResource("13_clh56")
 bbcode_enabled = true
 text = "[center]alert text"
 fit_content = true
 scroll_active = false
 
-[node name="BottomBar" type="CenterContainer" parent="Camera/Camera2D/GUI/GUI"]
+[node name="BottomBar" type="VBoxContainer" parent="Camera/Camera2D/GUI/GUI"]
 layout_mode = 1
-anchors_preset = 12
+anchors_preset = -1
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -24.0
+offset_left = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
 grow_horizontal = 2
 grow_vertical = 0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Camera/Camera2D/GUI/GUI/BottomBar"]
+[node name="Panel" type="Panel" parent="Camera/Camera2D/GUI/GUI/BottomBar"]
+custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
 
-[node name="Music" type="CheckButton" parent="Camera/Camera2D/GUI/GUI/BottomBar/VBoxContainer"]
-layout_mode = 2
-focus_mode = 0
-text = "Delete code with music (it goes in the recycling bin)"
-
-[node name="Music2" type="CheckButton" parent="Camera/Camera2D/GUI/GUI/BottomBar/VBoxContainer"]
-layout_mode = 2
-focus_mode = 0
-text = "Shut down computer with music"
+[node name="Hotbar" type="HBoxContainer" parent="Camera/Camera2D/GUI/GUI/BottomBar/Panel"]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 1
+offset_top = -4.0
+offset_right = 1152.0
+offset_bottom = -4.0
+alignment = 1
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Camera/Camera2D/GUI/GUI"]
 stream = ExtResource("14_agi1x")
 
-[node name="Menu" type="CenterContainer" parent="Camera/Camera2D/GUI/GUI"]
+[node name="Menu" type="Control" parent="Camera/Camera2D/GUI/GUI"]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -321,10 +401,30 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
+
+[node name="ColorRect" type="ColorRect" parent="Camera/Camera2D/GUI/GUI/Menu"]
+material = SubResource("ShaderMaterial_2faln")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.827451, 0, 0.521569, 1)
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Camera/Camera2D/GUI/GUI/Menu"]
-layout_mode = 2
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -120.0
+offset_top = -84.0
+offset_right = 120.0
+offset_bottom = 84.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 0
 
 [node name="Button1" type="Button" parent="Camera/Camera2D/GUI/GUI/Menu/VBoxContainer"]
@@ -351,7 +451,19 @@ layout_mode = 2
 theme = ExtResource("13_clh56")
 text = "Main Menu"
 
-[node name="Classes" type="Node" parent="."]
+[node name="Music" type="CheckButton" parent="Camera/Camera2D/GUI/GUI/Menu/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 4
+focus_mode = 0
+text = "Delete code with music (it goes in the recycling bin)"
+
+[node name="Music2" type="CheckButton" parent="Camera/Camera2D/GUI/GUI/Menu/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 4
+focus_mode = 0
+text = "Shut down computer with music"
+
+[node name="WorldSave" type="Node" parent="."]
 script = ExtResource("4_mms3p")
 
 [node name="Line2D" type="Line2D" parent="."]
@@ -378,7 +490,8 @@ polygon = PackedVector2Array(1, 1, -1, 1, -1, -1, 1, -1)
 
 [connection signal="timeout" from="Camera/ShakeFrequency" to="Camera" method="_on_shake_frequency_timeout"]
 [connection signal="timeout" from="Camera/ShakeDuration" to="Camera" method="_on_shake_duration_timeout"]
-[connection signal="pressed" from="Camera/Camera2D/GUI/GUI/VBoxContainer/Bar1/Menu" to="Camera/Camera2D/GUI" method="_on_menu_pressed"]
-[connection signal="toggled" from="Camera/Camera2D/GUI/GUI/BottomBar/VBoxContainer/Music" to="Camera/Camera2D/GUI" method="_on_music_toggled"]
-[connection signal="toggled" from="Camera/Camera2D/GUI/GUI/BottomBar/VBoxContainer/Music2" to="Camera/Camera2D/GUI" method="_on_music_2_toggled"]
+[connection signal="pressed" from="Camera/Camera2D/GUI/GUI/TopBar/Bar1/Menu" to="Camera/Camera2D/GUI" method="_on_menu_pressed"]
+[connection signal="pressed" from="Camera/Camera2D/GUI/GUI/Menu/VBoxContainer/Button1" to="Camera/Camera2D/GUI" method="_on_resume_pressed"]
 [connection signal="pressed" from="Camera/Camera2D/GUI/GUI/Menu/VBoxContainer/Button4" to="Camera/Camera2D/GUI" method="_on_title_screen_pressed"]
+[connection signal="toggled" from="Camera/Camera2D/GUI/GUI/Menu/VBoxContainer/Music" to="Camera/Camera2D/GUI" method="_on_music_toggled"]
+[connection signal="toggled" from="Camera/Camera2D/GUI/GUI/Menu/VBoxContainer/Music2" to="Camera/Camera2D/GUI" method="_on_music_2_toggled"]

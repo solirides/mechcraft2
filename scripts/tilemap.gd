@@ -12,23 +12,13 @@ var explosion = preload("res://scenes/explosion.tscn")
 @export var camera:Node = null
 @export var tile_size = 16
 
+var world_accepts_input = true
 var running = false
 var tps:float = 3
 var last_tick = 0
+var highest_noise = 0
 
 # these vars are all from the world save file
-class WorldSave:
-	var elapsed_ticks = 0
-	var world_size:int # world length in chunks
-	var chunk_size:int # chunk length in tiles
-	var chunk_area:int
-	
-	var noise = []
-	var tiles = []
-	var tiledata = []
-	var items = []
-	var central_storage:Dictionary = {}
-	var tile_storage:Dictionary = {}
 
 var world = WorldSave.new()
 
@@ -50,7 +40,7 @@ var selected_tile = 1
 var tile_rotation = 0
 
 var tileset = TileSet.new()
-var bounds:Rect2i
+#var bounds:Rect2i
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -58,6 +48,10 @@ func _ready():
 	setup()
 	
 	gui.selection_changed.connect(_on_selection_changed)
+	gui.world_focused.connect(_on_world_focused)
+	
+	gui.noise_bar.max_value = world.sandworm_noise_threshold * 1.5
+	gui.noise_bar.value = 0
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -78,77 +72,84 @@ func _physics_process(delta):
 	#print(last_tick)
 	last_tick += delta
 	if running == true and last_tick >= (1.0 / tps):
-		last_tick = 0
-		do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement()
-		world.elapsed_ticks += 1;;;;;;;;;;;;;
-		gui.resources(str(floor(world.elapsed_ticks / 900)))
+		tick()
 
 func _input(event):
 	
-	if event.is_action_pressed("left_click"):
-		var p = get_global_mouse_position()
-		var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
-		print(p)
-		print(gc)
-		if (bounds.has_point(gc)):
-			set_tile(0, gc, selected_tile, tile_rotation)
-		
-	if event.is_action_pressed("middle_click"):
-		var p = get_global_mouse_position()
-		var tile_pos = Vector2i(floor(p.x / tile_size), floor(p.y / tile_size))
-		rotate_conveyor(tile_pos)
-	
-	if event.is_action_pressed("resource"):
-		var p = get_global_mouse_position()
-		print("resource spawned")
-		set_item(1, Vector2i(floor(p.x/tile_size), floor(p.y/tile_size)), 6)
-	
-	if event.is_action_pressed("right_click"):
-		var p = get_global_mouse_position()
-		var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
-		print(p);
-		if (bounds.has_point(gc)):
-			var e = explosion.instantiate()
-			add_child(e)
-			e.position = gc * tile_size
-			e.explode()
-			camera.camera_shake(0.4, 16, 50, 10)
-			set_tile(0, gc, 0, 0)
+	if world_accepts_input:
+		if event.is_action_pressed("reload"):
+			print("recalculate")
+			clear_markers()
+			#detect miners and create conveyor lines
+			#var roots:Array = []
+			lines_global = {}
+			priorities_global = {}
+			priorities_index = []
+			max_priority = 0
 			
+			for i in len(used_tiles):
+				used_tiles[i].fill(0)
+			
+			detect_world_tiles()
+		
+		if event.is_action_pressed("update_gui"):
+			gui.update_hotbar(world)
+		
+		if event.is_action_pressed("ping"):
+			var p = get_global_mouse_position()
+			print(p);
+			var c = Vector2i(int(p.x) / tile_size, int(p.y) / tile_size)
+			var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
+			var lc = global2local(gc)
+			print("PING " + " " + str(c) + " " + str(global2local(Vector2i(floor(p.x/tile_size), floor(p.y/tile_size)))) )
+			summon_the_sandworm_from_the_depths_of_the_dunes(gc, lc, local2index(Vector2i(lc.x, lc.y)))
+			
+		if event.is_action_pressed("tick"):
+			print("tick")
+			do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement()
+			#for i in world.noise:
+				#prints(i)
+			print(world.noise[0])
+			
+		if event.is_action_pressed("pause"):
+			running = !running
+		
+		if Input.is_action_just_pressed("save"):
+			print("write to save file")
+			json.create_save()
+			json.write_save()
+
+func _unhandled_input(event):
+	if world_accepts_input:
+		if event.is_action_pressed("left_click"):
+			var p = get_global_mouse_position()
+			var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
+			print(p)
+			print(gc)
+			if (world.bounds.has_point(gc)):
+				set_tile(0, gc, selected_tile, tile_rotation)
+			
+		if event.is_action_pressed("middle_click"):
+			var p = get_global_mouse_position()
+			var tile_pos = Vector2i(floor(p.x / tile_size), floor(p.y / tile_size))
+			rotate_conveyor(tile_pos)
 	
-	if event.is_action_pressed("reload"):
-		print("recalculate")
-		clear_markers()
-		#detect miners and create conveyor lines
-		#var roots:Array = []
-		lines_global = {}
-		priorities_global = {}
-		priorities_index = []
-		max_priority = 0
+		if event.is_action_pressed("resource"):
+			var p = get_global_mouse_position()
+			print("resource spawned")
+			set_item(1, Vector2i(floor(p.x/tile_size), floor(p.y/tile_size)), 6)
 		
-		for i in len(used_tiles):
-			used_tiles[i].fill(0)
-		
-		detect_world_tiles()
-	
-	if event.is_action_pressed("ping"):
-		var p = get_global_mouse_position()
-		print(p);
-		var c = Vector2i(int(p.x) / tile_size, int(p.y) / tile_size)
-		var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
-		var lc = global2local(gc)
-		print("PING " + " " + str(c) + " " + str(global2local(Vector2i(floor(p.x/tile_size), floor(p.y/tile_size)))) )
-		summon_the_sandworm_from_the_depths_of_the_dunes(gc, lc, local2index(Vector2i(lc.x, lc.y)))
-		
-	if event.is_action_pressed("tick"):
-		print("tick")
-		do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement()
-		#for i in world.noise:
-			#prints(i)
-		print(world.noise[0])
-		
-	if event.is_action_pressed("pause"):
-		running = !running
+		if event.is_action_pressed("right_click"):
+			var p = get_global_mouse_position()
+			var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
+			print(p);
+			if (world.bounds.has_point(gc)):
+				var e = explosion.instantiate()
+				add_child(e)
+				e.position = gc * tile_size
+				e.explode()
+				camera.camera_shake(0.4, 16, 50, 10)
+				set_tile(0, gc, 0, 0)
 		
 
 # Detecting conveyor lines:
@@ -240,7 +241,7 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 			var facing_lc:Vector3i = global2local(facing_gc)
 			#print(facing_lc)
 			print(str(facing_gc) + " gc")
-			if not bounds.has_point(Vector2i(facing_lc.x,facing_lc.y)) or used_tiles[facing_gc.x][facing_gc.y] == 1:
+			if not world.bounds.has_point(Vector2i(facing_lc.x,facing_lc.y)) or used_tiles[facing_gc.x][facing_gc.y] == 1:
 				# out of bounds
 				print("a")
 				#print(bounds.has_point(Vector2i(facing_lc.x,facing_lc.y)))
@@ -356,90 +357,103 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 #region
 
 func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement():
+	highest_noise = 0
 	for p in priorities_index: # p = array of lines of the same priority
 			for p2 in p: # i = index of one line
-				if len(p) != 0:
-					pass
-					
-					# process rest of the line
-					for gc in lines_global[p2]:
-						var lc = global2local(gc)
-						var index = local2index(Vector2i(lc.x, lc.y))
-						var id = world.tiles[lc.z][index]
-						if id != 0:
-							match id:
-								1:
-									world.noise[lc.z][index] += 2
-									var dir = world.tiledata[lc.z]["rotation"][index]
-									# the "last" vars are what the current conveyor points to (since the line's array is reversed)
-									#if (world_items[last_lc.z][last_index] == 0):
-									move_resource(gc, dir)
-									
-								2: #constructor
-									world.noise[lc.z][index] += 3
-									var item = world.items[lc.z][index]
-									if (item != 0):
-										
-										print("item recieved at constructor")
-										var a = gc2string(gc)
-										if (world.tile_storage.has(a) and world.tile_storage[a] != null):
-											# construct thing
-											world.noise[lc.z][index] += 5
-											set_item(1, gc, 4)
-											move_resource(gc, world.tiledata[lc.z]["rotation"][index])
-											world.tile_storage[a] = null
-										else:
-											world.tile_storage[a] = item
-											set_item(1, gc, 0)
-										# item go bye bye
-										#set_item(1, gc, 0)
+				# process rest of the line
+				for gc in lines_global[p2]:
+					var lc = global2local(gc)
+					var index = local2index(Vector2i(lc.x, lc.y))
+					var id = world.tiles[lc.z][index]
+					if id != 0:
+						match id:
+							1:
+								world.noise[lc.z][index] += 2
+								var dir = world.tiledata[lc.z]["rotation"][index]
+								# the "last" vars are what the current conveyor points to (since the line's array is reversed)
+								#if (world_items[last_lc.z][last_index] == 0):
+								move_resource(gc, dir)
 								
-								3:
-									world.noise[lc.z][index] += 3
-									if (world.items[lc.z][index] != 0):
-										var dir = world.tiledata[lc.z]["rotation"][index]
-										var state = world.tiledata[lc.z]["state"][index]
-										move_resource(gc, (dir + int(state)) % 4)
-										world.tiledata[lc.z]["state"][index] = not world.tiledata[lc.z]["state"][index]
-								4:
-									world.noise[lc.z][index] += 3
-									var item = world.items[lc.z][index]
-									if (item != 0):
-										move_resource(gc, world.tiledata[lc.z]["rotation"][index])
-									if (world.tiledata[lc.z]["state"][index] == 4):
-										set_item(1, gc, 6)
-										world.tiledata[lc.z]["state"][index] = 1
+							2: #constructor
+								world.noise[lc.z][index] += 3
+								var item = world.items[lc.z][index]
+								if (item != 0):
+									#print("item recieved at constructor")
+									var a = gc2string(gc)
+									if (world.tile_storage[lc.z][index] != 0):
+										# construct thing
+										world.noise[lc.z][index] += 5
+										var key = str(world.tile_storage[lc.z][index]) + "," + str(item)
+										if json.recipes.has(key):
+											set_item(1, gc, json.recipes[key])
+											move_resource(gc, world.tiledata[lc.z]["rotation"][index])
+										else:
+											set_item(1, gc, 0)
+											
+										world.tile_storage[lc.z][index] = 0
 									else:
-										world.tiledata[lc.z]["state"][index] += 1
-									
-								5:# storage recieves item
-									var item = world.items[lc.z][index]
-									if (item != 0):
-										print("item recieved")
-										#gui.add_resource(1)
-										if (not world.central_storage.has(item)):
-											world.central_storage[item] = 1
-										world.central_storage[item] += 1
-										# item go bye bye
+										world.tile_storage[lc.z][index] = item
 										set_item(1, gc, 0)
-						
-						world.noise[lc.z][index] = max(world.noise[lc.z][index] - 5, 0)
-						if world.noise[lc.z][index] >= 30:
-							summon_the_sandworm_from_the_depths_of_the_dunes(gc, lc, index)
+									# item go bye bye
+									#set_item(1, gc, 0)
 							
+							3:
+								world.noise[lc.z][index] += 3
+								if (world.items[lc.z][index] != 0):
+									var dir = world.tiledata[lc.z]["rotation"][index]
+									var state = world.tiledata[lc.z]["state"][index]
+									move_resource(gc, (dir + int(state)) % 4)
+									world.tiledata[lc.z]["state"][index] = not world.tiledata[lc.z]["state"][index]
+							4:
+								world.noise[lc.z][index] += 3
+								var item = world.items[lc.z][index]
+								if (item != 0):
+									move_resource(gc, world.tiledata[lc.z]["rotation"][index])
+								if (world.tiledata[lc.z]["state"][index] == 4):
+									set_item(1, gc, 6)
+									world.tiledata[lc.z]["state"][index] = 1
+								else:
+									world.tiledata[lc.z]["state"][index] += 1
+								
+							5:# storage recieves item
+								var item = world.items[lc.z][index]
+								if (item != 0):
+									#print("item recieved")
+									#gui.add_resource(1)
+									if (not world.central_storage.has(str(item))):
+										world.central_storage[str(item)] = 1
+									world.central_storage[str(item)] += 1
+									# item go bye bye
+									set_item(1, gc, 0)
+					
+					world.noise[lc.z][index] = max(world.noise[lc.z][index] - 5, 0)
+					if world.noise[lc.z][index] >= world.sandworm_noise_threshold and world.sandworm_current_cooldown <= 0:
+						summon_the_sandworm_from_the_depths_of_the_dunes(gc, lc, index)
+						world.sandworm_current_cooldown = world.sandworm_attack_cooldown
 						
-						#last_gc = gc
-						#last_lc = lc
-						#last_index = index
-		
-		
+					
+					highest_noise = max(highest_noise, world.noise[lc.z][index])
+					
+					gui.noise_bar.value = highest_noise
+					#last_gc = gc
+					#last_lc = lc
+					#last_index = index
+
+func tick():
+	last_tick = 0
+	do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement()
+	world.elapsed_ticks += 1;;;;;;;;;;;;;
+	world.sandworm_current_cooldown = max(0, world.sandworm_current_cooldown - 1)
+	gui.resources(str(floor(world.elapsed_ticks / 900)))
 
 func summon_the_sandworm_from_the_depths_of_the_dunes(gc:Vector2i, lc:Vector3i, index:int):
 	var e = explosion.instantiate()
 	add_child(e)
 	e.position = gc * tile_size
 	e.explode()
-	set_tile(0, gc, 0, 0)
+	for x in range(3):
+		for y in range(3):
+			set_tile(0, gc + Vector2i(x - 2, y - 2), 0, 0)
 	
 
 #func initiate_resource_movement(tile_pos):
@@ -500,7 +514,7 @@ func rotate_conveyor(tile_pos):
 
 func neighbor(gc:Vector2i, dir:int):
 	var tile = gc + SIDES[dir]
-	if bounds.has_point(tile):
+	if world.bounds.has_point(tile):
 		return tile
 	return null
 
@@ -559,6 +573,15 @@ func set_item(layer:int, global_coords:Vector2i, tile:int):
 			Vector2i.ZERO, rotation
 			)
 
+func set_terrain(layer:int, global_coords:Vector2i, tile:int):
+	var local_coords = global2local(global_coords)
+	
+	world.terrain[local_coords.z][local_coords.x + local_coords.y * world.chunk_size] = tile
+	self.set_cell(layer, \
+			global_coords, tile, \
+			Vector2i.ZERO, rotation
+			)
+
 func debug_marker(global_coords:Vector2i, color:Color):
 	var a = Polygon2D.new()
 	a.polygon = [Vector2(0.8,0.8), Vector2(-0.8,0.8), Vector2(-0.8,-0.8), Vector2(0.8,-0.8)]
@@ -588,35 +611,22 @@ func clear_markers():
 #region
 
 func setup():
-	make_tileset_exist(tileset)
-	ResourceSaver.save(tileset, "res://generated_tileset.tres")
-	self.tile_set = tileset
+	json.setup(tile_size)
+	self.tile_set = json.tileset
 	
-	world.world_size = json.json["world_size"]
-	world.chunk_size = json.json["chunk_size"]
-	bounds = Rect2i(0, 0, world.world_size * world.chunk_size, world.world_size * world.chunk_size)
-	
-	world.chunk_area = pow(world.chunk_size, 2)
-	#world.tiles = load_tiles()
-	#world_items = load_items()
-	#world.noise = load_noise()
-	world.tiles = load_data_int("tiles", 0)
-	world.items = load_data_int("items", 0)
-	world.noise = load_data_int("noise", 0)
-	
-	world.tiledata = load_tiledata()
-	
+	self.world = json.world
 	
 	var a = []
-	a.resize(bounds.size.y)
+	a.resize(world.bounds.size.y)
 	a.fill(0)
-	for i in bounds.size.x:
+	for i in world.bounds.size.x:
 		# make duplicate or else everything decides to use the same array
 		used_tiles.append(a.duplicate())
 	
-	set_tilemap()
+	set_tilemap_tiles()
+	set_tilemap_items()
 
-func set_tilemap():
+func set_tilemap_tiles():
 	for c in len(world.tiles):
 		for i in world.chunk_area:
 			#print(world.tiles[c][i])
@@ -626,90 +636,24 @@ func set_tilemap():
 					floor(i / world.chunk_size) + floor(c / world.world_size)*world.chunk_size), world.tiles[c][i], \
 				Vector2i.ZERO, world.tiledata[c]["rotation"][i]
 			)
-#		world.tiledata[c]["rotation"][i]
 
+func set_tilemap_items():
+	for c in len(world.items):
+		for i in world.chunk_area:
+			#print(world.tiles[c][i])
+			# left to right, top to bottom
+			self.set_cell(1, \
+				Vector2i(fmod(i, world.chunk_size) + (c % world.world_size)*world.chunk_size, \
+					floor(i / world.chunk_size) + floor(c / world.world_size)*world.chunk_size), world.items[c][i], \
+				Vector2i.ZERO, 0
+			)
 
-func load_data_int(property:String, default_value:int = 0):
-	var data = []
-	print("loading world.tiles")
-	for i in len(json.json["chunks"]):
-		data.append(PackedInt32Array(json.json["chunks"][i][property]))
-	
-	# fill missing chunks
-	var a:PackedInt32Array = []
-	a.resize(pow(world.chunk_size, 2))
-	a.fill(default_value)
-	for i in pow(world.world_size, 2) - len(data):
-		data.append(a.duplicate())
-	
-	return data
-
-func load_tiledata():
-	var data = []
-	print("loading world.tiledata")
-	for i in len(json.json["chunks"]):
-		data.append(json.json["chunks"][i]["tiledata"])
-#		print(world[0]["rotation"])
-	
-	# fill missing chunks
-	var a:PackedInt32Array = []
-	a.resize(pow(world.chunk_size, 2))
-	a.fill(0)
-	#var d:Dictionary = {"storage": a, "rotation": a, "state": a}
-	for i in pow(world.world_size, 2) - len(data):
-		data.append({"storage": a.duplicate(), "rotation": a.duplicate(), "state": a.duplicate()})
-	
-	return data
-
-func make_tileset_exist(ts: TileSet):
-	var id = 0
-	var path = "res://assets/tiles/"
-	var dir = DirAccess.open(path)
-	
-	var blank = TileSetAtlasSource.new()
-	ts.add_source(blank)
-	ts.tile_size = Vector2i(tile_size,tile_size)
-	var file_data = FileAccess.open("res://assets/tiles.json", FileAccess.READ)
-	var json_thing = JSON.new()
-	json_thing.parse(file_data.get_as_text())
-	var tile_metadata = json_thing.get_data()
-	
-	if dir:
-		dir.list_dir_begin()
-		#var file_name = dir.get_next()
-		for file_name in dir.get_files():
-			if dir.current_is_dir():
-				print("Found directory: " + file_name)
-			elif file_name.ends_with(".png"):
-				print("Found file: " + file_name)
-				print(path + file_name)
-				var image = Image.load_from_file(path + file_name)
-				
-				if (tile_metadata.has(file_name.get_basename())):
-					var tile = tile_metadata[file_name.get_basename()]
-					var source = TileSetAtlasSource.new()
-					source.texture = ImageTexture.create_from_image(image)
-					source.create_tile(Vector2i(0,0))
-					
-					for i in range(3):
-						source.create_alternative_tile(Vector2i(0,0), -1)
-					
-					for i in tile["flip_h"]:
-						source.get_tile_data(Vector2i(0,0), i).flip_h = true
-					for i in tile["flip_v"]:
-						source.get_tile_data(Vector2i(0,0), i).flip_v = true
-					for i in tile["transpose"]:
-						source.get_tile_data(Vector2i(0,0), i).transpose = true
-					
-					ts.add_source(source, tile["id"])
-			file_name = dir.get_next()
-		dir.list_dir_end()
-	else:
-		print("An error occurred when trying to access the path.")
-	
 
 #endregion
 
 func _on_selection_changed(selected_tile, tile_rotation):
-	self.selected_tile = selected_tile
-	self.tile_rotation = tile_rotation
+	self.selected_tile = int(selected_tile)
+	self.tile_rotation = int(tile_rotation)
+
+func _on_world_focused(state):
+	world_accepts_input = state

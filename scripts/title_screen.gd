@@ -8,11 +8,12 @@ var direction = Vector2i(1, 1)
 var screen_size = DisplayServer.screen_get_size()
 
 func _ready():
-	get_tree().root.add_child(window)
+	pass
+	#get_tree().root.add_child(window)
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
+func _physics_process(delta):
 	if (window.position.x + 256 >= screen_size.x):
 		direction.x = -1
 	elif (window.position.x <= 0):
