@@ -168,7 +168,7 @@ func make_tileset_exist(tile_size:int):
 					var source = TileSetAtlasSource.new()
 					source.texture = ImageTexture.create_from_image(image)
 					
-					if tile["id"] == 1001:
+					if image.get_height() == 32:
 						source.texture_region_size = Vector2i(32, 32)
 						#source.texture
 					

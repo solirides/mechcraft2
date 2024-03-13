@@ -1,4 +1,4 @@
-[gd_scene load_steps=37 format=3 uid="uid://wbpqro6tssd5"]
+[gd_scene load_steps=38 format=3 uid="uid://wbpqro6tssd5"]
 
 [ext_resource type="Script" path="res://scripts/json.gd" id="1_3pqby"]
 [ext_resource type="Script" path="res://scripts/tilemap.gd" id="2_e3udp"]
@@ -54,6 +54,10 @@ sources/4 = SubResource("TileSetAtlasSource_w0fur")
 sources/3 = SubResource("TileSetAtlasSource_vmbpx")
 sources/2 = SubResource("TileSetAtlasSource_y1uis")
 
+[sub_resource type="Gradient" id="Gradient_k1d5f"]
+interpolation_mode = 1
+offsets = PackedFloat32Array(0, 0.132075)
+
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_e0op7"]
 noise_type = 2
 frequency = 0.0236
@@ -64,6 +68,7 @@ width = 128
 height = 128
 generate_mipmaps = false
 normalize = false
+color_ramp = SubResource("Gradient_k1d5f")
 noise = SubResource("FastNoiseLite_e0op7")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_srgol"]

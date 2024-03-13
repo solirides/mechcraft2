@@ -1,13 +1,13 @@
 [gd_scene load_steps=3 format=3 uid="uid://ormdmnipbrco"]
 
-[ext_resource type="Texture2D" uid="uid://bew1l4udajlnu" path="res://assets/tiles/6-iron.png" id="1_ydcbi"]
+[ext_resource type="Texture2D" uid="uid://bujtksqumn34r" path="res://assets/textures/blank_slot.png" id="1_m2pc7"]
 [ext_resource type="Script" path="res://scripts/gui_item.gd" id="2_03o5m"]
 
 [node name="GuiItem" type="TextureRect"]
 custom_minimum_size = Vector2(64, 64)
 offset_right = 40.0
 offset_bottom = 40.0
-texture = ExtResource("1_ydcbi")
+texture = ExtResource("1_m2pc7")
 script = ExtResource("2_03o5m")
 
 [node name="Count" type="Label" parent="."]

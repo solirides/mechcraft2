@@ -21,9 +21,9 @@ func generate_world():
 		for y:float in a:
 			var value = noise_sprite.texture.noise.get_noise_2d(x, y)
 			#print(value)
-			if value > -0.5:
+			if value > -0.4:
 				#print("terrain")
-				tilemap.set_terrain(2, Vector2i(x, y), 6)
+				tilemap.set_terrain(2, Vector2i(x, y), 1002)
 			else:
 				tilemap.set_terrain(2, Vector2i(x, y), 1001)
 
