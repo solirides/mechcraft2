@@ -2,14 +2,14 @@
 	"world_name":"test",
 	"seed":123,
 	"chunk_size":8,
-	"world_size":16,
+	"world_size":64,
 	"elapsed_ticks":12,
 	"central_storage":{},
 	"sandworm_attack_cooldown":30,
 	"sandworm_noise_threshold":50,
 	"sandworm_current_cooldown":0,
-	"chunks":[
-		{
+	"chunks":{
+		"0":{
 			"stale":0,
 			"tiles":[
 				1,5,0,0,0,0,0,0,
@@ -84,5 +84,5 @@
 				]
 			}
 		}
-	]
+	}
 }

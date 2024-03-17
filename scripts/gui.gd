@@ -67,7 +67,7 @@ func update_hotbar(world:WorldSave):
 
 
 func _on_hotbar_item_clicked(slot, id, count):
-	selected_tile = id
+	selected_tile = int(id)
 	self.selection_changed.emit(selected_tile, tile_rotation)
 	print(id)
 

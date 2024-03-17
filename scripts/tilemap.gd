@@ -33,6 +33,7 @@ var priorities_index:Array[Array] = []
 var infinite_loop:Array[Array] = []
 var max_priority:int = 0
 var used_tiles:Array[Array] = [] # 0 = unprocessed; 1 = completely processed; 2 = somewhat processed
+var needs_recalculation = true
 
 const SIDES = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 
@@ -78,19 +79,8 @@ func _input(event):
 	
 	if world_accepts_input:
 		if event.is_action_pressed("reload"):
-			print("recalculate")
-			clear_markers()
-			#detect miners and create conveyor lines
-			#var roots:Array = []
-			lines_global = {}
-			priorities_global = {}
-			priorities_index = []
-			max_priority = 0
+			print("this does nothing")
 			
-			for i in len(used_tiles):
-				used_tiles[i].fill(0)
-			
-			detect_world_tiles()
 		
 		if event.is_action_pressed("update_gui"):
 			gui.update_hotbar(world)
@@ -440,6 +430,10 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 					#last_index = index
 
 func tick():
+	if needs_recalculation:
+		recalculate()
+		needs_recalculation = false
+	
 	last_tick = 0
 	do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement()
 	world.elapsed_ticks += 1;;;;;;;;;;;;;
@@ -455,6 +449,21 @@ func summon_the_sandworm_from_the_depths_of_the_dunes(gc:Vector2i, lc:Vector3i, 
 		for y in range(3):
 			set_tile(0, gc + Vector2i(x - 2, y - 2), 0, 0)
 	
+
+func recalculate():
+	clear_markers()
+	#detect miners and create conveyor lines
+	#var roots:Array = []
+	lines_global = {}
+	priorities_global = {}
+	priorities_index = []
+	max_priority = 0
+	
+	for i in len(used_tiles):
+		used_tiles[i].fill(0)
+	
+	detect_world_tiles()
+
 
 #func initiate_resource_movement(tile_pos):
 	#var local_coords = global2local(tile_pos)
@@ -563,6 +572,8 @@ func set_tile(layer:int, global_coords:Vector2i, tile:int, rotation:int):
 			global_coords, tile, \
 			Vector2i.ZERO, rotation
 			)
+	
+	_on_world_updated()
 
 func set_item(layer:int, global_coords:Vector2i, tile:int):
 	var local_coords = global2local(global_coords)
@@ -625,6 +636,7 @@ func setup():
 	
 	set_tilemap_tiles()
 	set_tilemap_items()
+	_on_world_updated()
 
 func set_tilemap_tiles():
 	for c in len(world.tiles):
@@ -657,3 +669,6 @@ func _on_selection_changed(selected_tile, tile_rotation):
 
 func _on_world_focused(state):
 	world_accepts_input = state
+
+func _on_world_updated():
+	needs_recalculation = true
