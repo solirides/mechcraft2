@@ -15,7 +15,7 @@ var tile_textures:Dictionary = {}
 #var bounds:Rect2i = Rect2i()
 
 var world_properties = ["seed", "world_size", "chunk_size", "world_name", "elapsed_ticks", "central_storage", "sandworm_noise_threshold", "sandworm_attack_cooldown", "sandworm_current_cooldown"]
-var world_data_int = ["tiles", "items", "noise", "terrain", "tile_storage"]
+var world_data_int = ["tiles", "items", "noise", "terrain", "integrity", "tile_storage"]
 
 func _ready():
 	pass

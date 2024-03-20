@@ -17,6 +17,7 @@ var noise = []
 var tiles = []
 var items = []
 var terrain = []
+var integrity = []
 var tile_storage = []
 
 var sandworm_noise_threshold = 30

@@ -114,9 +114,10 @@ func _unhandled_input(event):
 		if event.is_action_pressed("left_click"):
 			var p = get_global_mouse_position()
 			var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
+			var lc = global2local(gc)
 			print(p)
 			print(gc)
-			if (world.bounds.has_point(gc)):
+			if (world.bounds.has_point(gc) and world.integrity[lc.z][local2index(Vector2i(lc.x, lc.y))] >= 0):
 				set_tile(0, gc, selected_tile, tile_rotation)
 			
 		if event.is_action_pressed("middle_click"):
@@ -148,31 +149,32 @@ func detect_world_tiles():
 #	var cells = self.get_used_cells(0)
 	var d = [world.chunk_size, 1, -world.chunk_size, -1]
 	var lines:Array[Vector2i] = []
-	var c = 0
 	
-	for index in world.chunk_area:
-#		print(world.tiles[0][index])
-		# one chunk
-		match int(world.tiles[c][index]):
-			5: # line includes storage
-				print("5")
-				var gc = local2global(index2local(index, c))
-#				print(Vector3i(index % world.chunk_size, floor(index / world.chunk_size), c))
-#				print(gc)
-				debug_marker(gc, Color(1, 0, 1, 0.7))
-				used_tiles[gc.x][gc.y] == 1
-				var a = detect_connections(gc, world.tiles[c][index], 1, 0, true)
-				# add self to line
-				#a[0][0].push_front(gc)
-				
-				lines_global.merge(a[0])
-				#priorities_global.merge(a[1])
-				for k in a[1].keys():
-					if (priorities_global.has(k)):
-						if (priorities_global[k] < a[1][k]):
+	for c in world.world_size**2:
+		for index in world.chunk_area:
+	#		print(world.tiles[0][index])
+			# one chunk
+			var gc = local2global(index2local(index, c))
+			match int(world.tiles[c][index]):
+				5: # line includes storage
+					print("5")
+					
+	#				print(Vector3i(index % world.chunk_size, floor(index / world.chunk_size), c))
+	#				print(gc)
+					debug_marker(gc, Color(1, 0, 1, 0.7))
+					used_tiles[gc.x][gc.y] == 1
+					var a = detect_connections(gc, world.tiles[c][index], 1, 0, true)
+					# add self to line
+					#a[0][0].push_front(gc)
+					
+					lines_global.merge(a[0])
+					#priorities_global.merge(a[1])
+					for k in a[1].keys():
+						if (priorities_global.has(k)):
+							if (priorities_global[k] < a[1][k]):
+								priorities_global[k] = a[1][k]
+						else:
 							priorities_global[k] = a[1][k]
-					else:
-						priorities_global[k] = a[1][k]
 	
 	# sort lines
 	for i in range(max_priority + 1):
@@ -429,12 +431,22 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 					#last_lc = lc
 					#last_index = index
 
+func make_the_terrain_less_bad():
+	for c in world.world_size**2:
+		for index in world.chunk_area:
+			var gc = local2global(index2local(index, c))
+			if world.integrity[c][index] < 0:
+				world.integrity[c][index] = min(0, world.integrity[c][index] + 4)
+				if world.integrity[c][index] >= 0:
+					set_terrain(3, gc, -1)
+
 func tick():
 	if needs_recalculation:
 		recalculate()
 		needs_recalculation = false
 	
 	last_tick = 0
+	make_the_terrain_less_bad()
 	do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement()
 	world.elapsed_ticks += 1;;;;;;;;;;;;;
 	world.sandworm_current_cooldown = max(0, world.sandworm_current_cooldown - 1)
@@ -447,7 +459,11 @@ func summon_the_sandworm_from_the_depths_of_the_dunes(gc:Vector2i, lc:Vector3i, 
 	e.explode()
 	for x in range(3):
 		for y in range(3):
-			set_tile(0, gc + Vector2i(x - 2, y - 2), 0, 0)
+			var coords = gc + Vector2i(x - 2, y - 2)
+			set_tile(0, coords, 0, 0)
+			var local = global2local(coords)
+			world.integrity[local.z][local2index(Vector2i(local.x, local.y))] = -40
+			set_terrain(3, coords, 2001)
 	
 
 func recalculate():
