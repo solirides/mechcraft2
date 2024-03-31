@@ -3,7 +3,7 @@ extends Node2D
 
 @export var noise_sprite:Sprite2D = null
 @export var tilemap:TileMap = null
-@export var thresholds:Dictionary = {-0.4: 1002, -1: 1001}
+@export var thresholds:Dictionary = {-0.4: 1001, -0.5: 1002, -0.6: 1001, -1: 1002}
 @export var ore_thresholds:Dictionary = {-0.4: 1002, -1: 1001}
 
 var ore_noise = FastNoiseLite.new()

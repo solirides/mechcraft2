@@ -5,6 +5,7 @@ signal selection_changed(selected_tile, tile_rotation)
 signal world_focused(state)
 
 @export var json:Node = null
+@export var camera:Node = null
 @export var create_chaos_with_music = true
 @export var selection_label:RichTextLabel = null
 @export var alert_label:RichTextLabel = null
@@ -128,3 +129,9 @@ func _on_title_screen_pressed():
 func _on_resume_pressed():
 	menu.visible = false
 	world_focused.emit(true)
+
+
+func _on_zoom_value_changed(value):
+	var v = 2**value
+	camera.camera.zoom = Vector2(v, v)
+	print("zoom")

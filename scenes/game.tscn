@@ -1,4 +1,4 @@
-[gd_scene load_steps=41 format=3 uid="uid://wbpqro6tssd5"]
+[gd_scene load_steps=43 format=3 uid="uid://wbpqro6tssd5"]
 
 [ext_resource type="Script" path="res://scripts/json.gd" id="1_3pqby"]
 [ext_resource type="Script" path="res://scripts/tilemap.gd" id="2_e3udp"]
@@ -72,15 +72,27 @@ color_ramp = SubResource("Gradient_k1d5f")
 noise = SubResource("FastNoiseLite_e0op7")
 
 [sub_resource type="Gradient" id="Gradient_23xud"]
-interpolation_mode = 1
-offsets = PackedFloat32Array(0, 0.214408)
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_ngppb"]
-fractal_octaves = 2
+fractal_octaves = 3
+domain_warp_enabled = true
+domain_warp_type = 2
+domain_warp_amplitude = 24.685
+domain_warp_fractal_lacunarity = 1.705
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_otusw"]
 color_ramp = SubResource("Gradient_23xud")
 noise = SubResource("FastNoiseLite_ngppb")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_uonlq"]
+fractal_octaves = 3
+domain_warp_enabled = true
+domain_warp_type = 2
+domain_warp_amplitude = 24.685
+domain_warp_fractal_lacunarity = 1.705
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_fkb45"]
+noise = SubResource("FastNoiseLite_uonlq")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_srgol"]
 shader = ExtResource("12_a6vs3")
@@ -193,7 +205,7 @@ scroll_active = false
 
 [node name="WorldGen" type="Node2D" parent="TileMap" node_paths=PackedStringArray("noise_sprite", "tilemap")]
 script = ExtResource("9_vsps7")
-noise_sprite = NodePath("Noise")
+noise_sprite = NodePath("Noise2")
 tilemap = NodePath("..")
 
 [node name="Noise" type="Sprite2D" parent="TileMap/WorldGen"]
@@ -208,19 +220,16 @@ centered = false
 visible = false
 texture = SubResource("NoiseTexture2D_otusw")
 
+[node name="Noise2" type="Sprite2D" parent="TileMap/WorldGen"]
+visible = false
+texture = SubResource("NoiseTexture2D_fkb45")
+
 [node name="Camera" type="Node2D" parent="." node_paths=PackedStringArray("background", "camera")]
 script = ExtResource("4_3i4pa")
 background = NodePath("Camera2D/CanvasLayer/Background")
 camera = NodePath("Camera2D")
 
-[node name="ShakeFrequency" type="Timer" parent="Camera"]
-
-[node name="ShakeDuration" type="Timer" parent="Camera"]
-
-[node name="Camera2D" type="Camera2D" parent="Camera" node_paths=PackedStringArray("background", "camera")]
-script = ExtResource("4_3i4pa")
-background = NodePath("CanvasLayer/Background")
-camera = NodePath(".")
+[node name="Camera2D" type="Camera2D" parent="Camera"]
 
 [node name="CanvasLayer" type="CanvasLayer" parent="Camera/Camera2D"]
 layer = -1
@@ -258,10 +267,11 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(1, 0.156863, 0.568627, 1)
 
-[node name="GUI" type="CanvasLayer" parent="Camera/Camera2D" node_paths=PackedStringArray("json", "selection_label", "alert_label", "debug_label", "resources_label", "menu", "music_player", "noise_bar", "hotbar")]
+[node name="GUI" type="CanvasLayer" parent="Camera/Camera2D" node_paths=PackedStringArray("json", "camera", "selection_label", "alert_label", "debug_label", "resources_label", "menu", "music_player", "noise_bar", "hotbar")]
 layer = 10
 script = ExtResource("10_ocoff")
 json = NodePath("../../../Json")
+camera = NodePath("../..")
 create_chaos_with_music = false
 selection_label = NodePath("GUI/TopBar/Bar2/Selection")
 alert_label = NodePath("GUI/Center/Alert")
@@ -301,6 +311,18 @@ offset_right = 89.0
 offset_bottom = 39.0
 theme = ExtResource("13_clh56")
 text = "⚙️Menu"
+
+[node name="Zoom" type="HSlider" parent="Camera/Camera2D/GUI/GUI/TopBar/Bar1"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.2
+anchor_right = 0.8
+offset_bottom = 16.0
+grow_horizontal = 2
+min_value = -3.0
+max_value = 3.0
+step = 0.05
+value = 1.0
 
 [node name="Bar2" type="Control" parent="Camera/Camera2D/GUI/GUI/TopBar"]
 custom_minimum_size = Vector2(0, 40)
@@ -509,9 +531,8 @@ scale = Vector2(4, 4)
 color = Color(1, 0, 0.713726, 0.584314)
 polygon = PackedVector2Array(1, 1, -1, 1, -1, -1, 1, -1)
 
-[connection signal="timeout" from="Camera/ShakeFrequency" to="Camera" method="_on_shake_frequency_timeout"]
-[connection signal="timeout" from="Camera/ShakeDuration" to="Camera" method="_on_shake_duration_timeout"]
 [connection signal="pressed" from="Camera/Camera2D/GUI/GUI/TopBar/Bar1/Menu" to="Camera/Camera2D/GUI" method="_on_menu_pressed"]
+[connection signal="value_changed" from="Camera/Camera2D/GUI/GUI/TopBar/Bar1/Zoom" to="Camera/Camera2D/GUI" method="_on_zoom_value_changed"]
 [connection signal="pressed" from="Camera/Camera2D/GUI/GUI/Menu/VBoxContainer/Button1" to="Camera/Camera2D/GUI" method="_on_resume_pressed"]
 [connection signal="pressed" from="Camera/Camera2D/GUI/GUI/Menu/VBoxContainer/Button4" to="Camera/Camera2D/GUI" method="_on_title_screen_pressed"]
 [connection signal="toggled" from="Camera/Camera2D/GUI/GUI/Menu/VBoxContainer/Music" to="Camera/Camera2D/GUI" method="_on_music_toggled"]

@@ -25,9 +25,10 @@ var zoom_base = 1
 func _ready():
 	self.add_child(duration_timer)
 	self.add_child(frequency_timer)
+	duration_timer.one_shot = true
 	duration_timer.timeout.connect(_on_duration_timer_timeout)
 	frequency_timer.timeout.connect(_on_frequency_timer_timeout)
-	pass # Replace with function body.
+	
 
 func _input(event: InputEvent):
 	if event.is_action_pressed("zoom_in"):

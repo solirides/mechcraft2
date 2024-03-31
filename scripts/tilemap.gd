@@ -460,10 +460,13 @@ func summon_the_sandworm_from_the_depths_of_the_dunes(gc:Vector2i, lc:Vector3i, 
 	for x in range(3):
 		for y in range(3):
 			var coords = gc + Vector2i(x - 2, y - 2)
-			set_tile(0, coords, 0, 0)
-			var local = global2local(coords)
-			world.integrity[local.z][local2index(Vector2i(local.x, local.y))] = -40
-			set_terrain(3, coords, 2001)
+			if (world.bounds.has_point(coords)):
+				set_tile(0, coords, 0, 0)
+				var local = global2local(coords)
+				world.integrity[local.z][local2index(Vector2i(local.x, local.y))] = -40
+				set_terrain(3, coords, 2001)
+	
+	camera.camera_shake(0.4, 40, 30, 10)
 	
 
 func recalculate():
