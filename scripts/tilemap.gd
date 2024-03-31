@@ -10,6 +10,7 @@ var explosion = preload("res://scenes/explosion.tscn")
 @export var debug_dot:Polygon2D = null
 
 @export var camera:Node = null
+@export var selector:Node = null
 @export var tile_size = 16
 
 var world_accepts_input = true
@@ -68,6 +69,7 @@ func _process(delta):
 		#"\n" + str(gc2.x) + " " + str(gc2.y))
 	gui.debug(str(gc.x) + " " + str(gc.y) + "\n" + str(lc.x) + " " + str(lc.y) + " " + str(lc.z))
 	
+	selector.position = selector.position.lerp(gc * 32, delta * 10)
 
 func _physics_process(delta):
 	#print(last_tick)
@@ -111,7 +113,7 @@ func _input(event):
 
 func _unhandled_input(event):
 	if world_accepts_input:
-		if event.is_action_pressed("left_click"):
+		if event.is_action_pressed("place"):
 			var p = get_global_mouse_position()
 			var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
 			var lc = global2local(gc)
@@ -119,8 +121,11 @@ func _unhandled_input(event):
 			print(gc)
 			if (world.bounds.has_point(gc) and world.integrity[lc.z][local2index(Vector2i(lc.x, lc.y))] >= 0):
 				set_tile(0, gc, selected_tile, tile_rotation)
-			
-		if event.is_action_pressed("middle_click"):
+		
+		if Input.is_action_pressed("pan") and event is InputEventMouseMotion:
+			camera.camera.position -= event.relative / camera.camera.zoom
+		
+		if false:
 			var p = get_global_mouse_position()
 			var tile_pos = Vector2i(floor(p.x / tile_size), floor(p.y / tile_size))
 			rotate_conveyor(tile_pos)
@@ -130,7 +135,7 @@ func _unhandled_input(event):
 			print("resource spawned")
 			set_item(1, Vector2i(floor(p.x/tile_size), floor(p.y/tile_size)), 6)
 		
-		if event.is_action_pressed("right_click"):
+		if event.is_action_pressed("remove"):
 			var p = get_global_mouse_position()
 			var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
 			print(p);

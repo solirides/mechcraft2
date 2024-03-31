@@ -16,6 +16,7 @@ signal world_focused(state)
 @export var noise_bar:ProgressBar = null
 @export var hotbar:HBoxContainer = null
 
+var mode = 0
 var selected_tile = 1
 var tile_rotation = 0
 var resource_count = 0

@@ -1,4 +1,4 @@
-[gd_scene load_steps=43 format=3 uid="uid://wbpqro6tssd5"]
+[gd_scene load_steps=44 format=3 uid="uid://wbpqro6tssd5"]
 
 [ext_resource type="Script" path="res://scripts/json.gd" id="1_3pqby"]
 [ext_resource type="Script" path="res://scripts/tilemap.gd" id="2_e3udp"]
@@ -10,6 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://eg1scyadfujp" path="res://assets/tiles/5-storage.png" id="6_y2sc0"]
 [ext_resource type="Script" path="res://scripts/world_gen.gd" id="9_vsps7"]
 [ext_resource type="Texture2D" uid="uid://5am0arvmxore" path="res://assets/factorygame3.png" id="10_1k22r"]
+[ext_resource type="Texture2D" uid="uid://bujtksqumn34r" path="res://assets/textures/blank_slot.png" id="10_4g3wo"]
 [ext_resource type="Script" path="res://scripts/gui.gd" id="10_ocoff"]
 [ext_resource type="Shader" path="res://assets/shaders/test.gdshader" id="10_shcmx"]
 [ext_resource type="Script" path="res://scripts/background.gd" id="10_y4vju"]
@@ -171,7 +172,7 @@ offset_right = 2048.0
 offset_bottom = 2048.0
 color = Color(0.117647, 0.141176, 0.164706, 1)
 
-[node name="TileMap" type="TileMap" parent="." node_paths=PackedStringArray("gui", "debug_dot", "camera")]
+[node name="TileMap" type="TileMap" parent="." node_paths=PackedStringArray("gui", "debug_dot", "camera", "selector")]
 tile_set = SubResource("TileSet_huth1")
 format = 2
 layer_0/name = "Tiles"
@@ -190,6 +191,7 @@ script = ExtResource("2_e3udp")
 gui = NodePath("../Camera/Camera2D/GUI")
 debug_dot = NodePath("../DebugDot")
 camera = NodePath("../Camera")
+selector = NodePath("Selector")
 tile_size = 32
 
 [node name="Debug" type="Node" parent="TileMap"]
@@ -223,6 +225,10 @@ texture = SubResource("NoiseTexture2D_otusw")
 [node name="Noise2" type="Sprite2D" parent="TileMap/WorldGen"]
 visible = false
 texture = SubResource("NoiseTexture2D_fkb45")
+
+[node name="Selector" type="Sprite2D" parent="TileMap"]
+texture = ExtResource("10_4g3wo")
+centered = false
 
 [node name="Camera" type="Node2D" parent="." node_paths=PackedStringArray("background", "camera")]
 script = ExtResource("4_3i4pa")
