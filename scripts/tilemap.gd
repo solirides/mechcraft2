@@ -399,10 +399,12 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 							4:
 								world.noise[lc.z][index] += 3
 								var item = world.items[lc.z][index]
+								var terrain = world.terrain[lc.z][index]
 								if (item != 0):
 									move_resource(gc, world.tiledata[lc.z]["rotation"][index])
 								if (world.tiledata[lc.z]["state"][index] == 4):
-									set_item(1, gc, 6)
+									if json.ores.has(str(terrain)):
+										set_item(1, gc, json.ores[str(terrain)])
 									world.tiledata[lc.z]["state"][index] = 1
 								else:
 									world.tiledata[lc.z]["state"][index] += 1
