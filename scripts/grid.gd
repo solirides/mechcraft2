@@ -5,7 +5,7 @@ extends Node2D
 @export var sub_color:Color = Color(0.8,0.8,0.8,0.1)
 
 var pos = Vector2(100,100)
-var size:int = 256/2
+var size:int = 256
 var zoom = 1
 
 # Called when the node enters the scene tree for the first time.

@@ -443,7 +443,7 @@ func make_the_terrain_less_bad():
 		for index in world.chunk_area:
 			var gc = local2global(index2local(index, c))
 			if world.integrity[c][index] < 0:
-				world.integrity[c][index] = min(0, world.integrity[c][index] + 4)
+				world.integrity[c][index] = min(40, world.integrity[c][index] + 4)
 				if world.integrity[c][index] >= 0:
 					set_terrain(3, gc, -1)
 
@@ -470,7 +470,7 @@ func summon_the_sandworm_from_the_depths_of_the_dunes(gc:Vector2i, lc:Vector3i, 
 			if (world.bounds.has_point(coords)):
 				set_tile(0, coords, 0, 0)
 				var local = global2local(coords)
-				world.integrity[local.z][local2index(Vector2i(local.x, local.y))] = -40
+				world.integrity[local.z][local2index(Vector2i(local.x, local.y))] = -200
 				set_terrain(3, coords, 2001)
 	
 	camera.camera_shake(0.4, 40, 30, 10)
