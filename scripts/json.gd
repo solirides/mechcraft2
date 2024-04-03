@@ -196,3 +196,5 @@ func make_tileset_exist(tile_size:int):
 	
 	return ts
 
+func texture_from_tile(id:int):
+	return ImageTexture.create_from_image(Image.load_from_file("res://assets/tiles/" + self.tile_textures[id] + ".png"))

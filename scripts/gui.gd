@@ -59,7 +59,7 @@ func update_hotbar(world:WorldSave):
 		a.get_child(0).text = str(world.central_storage[k])
 		a.slot = i
 		a.tile_id = k
-		a.texture = ImageTexture.create_from_image(Image.load_from_file("res://assets/tiles/" + json.tile_textures[int(k)] + ".png"))
+		a.texture = json.texture_from_tile(int(k))
 		print("res://assets/tiles/" + json.tile_textures[int(k)] + ".png")
 		a.clicked.connect(_on_hotbar_item_clicked)
 		hotbar.add_child(a)

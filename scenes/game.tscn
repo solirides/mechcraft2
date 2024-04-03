@@ -227,9 +227,12 @@ visible = false
 texture = SubResource("NoiseTexture2D_fkb45")
 
 [node name="Selector" type="Sprite2D" parent="TileMap"]
-modulate = Color(7.865, 7.303, 12.922, 1)
 texture = ExtResource("10_4g3wo")
 centered = false
+
+[node name="Tile" type="Sprite2D" parent="TileMap/Selector"]
+position = Vector2(16, 16)
+texture = ExtResource("2_obwd8")
 
 [node name="Camera" type="Node2D" parent="." node_paths=PackedStringArray("background", "camera")]
 script = ExtResource("4_3i4pa")
