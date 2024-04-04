@@ -176,16 +176,16 @@ func make_tileset_exist(tile_size:int):
 					
 					source.create_tile(Vector2i(0,0))
 					
-					
-					for i in range(3):
-						source.create_alternative_tile(Vector2i(0,0), -1)
-					
-					for i in tile["flip_h"]:
-						source.get_tile_data(Vector2i(0,0), i).flip_h = true
-					for i in tile["flip_v"]:
-						source.get_tile_data(Vector2i(0,0), i).flip_v = true
-					for i in tile["transpose"]:
-						source.get_tile_data(Vector2i(0,0), i).transpose = true
+					if tile.has("rotatable") and tile["rotatable"] == 1:
+						for i in range(3):
+							source.create_alternative_tile(Vector2i(0,0), -1)
+						
+						for i in [1,2]:
+							source.get_tile_data(Vector2i(0,0), i).flip_h = true
+						for i in [2,3]:
+							source.get_tile_data(Vector2i(0,0), i).flip_v = true
+						for i in [1,3]:
+							source.get_tile_data(Vector2i(0,0), i).transpose = true
 					
 					ts.add_source(source, tile["id"])
 					tile_textures[int(tile["id"])] = file_name.get_basename()
