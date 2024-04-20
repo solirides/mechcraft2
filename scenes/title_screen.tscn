@@ -18,6 +18,7 @@ window = NodePath("Window")
 title = "thing"
 initial_position = 2
 size = Vector2i(256, 256)
+visible = false
 transient = true
 unresizable = true
 borderless = true
@@ -61,5 +62,44 @@ theme_override_font_sizes/normal_font_size = 100
 bbcode_enabled = true
 text = "[center]FACTORY GAME"
 scroll_active = false
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -100.0
+offset_right = 150.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="Load" type="Button" parent="VBoxContainer2"]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+theme = ExtResource("3_gol26")
+text = "Load Game"
+
+[node name="New" type="Button" parent="VBoxContainer2"]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+theme = ExtResource("3_gol26")
+text = "New Game"
+
+[node name="Options" type="Button" parent="VBoxContainer2"]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+theme = ExtResource("3_gol26")
+text = "Options"
+
+[node name="Quit" type="Button" parent="VBoxContainer2"]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+theme = ExtResource("3_gol26")
+text = "Quit"
 
 [connection signal="close_requested" from="Window" to="." method="_on_window_close_requested"]

@@ -30,7 +30,7 @@ func generate_world():
 			var value = ore_noise.get_noise_2d(x, y)
 			
 			if value > 0.6:
-				tilemap.set_terrain(2, Vector2i(x, y), 1003)
+				tilemap.set_terrain(2, Vector2i(x, y), 1101)
 			else:
 				value = noise_sprite.texture.noise.get_noise_2d(x, y)
 				#print(value)

@@ -14,6 +14,15 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _physics_process(delta):
+	#moving_window_thing(delta)
+	pass
+
+
+func _on_window_close_requested():
+	window.hide()
+
+
+func moving_window_thing(delta):
 	if (window.position.x + 256 >= screen_size.x):
 		direction.x = -1
 	elif (window.position.x <= 0):
@@ -29,7 +38,3 @@ func _physics_process(delta):
 	
 	window.position.x += delta * 400 * direction.x
 	window.position.y += delta * 400 * direction.y
-
-
-func _on_window_close_requested():
-	window.hide()

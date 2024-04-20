@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://chuy47varben7"
-path="res://.godot/imported/7-generic_thing.png-4f42003235d501ef94782f6e3a751345.ctex"
+uid="uid://bew1l4udajlnu"
+path="res://.godot/imported/3001-raw_iron.png-6c8cfd104558f0e9f58448d03cfc2d83.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/tiles/7-generic_thing.png"
-dest_files=["res://.godot/imported/7-generic_thing.png-4f42003235d501ef94782f6e3a751345.ctex"]
+source_file="res://assets/tiles/3001-raw_iron.png"
+dest_files=["res://.godot/imported/3001-raw_iron.png-6c8cfd104558f0e9f58448d03cfc2d83.ctex"]
 
 [params]
 

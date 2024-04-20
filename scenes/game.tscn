@@ -141,8 +141,8 @@ corner_radius_bottom_left = 8
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_2faln"]
 shader = ExtResource("16_udpk1")
-shader_parameter/color1 = Color(0.670588, 0.764706, 0.980392, 0.784314)
-shader_parameter/color2 = Color(0.694118, 0.752941, 0.933333, 0.784314)
+shader_parameter/color1 = Color(0.152941, 0.286275, 0.717647, 0.784314)
+shader_parameter/color2 = Color(0.219608, 0.286275, 0.560784, 0.784314)
 shader_parameter/speed = 16.0
 shader_parameter/size = 2.0
 
