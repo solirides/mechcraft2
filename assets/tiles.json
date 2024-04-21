@@ -19,11 +19,9 @@
 		"id": 5,
 		"rotatable":1
 	},
-	"6-iron": {
-		"id": 6
-	},
-	"7-generic_thing": {
-		"id": 7
+	"6-retriever": {
+		"id": 6,
+		"rotatable":1
 	},
 	"1001-sand": {
 		"id": 1001

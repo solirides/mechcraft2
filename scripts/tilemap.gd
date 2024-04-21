@@ -133,7 +133,7 @@ func _unhandled_input(event):
 		if event.is_action_pressed("resource"):
 			var p = get_global_mouse_position()
 			print("resource spawned")
-			set_item(1, Vector2i(floor(p.x/tile_size), floor(p.y/tile_size)), 6)
+			set_item(1, Vector2i(floor(p.x/tile_size), floor(p.y/tile_size)), 3001)
 		
 		if event.is_action_pressed("remove"):
 			var p = get_global_mouse_position()
@@ -342,6 +342,30 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 						n_dir = facing_rot
 						#loop = true
 						split = true
+				6:
+					if facing_rot == (neighbor_dir + 2) % 4:
+						used_tiles[facing_gc.x][facing_gc.y] = 1
+						
+						if split:
+							#var a = detect_connections(facing_gc, facing_tile, priority + 1, facing_rot, false)
+							#print(a)
+							var color2 = Color.from_hsv(randf(), randf_range(0.7, 1), randf_range(0.7, 1))
+							debug_marker(facing_gc, color2)
+							debug_text(facing_gc, str((priority + 1)))
+							
+							var line2:Array[Vector2i] = [facing_gc]
+							result.merge({gc2string(facing_gc):line2})
+							priorities.merge({gc2string(facing_gc):int(priority + 1)})
+							max_priority = max(max_priority, priority + 1)
+							continue
+						
+						debug_marker(facing_gc, color)
+						line.append(facing_gc)
+						
+						#n_tile = facing_gc
+						#n_dir = facing_rot
+						#loop = false
+						#split = true
 	result[gc2string(gc)] = line
 	priorities[gc2string(gc)] = priority
 	
@@ -424,6 +448,21 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 									world.central_storage[str(item)] += 1
 									# item go bye bye
 									set_item(1, gc, 0)
+							6:
+								world.noise[lc.z][index] += 2
+								var item = world.items[lc.z][index]
+								var target_item = 3001
+								if (item != 0):
+									move_resource(gc, world.tiledata[lc.z]["rotation"][index])
+								if (world.tiledata[lc.z]["state"][index] == 4):
+									var input_lc = global2local(gc + SIDES[(world.tiledata[lc.z]["rotation"][index] + 2) % 4])
+									if world.tiles[input_lc.z][local2index(Vector2i(input_lc.x, input_lc.y))] == 5:
+										
+										if world.central_storage.has(str(target_item)) and world.central_storage[str(target_item)] > 0:
+											set_item(1, gc, target_item)
+									world.tiledata[lc.z]["state"][index] = 1
+								else:
+									world.tiledata[lc.z]["state"][index] += 1
 					
 					world.noise[lc.z][index] = max(world.noise[lc.z][index] - 5, 0)
 					if world.noise[lc.z][index] >= world.sandworm_noise_threshold and world.sandworm_current_cooldown <= 0:
