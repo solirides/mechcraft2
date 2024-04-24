@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://dmcupfl7bgnx5"]
+
+[ext_resource type="Texture2D" uid="uid://5am0arvmxore" path="res://assets/factorygame3.png" id="1_mfh60"]
+
+[node name="Resource" type="Node2D"]
+
+[node name="cur_resource" type="Sprite2D" parent="."]
+position = Vector2(36, 26.5)
+scale = Vector2(0.0683594, 0.0537109)
+texture = ExtResource("1_mfh60")
+
+[node name="Label" type="Label" parent="."]
+offset_right = 40.0
+offset_bottom = 23.0
