@@ -15,6 +15,7 @@ signal world_focused(state)
 @export var music_player:AudioStreamPlayer = null
 @export var noise_bar:ProgressBar = null
 @export var hotbar:HBoxContainer = null
+@export var popup:Node = null
 
 var mode = 0
 var selected_tile = 1

@@ -514,6 +514,9 @@ func summon_the_sandworm_from_the_depths_of_the_dunes(gc:Vector2i, lc:Vector3i, 
 	
 	camera.camera_shake(0.4, 40, 30, 10)
 	
+	running = false
+	gui.popup.visible = true
+	
 
 func recalculate():
 	clear_markers()
@@ -600,6 +603,15 @@ func neighbor(gc:Vector2i, dir:int):
 #	var y:int = floor(index / world.chunk_size)
 #
 #	return location
+
+
+
+func change_tick_speed(speed:float):
+	if speed == 0:
+		running = false
+	else:
+		running = true
+		tps = speed
 
 
 # Coordinate stuff:
