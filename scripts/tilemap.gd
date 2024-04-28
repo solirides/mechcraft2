@@ -42,12 +42,14 @@ var selected_tile = 1
 var tile_rotation = 0
 
 var tileset = TileSet.new()
-#var bounds:Rect2i
+
+signal storage_changed()
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 #	print(json.json)
 	setup()
+	self.storage_changed.connect(_on_storage_changed)
 	
 	gui.selection_changed.connect(_on_selection_changed)
 	gui.world_focused.connect(_on_world_focused)
@@ -85,7 +87,7 @@ func _input(event):
 			
 		
 		if event.is_action_pressed("update_gui"):
-			gui.update_hotbar(world)
+			gui.update_hotbar(world.central_storage)
 		
 		if event.is_action_pressed("ping"):
 			var p = get_global_mouse_position()
@@ -117,10 +119,9 @@ func _unhandled_input(event):
 			var p = get_global_mouse_position()
 			var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
 			var lc = global2local(gc)
-			print(p)
-			print(gc)
-			if (world.bounds.has_point(gc) and world.integrity[lc.z][local2index(Vector2i(lc.x, lc.y))] >= 0):
-				set_tile(0, gc, selected_tile, tile_rotation)
+			#print(p)
+			#print(gc)
+			place_tile(gc, lc, selected_tile, tile_rotation)
 		
 		if Input.is_action_pressed("pan") and event is InputEventMouseMotion:
 			camera.camera.position -= event.relative / camera.camera.zoom
@@ -138,7 +139,8 @@ func _unhandled_input(event):
 		if event.is_action_pressed("remove"):
 			var p = get_global_mouse_position()
 			var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
-			print(p);
+			#print(p)
+			
 			if (world.bounds.has_point(gc)):
 				var e = explosion.instantiate()
 				add_child(e)
@@ -147,6 +149,15 @@ func _unhandled_input(event):
 				camera.camera_shake(0.4, 16, 50, 10)
 				set_tile(0, gc, 0, 0)
 		
+
+func place_tile(gc, lc, id, rotation):
+	if (world.bounds.has_point(gc) and world.integrity[lc.z][local2index(Vector2i(lc.x, lc.y))] >= 0):
+		if world.central_storage.has(id) and world.central_storage[str(id)] > 0:
+			set_tile(0, gc, id, rotation)
+			world.central_storage[str(id)] -= 1
+			self.storage_changed.emit()
+		else:
+			gui.alert("Not enough resources")
 
 # Detecting conveyor lines:
 #region
@@ -448,6 +459,7 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 									world.central_storage[str(item)] += 1
 									# item go bye bye
 									set_item(1, gc, 0)
+									self.storage_changed.emit()
 							6:
 								world.noise[lc.z][index] += 2
 								var item = world.items[lc.z][index]
@@ -460,6 +472,8 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 										
 										if world.central_storage.has(str(target_item)) and world.central_storage[str(target_item)] > 0:
 											set_item(1, gc, target_item)
+											world.central_storage[str(target_item)] -= 1
+											self.storage_changed.emit()
 									world.tiledata[lc.z]["state"][index] = 1
 								else:
 									world.tiledata[lc.z]["state"][index] += 1
@@ -751,3 +765,6 @@ func _on_world_focused(state):
 
 func _on_world_updated():
 	needs_recalculation = true
+
+func _on_storage_changed():
+	gui.update_resources(world.central_storage)

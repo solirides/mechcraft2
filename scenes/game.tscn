@@ -1,4 +1,4 @@
-[gd_scene load_steps=48 format=3 uid="uid://wbpqro6tssd5"]
+[gd_scene load_steps=49 format=3 uid="uid://wbpqro6tssd5"]
 
 [ext_resource type="Script" path="res://scripts/json.gd" id="1_3pqby"]
 [ext_resource type="Script" path="res://scripts/tilemap.gd" id="2_e3udp"]
@@ -134,11 +134,15 @@ corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jbbp0"]
-bg_color = Color(0.921569, 0.647059, 0.254902, 1)
+bg_color = Color(0.960784, 0.823529, 0.145098, 1)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
+
+[sub_resource type="LabelSettings" id="LabelSettings_mnp4j"]
+font_size = 22
+font_color = Color(0.952941, 1, 0.486275, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_2faln"]
 shader = ExtResource("16_udpk1")
@@ -290,7 +294,7 @@ color = Color(1, 0.156863, 0.568627, 1)
 [node name="Grid" type="Node2D" parent="Camera/Camera2D/Shaders"]
 script = ExtResource("10_y4vju")
 
-[node name="GUI" type="CanvasLayer" parent="Camera/Camera2D" node_paths=PackedStringArray("json", "camera", "selection_label", "alert_label", "debug_label", "resources_label", "menu", "music_player", "noise_bar", "hotbar", "popup")]
+[node name="GUI" type="CanvasLayer" parent="Camera/Camera2D" node_paths=PackedStringArray("json", "camera", "selection_label", "alert_label", "debug_label", "resources_label", "menu", "music_player", "noise_bar", "hotbar", "leftbar", "popup")]
 layer = 10
 script = ExtResource("10_ocoff")
 json = NodePath("../../../Json")
@@ -304,6 +308,7 @@ menu = NodePath("GUI/Menu")
 music_player = NodePath("GUI/AudioStreamPlayer")
 noise_bar = NodePath("GUI/TopBar/Bar3/Noise")
 hotbar = NodePath("GUI/BottomBar/Panel/Hotbar")
+leftbar = NodePath("GUI/LeftBar")
 popup = NodePath("Popup")
 
 [node name="GUI" type="Control" parent="Camera/Camera2D/GUI"]
@@ -377,7 +382,7 @@ grow_horizontal = 2
 mouse_filter = 1
 theme = ExtResource("13_clh56")
 bbcode_enabled = true
-text = "[center]alert text"
+text = "[center]debug"
 fit_content = true
 scroll_active = false
 
@@ -414,24 +419,21 @@ value = 30.0
 show_percentage = false
 
 [node name="Center" type="CenterContainer" parent="Camera/Camera2D/GUI/GUI"]
-visible = false
 layout_mode = 1
-anchors_preset = 15
+anchors_preset = -1
 anchor_right = 1.0
-anchor_bottom = 1.0
+anchor_bottom = 0.43
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Alert" type="RichTextLabel" parent="Camera/Camera2D/GUI/GUI/Center"]
-clip_contents = false
+[node name="Alert" type="Label" parent="Camera/Camera2D/GUI/GUI/Center"]
 custom_minimum_size = Vector2(600, 0)
 layout_mode = 2
 mouse_filter = 1
 theme = ExtResource("13_clh56")
-bbcode_enabled = true
-text = "[center]alert text"
-fit_content = true
-scroll_active = false
+text = "alert text"
+label_settings = SubResource("LabelSettings_mnp4j")
+horizontal_alignment = 1
 
 [node name="BottomBar" type="VBoxContainer" parent="Camera/Camera2D/GUI/GUI"]
 layout_mode = 1
@@ -456,6 +458,17 @@ offset_top = -4.0
 offset_right = 1152.0
 offset_bottom = -4.0
 alignment = 1
+
+[node name="LeftBar" type="VBoxContainer" parent="Camera/Camera2D/GUI/GUI"]
+custom_minimum_size = Vector2(100, 300)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.24
+anchor_right = 0.1
+anchor_bottom = 0.825
+offset_left = 20.0
+grow_vertical = 2
+theme = ExtResource("13_clh56")
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Camera/Camera2D/GUI/GUI"]
 stream = ExtResource("14_agi1x")
@@ -531,6 +544,7 @@ focus_mode = 0
 text = "Shut down computer with music"
 
 [node name="Popup" type="Panel" parent="Camera/Camera2D/GUI" node_paths=PackedStringArray("label", "button1", "button2")]
+visible = false
 custom_minimum_size = Vector2(500, 250)
 anchors_preset = 8
 anchor_left = 0.5
