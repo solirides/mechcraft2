@@ -5,7 +5,6 @@
 
 [node name="GuiItem" type="TextureRect"]
 custom_minimum_size = Vector2(64, 64)
-anchors_preset = -1
 size_flags_horizontal = 0
 size_flags_vertical = 0
 texture = ExtResource("1_m2pc7")

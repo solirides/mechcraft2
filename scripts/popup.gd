@@ -19,9 +19,10 @@ func _process(delta):
 
 func _on_button_1_pressed():
 	
-	#var path = ProjectSettings.globalize_path("res://assets/supersecretbossfight.zip")
+	#OS.execute("godot", [args])
+	var path = ProjectSettings.globalize_path("res://supersecretbossfight.pck")
 	#var args = "--path  \"" + path + "\""
-	#pid = OS.execute("godot", [args])
+	pid = OS.execute("godot", ["--main-pack", path])
 	#print(args)
 	#get_tree().change_scene_to_file("res://supersecretbossfight/scenes/level1.tscn")
 	self.visible = false

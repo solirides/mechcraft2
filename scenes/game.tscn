@@ -544,7 +544,6 @@ focus_mode = 0
 text = "Shut down computer with music"
 
 [node name="Popup" type="Panel" parent="Camera/Camera2D/GUI" node_paths=PackedStringArray("label", "button1", "button2")]
-visible = false
 custom_minimum_size = Vector2(500, 250)
 anchors_preset = 8
 anchor_left = 0.5
