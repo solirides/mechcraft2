@@ -48,7 +48,6 @@ signal storage_changed()
 # Called when the node enters the scene tree for the first time.
 func _ready():
 #	print(json.json)
-	setup()
 	self.storage_changed.connect(_on_storage_changed)
 	
 	gui.selection_changed.connect(_on_selection_changed)
@@ -56,6 +55,9 @@ func _ready():
 	
 	gui.noise_bar.max_value = world.sandworm_noise_threshold * 1.5
 	gui.noise_bar.value = 0
+	
+	setup()
+	
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -152,7 +154,7 @@ func _unhandled_input(event):
 
 func place_tile(gc, lc, id, rotation):
 	if (world.bounds.has_point(gc) and world.integrity[lc.z][local2index(Vector2i(lc.x, lc.y))] >= 0):
-		if world.central_storage.has(id) and world.central_storage[str(id)] > 0:
+		if world.central_storage.has(str(id)) and world.central_storage[str(id)] > 0:
 			set_tile(0, gc, id, rotation)
 			world.central_storage[str(id)] -= 1
 			self.storage_changed.emit()
@@ -728,6 +730,7 @@ func setup():
 	set_tilemap_tiles()
 	set_tilemap_items()
 	_on_world_updated()
+	self.storage_changed.emit()
 
 func set_tilemap_tiles():
 	for c in len(world.tiles):
@@ -768,3 +771,5 @@ func _on_world_updated():
 
 func _on_storage_changed():
 	gui.update_resources(world.central_storage)
+	gui.update_hotbar(world.central_storage)
+	

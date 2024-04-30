@@ -454,9 +454,11 @@ layout_mode = 2
 [node name="Hotbar" type="HBoxContainer" parent="Camera/Camera2D/GUI/GUI/BottomBar/Panel"]
 custom_minimum_size = Vector2(0, 60)
 layout_mode = 1
-offset_top = -4.0
-offset_right = 1152.0
-offset_bottom = -4.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 alignment = 1
 
 [node name="LeftBar" type="VBoxContainer" parent="Camera/Camera2D/GUI/GUI"]

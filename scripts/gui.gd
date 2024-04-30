@@ -56,17 +56,18 @@ func update_selection():
 
 func update_hotbar(central_storage):
 	var i = 0
+	for n in hotbar.get_children():
+		hotbar.remove_child(n)
+		n.queue_free()
 	for k in central_storage.keys():
 		var a = gui_item.instantiate()
 		a.get_child(0).text = str(central_storage[k])
 		a.slot = i
 		a.tile_id = k
 		a.texture = json.texture_from_tile(int(k))
-		print("res://assets/tiles/" + json.tile_textures[int(k)] + ".png")
 		a.clicked.connect(_on_hotbar_item_clicked)
 		hotbar.add_child(a)
 		
-		print("hotbar item")
 		i += 1
 
 func update_resources(central_storage):
@@ -77,6 +78,7 @@ func update_resources(central_storage):
 	for k in central_storage.keys():
 		var a = gui_item.instantiate()
 		a.custom_minimum_size = Vector2(32, 32)
+		a.get_child(0).label_settings.font_size = 16
 		a.get_child(0).text = str(central_storage[k])
 		a.slot = i
 		a.tile_id = k
