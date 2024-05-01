@@ -21,7 +21,7 @@ var highest_noise = 0
 
 # these vars are all from the world save file
 
-var world = WorldSave.new()
+var world:Dictionary = {}
 
 var result:Array[Array]
 
@@ -42,6 +42,7 @@ var selected_tile = 1
 var tile_rotation = 0
 
 var tileset = TileSet.new()
+var bounds:Rect2
 
 signal storage_changed()
 
@@ -53,10 +54,12 @@ func _ready():
 	gui.selection_changed.connect(_on_selection_changed)
 	gui.world_focused.connect(_on_world_focused)
 	
-	gui.noise_bar.max_value = world.sandworm_noise_threshold * 1.5
+	setup()
+	
+	gui.noise_bar.max_value = world["settings"]["sandworm_noise_threshold_3"]
 	gui.noise_bar.value = 0
 	
-	setup()
+	
 	
 
 
@@ -143,7 +146,7 @@ func _unhandled_input(event):
 			var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
 			#print(p)
 			
-			if (world.bounds.has_point(gc)):
+			if (bounds.has_point(gc)):
 				var e = explosion.instantiate()
 				add_child(e)
 				e.position = gc * tile_size
@@ -153,7 +156,7 @@ func _unhandled_input(event):
 		
 
 func place_tile(gc, lc, id, rotation):
-	if (world.bounds.has_point(gc) and world.integrity[lc.z][local2index(Vector2i(lc.x, lc.y))] >= 0):
+	if (bounds.has_point(gc) and world["chunks"][str(lc.z)]["integrity"][local2index(Vector2i(lc.x, lc.y))] >= 0):
 		if world.central_storage.has(str(id)) and world.central_storage[str(id)] > 0:
 			set_tile(0, gc, id, rotation)
 			world.central_storage[str(id)] -= 1
@@ -165,23 +168,23 @@ func place_tile(gc, lc, id, rotation):
 #region
 func detect_world_tiles():
 #	var cells = self.get_used_cells(0)
-	var d = [world.chunk_size, 1, -world.chunk_size, -1]
+	var d = [world["chunk_size"], 1, -world["chunk_size"], -1]
 	var lines:Array[Vector2i] = []
 	
-	for c in world.world_size**2:
+	for c in world["world_size"]**2:
 		for index in world.chunk_area:
 	#		print(world.tiles[0][index])
 			# one chunk
 			var gc = local2global(index2local(index, c))
-			match int(world.tiles[c][index]):
+			match int(world["chunks"][str(c)]["tiles"][index]):
 				5: # line includes storage
 					print("5")
 					
-	#				print(Vector3i(index % world.chunk_size, floor(index / world.chunk_size), c))
+	#				print(Vector3i(index % world["chunk_size"], floor(index / world["chunk_size"]), c))
 	#				print(gc)
 					debug_marker(gc, Color(1, 0, 1, 0.7))
 					used_tiles[gc.x][gc.y] == 1
-					var a = detect_connections(gc, world.tiles[c][index], 1, 0, true)
+					var a = detect_connections(gc, world["chunks"][str(c)]["tiles"][index], 1, 0, true)
 					# add self to line
 					#a[0][0].push_front(gc)
 					
@@ -251,7 +254,7 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 			var facing_lc:Vector3i = global2local(facing_gc)
 			#print(facing_lc)
 			print(str(facing_gc) + " gc")
-			if not world.bounds.has_point(Vector2i(facing_lc.x,facing_lc.y)) or used_tiles[facing_gc.x][facing_gc.y] == 1:
+			if not bounds.has_point(Vector2i(facing_lc.x,facing_lc.y)) or used_tiles[facing_gc.x][facing_gc.y] == 1:
 				# out of bounds
 				print("a")
 				#print(bounds.has_point(Vector2i(facing_lc.x,facing_lc.y)))
@@ -259,8 +262,8 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 				continue
 			var c = facing_lc.z
 			var facing_idx:int = local2index(Vector2i(facing_lc.x,facing_lc.y))
-			var facing_rot:int = world.tiledata[c]["rotation"][facing_idx]
-			var facing_tile:int = world.tiles[c][facing_idx]
+			var facing_rot:int = world["chunks"][str(c)]["rotation"][facing_idx]
+			var facing_tile:int = world["chunks"][str(c)]["tiles"][facing_idx]
 			print(str(facing_tile) + " facing tile")
 			match facing_tile:
 				1: # conveyor
@@ -398,29 +401,29 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 				for gc in lines_global[p2]:
 					var lc = global2local(gc)
 					var index = local2index(Vector2i(lc.x, lc.y))
-					var id = world.tiles[lc.z][index]
+					var id = world["chunks"][str(lc.z)]["tiles"][index]
 					if id != 0:
 						match id:
 							1:
-								world.noise[lc.z][index] += 2
-								var dir = world.tiledata[lc.z]["rotation"][index]
+								world["chunks"][str(lc.z)]["noise"][index] += 2
+								var dir = world["chunks"][str(lc.z)]["rotation"][index]
 								# the "last" vars are what the current conveyor points to (since the line's array is reversed)
 								#if (world_items[last_lc.z][last_index] == 0):
 								move_resource(gc, dir)
 								
 							2: #constructor
-								world.noise[lc.z][index] += 3
-								var item = world.items[lc.z][index]
+								world["chunks"][str(lc.z)]["noise"][index] += 3
+								var item = world["chunks"][str(lc.z)]["items"][index]
 								if (item != 0):
 									#print("item recieved at constructor")
 									var a = gc2string(gc)
 									if (world.tile_storage[lc.z][index] != 0):
 										# construct thing
-										world.noise[lc.z][index] += 5
+										world["chunks"][str(lc.z)]["noise"][index] += 5
 										var key = str(world.tile_storage[lc.z][index]) + "," + str(item)
 										if json.recipes.has(key):
 											set_item(1, gc, json.recipes[key])
-											move_resource(gc, world.tiledata[lc.z]["rotation"][index])
+											move_resource(gc, world["chunks"][str(lc.z)]["rotation"][index])
 										else:
 											set_item(1, gc, 0)
 											
@@ -432,18 +435,18 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 									#set_item(1, gc, 0)
 							
 							3:
-								world.noise[lc.z][index] += 3
-								if (world.items[lc.z][index] != 0):
-									var dir = world.tiledata[lc.z]["rotation"][index]
+								world["chunks"][str(lc.z)]["noise"][index] += 3
+								if (world["chunks"][str(lc.z)]["items"][index] != 0):
+									var dir = world["chunks"][str(lc.z)]["rotation"][index]
 									var state = world.tiledata[lc.z]["state"][index]
 									move_resource(gc, (dir + int(state)) % 4)
 									world.tiledata[lc.z]["state"][index] = not world.tiledata[lc.z]["state"][index]
 							4:
-								world.noise[lc.z][index] += 3
-								var item = world.items[lc.z][index]
+								world["chunks"][str(lc.z)]["noise"][index] += 3
+								var item = world["chunks"][str(lc.z)]["items"][index]
 								var terrain = world.terrain[lc.z][index]
 								if (item != 0):
-									move_resource(gc, world.tiledata[lc.z]["rotation"][index])
+									move_resource(gc, world["chunks"][str(lc.z)]["rotation"][index])
 								if (world.tiledata[lc.z]["state"][index] == 4):
 									if json.ores.has(str(terrain)):
 										set_item(1, gc, json.ores[str(terrain)])
@@ -452,7 +455,7 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 									world.tiledata[lc.z]["state"][index] += 1
 								
 							5:# storage recieves item
-								var item = world.items[lc.z][index]
+								var item = world["chunks"][str(lc.z)]["items"][index]
 								if (item != 0):
 									#print("item recieved")
 									#gui.add_resource(1)
@@ -463,13 +466,13 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 									set_item(1, gc, 0)
 									self.storage_changed.emit()
 							6:
-								world.noise[lc.z][index] += 2
-								var item = world.items[lc.z][index]
+								world["chunks"][str(lc.z)]["noise"][index] += 2
+								var item = world["chunks"][str(lc.z)]["items"][index]
 								var target_item = 3001
 								if (item != 0):
-									move_resource(gc, world.tiledata[lc.z]["rotation"][index])
+									move_resource(gc, world["chunks"][str(lc.z)]["rotation"][index])
 								if (world.tiledata[lc.z]["state"][index] == 4):
-									var input_lc = global2local(gc + SIDES[(world.tiledata[lc.z]["rotation"][index] + 2) % 4])
+									var input_lc = global2local(gc + SIDES[(world["chunks"][str(lc.z)]["rotation"][index] + 2) % 4])
 									if world.tiles[input_lc.z][local2index(Vector2i(input_lc.x, input_lc.y))] == 5:
 										
 										if world.central_storage.has(str(target_item)) and world.central_storage[str(target_item)] > 0:
@@ -480,13 +483,13 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 								else:
 									world.tiledata[lc.z]["state"][index] += 1
 					
-					world.noise[lc.z][index] = max(world.noise[lc.z][index] - 5, 0)
-					if world.noise[lc.z][index] >= world.sandworm_noise_threshold and world.sandworm_current_cooldown <= 0:
+					world["chunks"][str(lc.z)]["noise"][index] = max(world["chunks"][str(lc.z)]["noise"][index] - 5, 0)
+					if world["chunks"][str(lc.z)]["noise"][index] >= world["settings"]["sandworm_noise_threshold_3"] and world["settings"]["sandworm_current_cooldown"] <= 0:
 						summon_the_sandworm_from_the_depths_of_the_dunes(gc, lc, index)
 						world.sandworm_current_cooldown = world.sandworm_attack_cooldown
 						
 					
-					highest_noise = max(highest_noise, world.noise[lc.z][index])
+					highest_noise = max(highest_noise, world["chunks"][str(lc.z)]["noise"][index])
 					
 					gui.noise_bar.value = highest_noise
 					#last_gc = gc
@@ -494,12 +497,12 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 					#last_index = index
 
 func make_the_terrain_less_bad():
-	for c in world.world_size**2:
-		for index in world.chunk_area:
-			var gc = local2global(index2local(index, c))
-			if world.integrity[c][index] < 0:
-				world.integrity[c][index] = min(40, world.integrity[c][index] + 4)
-				if world.integrity[c][index] >= 0:
+	for c in world["world_size"]**2:
+		for i in world.chunk_area:
+			var gc = local2global(index2local(i, c))
+			if world["chunks"][str(c)]["integrity"][i] < 0:
+				world["chunks"][str(c)]["integrity"][i] = min(40, world["chunks"][str(c)]["integrity"][i] + 4)
+				if world["chunks"][str(c)]["integrity"][i] >= 0:
 					set_terrain(3, gc, -1)
 
 func tick():
@@ -510,9 +513,9 @@ func tick():
 	last_tick = 0
 	make_the_terrain_less_bad()
 	do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement()
-	world.elapsed_ticks += 1;;;;;;;;;;;;;
-	world.sandworm_current_cooldown = max(0, world.sandworm_current_cooldown - 1)
-	gui.resources(str(floor(world.elapsed_ticks / 900)))
+	world["elapsed_ticks"] += 1;;;;;;;;;;;;;
+	world["settings"]["sandworm_current_cooldown"] = max(0, world["settings"]["sandworm_current_cooldown"] - 1)
+	gui.resources(str(floor(world["elapsed_ticks"] / 900)))
 
 func summon_the_sandworm_from_the_depths_of_the_dunes(gc:Vector2i, lc:Vector3i, index:int):
 	var e = explosion.instantiate()
@@ -522,7 +525,7 @@ func summon_the_sandworm_from_the_depths_of_the_dunes(gc:Vector2i, lc:Vector3i, 
 	for x in range(3):
 		for y in range(3):
 			var coords = gc + Vector2i(x - 2, y - 2)
-			if (world.bounds.has_point(coords)):
+			if (bounds.has_point(coords)):
 				set_tile(0, coords, 0, 0)
 				var local = global2local(coords)
 				world.integrity[local.z][local2index(Vector2i(local.x, local.y))] = -200
@@ -549,65 +552,46 @@ func recalculate():
 	detect_world_tiles()
 
 
-#func initiate_resource_movement(tile_pos):
-	#var local_coords = global2local(tile_pos)
-	#var index = local2index(Vector2i(local_coords.x, local_coords.y))
-	#var rotation = world.tiledata[local_coords.z]["rotation"][index]
-	#
-	#if world.tiles[local_coords.z][index] == 6:
-		#match rotation:
-			#0:  
-				#move_resource(tile_pos, "up")
-			#1:  
-				#move_resource(tile_pos, "right")
-			#2:  
-				#move_resource(tile_pos, "down")
-			#3:  
-				#move_resource(tile_pos, "left")
 
 func move_resource(gc:Vector2i, direction:int):
 	var lc = global2local(gc)
 	var idx = local2index(Vector2i(lc.x, lc.y))
-	var current_tile = world.tiles[lc.z][idx]
+	var current_tile = world["chunks"][str(lc.z)]["tiles"][idx]
 	var next_gc = gc + SIDES[direction]
 	var next_lc = global2local(next_gc)
 	var next_idx = local2index(Vector2i(next_lc.x, next_lc.y))
-	var id = world.items[lc.z][idx]
+	var id = world["chunks"][str(lc.z)]["items"][idx]
 	
 	
-	if (world.items[next_lc.z][next_idx] == 0):
-		match int(world.tiles[next_lc.z][next_idx]):
+	if (world["chunks"][str(next_lc.z)]["items"][next_idx] == 0):
+		match int(world["chunks"][str(next_lc.z)]["tiles"][next_idx]):
 			3:
 				if (int(int(world.tiledata[next_lc.z]["state"][next_idx]) + \
-				world.tiledata[next_lc.z]["rotation"][next_idx]) % 4 == direction):
+				world["chunks"][str(next_lc.z)]["rotation"][next_idx]) % 4 == direction):
 					set_item(1, gc, 0)
 					set_item(1, next_gc, id)
 			_:
 				set_item(1, gc, 0)
 				set_item(1, next_gc, id)
 	else: # clogged
-		world.noise[lc.z][idx] += 6
+		world["chunks"][str(lc.z)]["noise"][idx] += 6
 	
-	#if next_tile and world.tiles[next_tile.z][local2index(Vector2i(next_tile.x, next_tile.y))] == 6:
-		#print("Moving resource from ", tile_pos, " to ", next_tile)
-	#else:
-		#print("Cannot move in that direction or no conveyor")
 
 #endregion
 
-func rotate_conveyor(tile_pos): 
-	var local_coords = global2local(tile_pos)
-	var index = local2index(Vector2i(local_coords.x, local_coords.y))
-	var tile = world.tiles[local_coords.z][index]
-	var rotation:int = world.tiledata[local_coords.z]["rotation"][index]
+func rotate_conveyor(gc): 
+	var lc = global2local(gc)
+	var index = local2index(Vector2i(lc.x, lc.y))
+	var tile = world["chunks"][str(lc.z)]["tiles"][index]
+	var rotation:int = world["chunks"][str(lc.z)]["rotation"][index]
 	
 	rotation = (rotation + 1) % 4
-	world.tiledata[local_coords.z]["rotation"][index] = rotation
-	set_cell(0, tile_pos, tile, Vector2i(0, 0), rotation)
+	world["chunks"][str(lc.z)]["rotation"][index] = rotation
+	set_cell(0, gc, tile, Vector2i(0, 0), rotation)
 
 func neighbor(gc:Vector2i, dir:int):
 	var tile = gc + SIDES[dir]
-	if world.bounds.has_point(tile):
+	if bounds.has_point(tile):
 		return tile
 	return null
 
@@ -615,8 +599,8 @@ func neighbor(gc:Vector2i, dir:int):
 
 #func neighbor_index(chunk:int, index:int, direction:int):
 #	var location:Vector3
-#	var x:int = index % world.chunk_size
-#	var y:int = floor(index / world.chunk_size)
+#	var x:int = index % world["chunk_size"]
+#	var y:int = floor(index / world["chunk_size"])
 #
 #	return location
 
@@ -637,72 +621,71 @@ func gc2string(gc:Vector2i):
 
 
 func local2index(local_coords:Vector2i):
-	return local_coords.x + local_coords.y * world.chunk_size
+	return local_coords.x + local_coords.y * world["chunk_size"]
 
-func index2local(index, chunk):
-	return Vector3i(index % world.chunk_size, floor(index / world.chunk_size), chunk)
+func index2local(index:int, chunk:int):
+	return Vector3i(index % int(world["chunk_size"]), floor(index / world["chunk_size"]), chunk)
 
 func local2global(local_coords:Vector3i):
-	var c = Vector2i(local_coords.z % world.world_size, floor(local_coords.z / world.world_size))
-	return Vector2i(local_coords.x + c.x * world.chunk_size, local_coords.y + c.y * world.chunk_size)
+	var c = Vector2i(local_coords.z % int(world["world_size"]), floor(local_coords.z / world["world_size"]))
+	return Vector2i(local_coords.x + c.x * world["chunk_size"], local_coords.y + c.y * world["chunk_size"])
 
 func global2local(global_coords:Vector2i):
-	return Vector3i(global_coords.x % world.chunk_size, \
-		global_coords.y % world.chunk_size, \
-		floor(global_coords.x / world.chunk_size) + world.world_size*floor(global_coords.y/world.chunk_size))
+	return Vector3i(global_coords.x % int(world["chunk_size"]), \
+		global_coords.y % int(world["chunk_size"]), \
+		floor(global_coords.x / world["chunk_size"]) + world["world_size"]*floor(global_coords.y/world["chunk_size"]))
 
-func set_tile(layer:int, global_coords:Vector2i, tile:int, rotation:int):
+func set_tile(layer:int, gc:Vector2i, tile:int, rotation:int):
 #	no storage data yet
-	var local_coords = global2local(global_coords)
-	var index = local2index(Vector2i(local_coords.x, local_coords.y))
+	var lc = global2local(gc)
+	var index = local2index(Vector2i(lc.x, lc.y))
 	
-#	world.tiledata[local_coords.z]["storage"][local_coords.x + local_coords.y * world.chunk_size] = null
-	world.tiles[local_coords.z][index] = tile
-	world.tiledata[local_coords.z]["rotation"][index] = rotation
-	print(global_coords)
-	print(local_coords)
+	world["chunks"][str(lc.z)]["tiles"][index] = tile
+	world["chunks"][str(lc.z)]["rotation"][index] = rotation
+	print(gc)
+	print(lc)
 	self.set_cell(layer, \
-			global_coords, tile, \
+			gc, tile, \
 			Vector2i.ZERO, rotation
 			)
 	
 	_on_world_updated()
 
-func set_item(layer:int, global_coords:Vector2i, tile:int):
-	var local_coords = global2local(global_coords)
+func set_item(layer:int, gc:Vector2i, tile:int):
+	var lc = global2local(gc)
 	
-	world.items[local_coords.z][local_coords.x + local_coords.y * world.chunk_size] = tile
+	world["chunks"][str(lc.z)]["items"][lc.x + lc.y * world["chunk_size"]] = tile
 	self.set_cell(layer, \
-			global_coords, tile, \
+			gc, tile, \
 			Vector2i.ZERO, rotation
 			)
 
-func set_terrain(layer:int, global_coords:Vector2i, tile:int):
-	var local_coords = global2local(global_coords)
+func set_terrain(layer:int, gc:Vector2i, tile:int):
+	var lc = global2local(gc)
 	
-	world.terrain[local_coords.z][local_coords.x + local_coords.y * world.chunk_size] = tile
+	world["chunks"][str(lc.z)]["terrain"][lc.x + lc.y * world["chunk_size"]] = tile
 	self.set_cell(layer, \
-			global_coords, tile, \
+			gc, tile, \
 			Vector2i.ZERO, rotation
 			)
 
-func debug_marker(global_coords:Vector2i, color:Color):
+func debug_marker(gc:Vector2i, color:Color):
 	var a = Polygon2D.new()
 	a.polygon = [Vector2(0.8,0.8), Vector2(-0.8,0.8), Vector2(-0.8,-0.8), Vector2(0.8,-0.8)]
 	a.color = color
-	a.position = Vector2(tile_size * global_coords.x + 8, \
-		tile_size * global_coords.y + 8)
+	a.position = Vector2(tile_size * gc.x + 8, \
+		tile_size * gc.y + 8)
 	$Debug.add_child(a)
 
-func debug_text(global_coords:Vector2i, text:String):
+func debug_text(gc:Vector2i, text:String):
 	var a = $DebugText.duplicate()
 	a.text = text
 	a.z_index = 10
 	a.clip_contents = false
 	#var theme = load("res://assets/theme.tres")
 	#a.set_theme(theme)
-	a.position = Vector2(tile_size * global_coords.x + 8, \
-		tile_size * global_coords.y + 8)
+	a.position = Vector2(tile_size * gc.x + 8, \
+		tile_size * gc.y + 8)
 	$Debug.add_child(a)
 
 func clear_markers():
@@ -718,14 +701,17 @@ func setup():
 	json.setup(tile_size)
 	self.tile_set = json.tileset
 	
+	# same dictionary (like literally the same memory address)
 	self.world = json.world
 	
 	var a = []
-	a.resize(world.bounds.size.y)
+	a.resize(world["bounds"][1])
 	a.fill(0)
-	for i in world.bounds.size.x:
+	for i in world["bounds"][0]:
 		# make duplicate or else everything decides to use the same array
 		used_tiles.append(a.duplicate())
+	
+	self.bounds = Rect2(0, 0, world["bounds"][0], world["bounds"][0])
 	
 	set_tilemap_tiles()
 	set_tilemap_items()
@@ -733,24 +719,22 @@ func setup():
 	self.storage_changed.emit()
 
 func set_tilemap_tiles():
-	for c in len(world.tiles):
-		for i in world.chunk_area:
-			#print(world.tiles[c][i])
+	for c in len(world["chunks"]):
+		for i in world["chunk_area"]:
+			#print(world["chunks"][str(c)]["tiles"][i])
 			# left to right, top to bottom
 			self.set_cell(0, \
-				Vector2i(fmod(i, world.chunk_size) + (c % world.world_size)*world.chunk_size, \
-					floor(i / world.chunk_size) + floor(c / world.world_size)*world.chunk_size), world.tiles[c][i], \
-				Vector2i.ZERO, world.tiledata[c]["rotation"][i]
+				Vector2i(fmod(i, world["chunk_size"]) + fmod(c, world["world_size"])*world["chunk_size"], \
+					floor(i / world["chunk_size"]) + floor(c / world["world_size"])*world["chunk_size"]), world["chunks"][str(c)]["tiles"][i], \
+				Vector2i.ZERO, world["chunks"][str(c)]["rotation"][i]
 			)
 
 func set_tilemap_items():
-	for c in len(world.items):
-		for i in world.chunk_area:
-			#print(world.tiles[c][i])
-			# left to right, top to bottom
-			self.set_cell(1, \
-				Vector2i(fmod(i, world.chunk_size) + (c % world.world_size)*world.chunk_size, \
-					floor(i / world.chunk_size) + floor(c / world.world_size)*world.chunk_size), world.items[c][i], \
+	for c in len(world["chunks"]):
+		for i in world["chunk_area"]:
+			self.set_cell(0, \
+				Vector2i(fmod(i, world["chunk_size"]) + fmod(c, world["world_size"])*world["chunk_size"], \
+					floor(i / world["chunk_size"]) + floor(c / world["world_size"])*world["chunk_size"]), world["chunks"][str(c)]["items"][i], \
 				Vector2i.ZERO, 0
 			)
 
