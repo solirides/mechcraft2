@@ -17,5 +17,5 @@ func _process(delta):
 
 
 func _on_gui_input(event):
-	if event.is_action_pressed("left_click"):
+	if event.is_action_pressed("place"):
 		self.clicked.emit(slot, tile_id, int($Count.text))

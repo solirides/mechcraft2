@@ -1,4 +1,4 @@
-[gd_scene load_steps=44 format=3 uid="uid://wbpqro6tssd5"]
+[gd_scene load_steps=49 format=3 uid="uid://wbpqro6tssd5"]
 
 [ext_resource type="Script" path="res://scripts/json.gd" id="1_3pqby"]
 [ext_resource type="Script" path="res://scripts/tilemap.gd" id="2_e3udp"]
@@ -19,6 +19,7 @@
 [ext_resource type="Shader" path="res://assets/shaders/grain.gdshader" id="13_xq4xh"]
 [ext_resource type="AudioStream" uid="uid://cmygilbmp72r3" path="res://assets/audio/music1.ogg" id="14_agi1x"]
 [ext_resource type="Shader" path="res://assets/shaders/scanlines.gdshader" id="16_udpk1"]
+[ext_resource type="Script" path="res://scripts/popup.gd" id="19_nvq47"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tbejw"]
 texture = ExtResource("2_obwd8")
@@ -125,6 +126,10 @@ shader_parameter/noise_size = 512.0
 shader_parameter/amount = 0.8
 shader_parameter/noise = SubResource("NoiseTexture2D_3vi5g")
 
+[sub_resource type="LabelSettings" id="LabelSettings_mnp4j"]
+font_size = 22
+font_color = Color(0.952941, 1, 0.486275, 1)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b0gy7"]
 bg_color = Color(0.262745, 0.262745, 0.262745, 0.254902)
 corner_radius_top_left = 8
@@ -133,7 +138,7 @@ corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jbbp0"]
-bg_color = Color(0.921569, 0.647059, 0.254902, 1)
+bg_color = Color(0.960784, 0.823529, 0.145098, 1)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
@@ -146,6 +151,18 @@ shader_parameter/color2 = Color(0.219608, 0.286275, 0.560784, 0.784314)
 shader_parameter/speed = 16.0
 shader_parameter/size = 2.0
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8om3o"]
+bg_color = Color(0.239216, 0.301961, 0.380392, 0.921569)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="LabelSettings" id="LabelSettings_pb51a"]
+font_size = 20
+
+[sub_resource type="Theme" id="Theme_koqpt"]
+
 [sub_resource type="Environment" id="Environment_tiixt"]
 background_mode = 3
 glow_enabled = true
@@ -155,7 +172,6 @@ glow_hdr_threshold = 0.87
 
 [node name="Json" type="Node" parent="."]
 script = ExtResource("1_3pqby")
-saving_path = "res://assets/world.json"
 loading_path = "res://assets/world.json"
 
 [node name="Marketing" type="Sprite2D" parent="."]
@@ -277,7 +293,7 @@ color = Color(1, 0.156863, 0.568627, 1)
 [node name="Grid" type="Node2D" parent="Camera/Camera2D/Shaders"]
 script = ExtResource("10_y4vju")
 
-[node name="GUI" type="CanvasLayer" parent="Camera/Camera2D" node_paths=PackedStringArray("json", "camera", "selection_label", "alert_label", "debug_label", "resources_label", "menu", "music_player", "noise_bar", "hotbar")]
+[node name="GUI" type="CanvasLayer" parent="Camera/Camera2D" node_paths=PackedStringArray("json", "camera", "selection_label", "alert_label", "debug_label", "resources_label", "menu", "music_player", "noise_bar", "hotbar", "leftbar", "popup")]
 layer = 10
 script = ExtResource("10_ocoff")
 json = NodePath("../../../Json")
@@ -291,6 +307,8 @@ menu = NodePath("GUI/Menu")
 music_player = NodePath("GUI/AudioStreamPlayer")
 noise_bar = NodePath("GUI/TopBar/Bar3/Noise")
 hotbar = NodePath("GUI/BottomBar/Panel/Hotbar")
+leftbar = NodePath("GUI/LeftBar")
+popup = NodePath("Popup")
 
 [node name="GUI" type="Control" parent="Camera/Camera2D/GUI"]
 layout_mode = 3
@@ -301,6 +319,64 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 1
 
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Camera/Camera2D/GUI/GUI"]
+stream = ExtResource("14_agi1x")
+
+[node name="Center" type="CenterContainer" parent="Camera/Camera2D/GUI/GUI"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.43
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Alert" type="Label" parent="Camera/Camera2D/GUI/GUI/Center"]
+custom_minimum_size = Vector2(600, 0)
+layout_mode = 2
+mouse_filter = 1
+theme = ExtResource("13_clh56")
+text = "alert text"
+label_settings = SubResource("LabelSettings_mnp4j")
+horizontal_alignment = 1
+
+[node name="BottomBar" type="VBoxContainer" parent="Camera/Camera2D/GUI/GUI"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Panel" type="Panel" parent="Camera/Camera2D/GUI/GUI/BottomBar"]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+
+[node name="Hotbar" type="HBoxContainer" parent="Camera/Camera2D/GUI/GUI/BottomBar/Panel"]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="LeftBar" type="VBoxContainer" parent="Camera/Camera2D/GUI/GUI"]
+custom_minimum_size = Vector2(100, 300)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.24
+anchor_right = 0.1
+anchor_bottom = 0.825
+offset_left = 20.0
+grow_vertical = 2
+theme = ExtResource("13_clh56")
+
 [node name="TopBar" type="VBoxContainer" parent="Camera/Camera2D/GUI/GUI"]
 layout_mode = 1
 anchors_preset = -1
@@ -308,6 +384,7 @@ anchor_right = 1.0
 offset_left = 20.0
 offset_top = 10.0
 offset_right = -20.0
+offset_bottom = 98.0
 grow_horizontal = 2
 
 [node name="Bar1" type="Control" parent="Camera/Camera2D/GUI/GUI/TopBar"]
@@ -363,7 +440,7 @@ grow_horizontal = 2
 mouse_filter = 1
 theme = ExtResource("13_clh56")
 bbcode_enabled = true
-text = "[center]alert text"
+text = "[center]debug"
 fit_content = true
 scroll_active = false
 
@@ -398,53 +475,6 @@ theme_override_styles/background = SubResource("StyleBoxFlat_b0gy7")
 theme_override_styles/fill = SubResource("StyleBoxFlat_jbbp0")
 value = 30.0
 show_percentage = false
-
-[node name="Center" type="CenterContainer" parent="Camera/Camera2D/GUI/GUI"]
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="Alert" type="RichTextLabel" parent="Camera/Camera2D/GUI/GUI/Center"]
-clip_contents = false
-custom_minimum_size = Vector2(600, 0)
-layout_mode = 2
-mouse_filter = 1
-theme = ExtResource("13_clh56")
-bbcode_enabled = true
-text = "[center]alert text"
-fit_content = true
-scroll_active = false
-
-[node name="BottomBar" type="VBoxContainer" parent="Camera/Camera2D/GUI/GUI"]
-layout_mode = 1
-anchors_preset = -1
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 20.0
-offset_right = -20.0
-offset_bottom = -20.0
-grow_horizontal = 2
-grow_vertical = 0
-
-[node name="Panel" type="Panel" parent="Camera/Camera2D/GUI/GUI/BottomBar"]
-custom_minimum_size = Vector2(0, 60)
-layout_mode = 2
-
-[node name="Hotbar" type="HBoxContainer" parent="Camera/Camera2D/GUI/GUI/BottomBar/Panel"]
-custom_minimum_size = Vector2(0, 60)
-layout_mode = 1
-offset_top = -4.0
-offset_right = 1152.0
-offset_bottom = -4.0
-alignment = 1
-
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Camera/Camera2D/GUI/GUI"]
-stream = ExtResource("14_agi1x")
 
 [node name="Menu" type="Control" parent="Camera/Camera2D/GUI/GUI"]
 visible = false
@@ -516,6 +546,78 @@ size_flags_vertical = 4
 focus_mode = 0
 text = "Shut down computer with music"
 
+[node name="Popup" type="Panel" parent="Camera/Camera2D/GUI" node_paths=PackedStringArray("label", "button1", "button2")]
+custom_minimum_size = Vector2(500, 250)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_8om3o")
+script = ExtResource("19_nvq47")
+label = NodePath("Control/Label")
+button1 = NodePath("Control/Control/Button1")
+button2 = NodePath("Control/Control/Button2")
+
+[node name="Control" type="Control" parent="Camera/Camera2D/GUI/Popup"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 32.0
+offset_top = 25.0
+offset_right = -32.0
+offset_bottom = -25.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="Camera/Camera2D/GUI/Popup/Control"]
+layout_mode = 2
+offset_right = 464.0
+offset_bottom = 28.0
+theme = ExtResource("13_clh56")
+text = "A sandworm has attacked!"
+label_settings = SubResource("LabelSettings_pb51a")
+
+[node name="Control" type="Control" parent="Camera/Camera2D/GUI/Popup/Control"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Button1" type="Button" parent="Camera/Camera2D/GUI/Popup/Control/Control"]
+custom_minimum_size = Vector2(140, 40)
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -40.0
+offset_right = 100.0
+grow_vertical = 0
+theme = SubResource("Theme_koqpt")
+text = "Challenge the 
+sandworm to an epic 1v1"
+
+[node name="Button2" type="Button" parent="Camera/Camera2D/GUI/Popup/Control/Control"]
+custom_minimum_size = Vector2(140, 40)
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -140.0
+offset_top = -40.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "AAAAAAHHHHH
+PANIC"
+
 [node name="WorldSave" type="Node" parent="."]
 script = ExtResource("4_mms3p")
 
@@ -547,3 +649,5 @@ polygon = PackedVector2Array(1, 1, -1, 1, -1, -1, 1, -1)
 [connection signal="pressed" from="Camera/Camera2D/GUI/GUI/Menu/VBoxContainer/Button4" to="Camera/Camera2D/GUI" method="_on_title_screen_pressed"]
 [connection signal="toggled" from="Camera/Camera2D/GUI/GUI/Menu/VBoxContainer/Music" to="Camera/Camera2D/GUI" method="_on_music_toggled"]
 [connection signal="toggled" from="Camera/Camera2D/GUI/GUI/Menu/VBoxContainer/Music2" to="Camera/Camera2D/GUI" method="_on_music_2_toggled"]
+[connection signal="pressed" from="Camera/Camera2D/GUI/Popup/Control/Control/Button1" to="Camera/Camera2D/GUI/Popup" method="_on_button_1_pressed"]
+[connection signal="pressed" from="Camera/Camera2D/GUI/Popup/Control/Control/Button2" to="Camera/Camera2D/GUI/Popup" method="_on_button_2_pressed"]

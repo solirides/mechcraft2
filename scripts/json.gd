@@ -8,15 +8,15 @@ class_name Json
 
 var json: Dictionary
 var write_json: Dictionary
-var world = WorldSave.new()
+var world:Dictionary = {}
 var recipes: Dictionary
 var ores: Dictionary
 var tileset:TileSet
 var tile_textures:Dictionary = {}
 #var bounds:Rect2i = Rect2i()
 
-var world_properties = ["seed", "world_size", "chunk_size", "world_name", "elapsed_ticks", "central_storage", "sandworm_noise_threshold", "sandworm_attack_cooldown", "sandworm_current_cooldown"]
-var world_data_int = ["tiles", "items", "noise", "terrain", "integrity", "tile_storage"]
+var world_properties = ["seed", "world_size", "chunk_size", "world_name", "elapsed_ticks", "central_storage", "settings"]
+var world_data_int = ["tiles", "items", "noise", "terrain", "integrity", "tile_storage", "rotation", "state"]
 
 func _ready():
 	pass
@@ -24,7 +24,7 @@ func _ready():
 	
 
 func setup(tile_size:int):
-	json = read_json()
+	json = read_json(loading_path)
 	recipes = read_json("res://assets/recipes.json")
 	ores = read_json("res://assets/ores.json")
 	
@@ -43,7 +43,7 @@ func read_json(file_path:String = loading_path):
 	
 	if file_data.get_error() == OK:
 		pass
-		#print(json_data)
+		print(json_data)
 	else:
 		print("Error: ", json_data.error)
 		print("Error Line: ", json_data.error_line)
@@ -54,91 +54,26 @@ func read_json(file_path:String = loading_path):
 
 
 func write_save(file_path:String = saving_path):
+	write_json = world
 	var file = FileAccess.open(file_path, FileAccess.WRITE)
 	file.store_string(JSON.stringify(write_json))
-	
-
-func create_save():
-	for p in world_properties:
-		write_json[p] = world.get(p)
-	write_json["chunks"] = {}
-	
-	for i in world.world_size**2:
-		write_json["chunks"][i] = {}
-	
-	for p in world_data_int:
-		save_data_int(p)
-	
-	#save_data_int("tiles")
-	#save_data_int("items")
-	#save_data_int("noise")
-	#save_data_int("tile_storage")
-	save_tiledata()
-	
-	#print(write_json)
-
-func save_data_int(property:String):
-	for i in len(world.get(property)):
-		write_json["chunks"][i][property] = world.get(property)[i]
-	
-
-func save_tiledata():
-	for i in len(world.tiledata):
-		write_json["chunks"][i]["tiledata"] = world.tiledata[i]
 
 func load_save():
-	for p in world_properties:
-		world.set(p, json[p])
-	#world.world_size = json["world_size"]
-	#world.chunk_size = json["chunk_size"]
-	world.bounds = Rect2i(0, 0, world.world_size * world.chunk_size, world.world_size * world.chunk_size)
-	world.chunk_area = pow(world.chunk_size, 2)
-	
-	
-	for p in world_data_int:
-		world.set(p, load_data_int(p, 0))
-	
-	#world.tiles = load_data_int("tiles", 0)
-	#world.items = load_data_int("items", 0)
-	#world.noise = load_data_int("noise", 0)
-	#world.tile_storage = load_data_int("tile_storage", 0)
-	world.tiledata = load_tiledata()
-
-func load_data_int(property:String, default_value:int = 0):
-	var data = []
-	print("loading world data")
-	for i in len(json["chunks"]):
-		#print(i)
-		#print(property)
-		if json["chunks"][str(i)].has(property):
-			data.append(PackedInt32Array(json["chunks"][str(i)][property]))
-	
-	# fill missing chunks
-	var a:PackedInt32Array = []
-	a.resize(pow(world.chunk_size, 2))
-	a.fill(default_value)
-	for i in pow(world.world_size, 2) - len(data):
-		data.append(a.duplicate())
-	
-	return data
-
-func load_tiledata():
-	var data = []
-	print("loading world tiledata")
-	#print(json["chunks"][0])
-	for i in len(json["chunks"]):
-		data.append(json["chunks"][str(i)]["tiledata"])
-#		print(world[0]["rotation"])
-	
-	# fill missing chunks
-	var a:PackedInt32Array = []
-	a.resize(pow(world.chunk_size, 2))
+	var world = json.duplicate()
+	var a:Array = []
+	a.resize(world["chunk_area"])
 	a.fill(0)
-	#var d:Dictionary = {"storage": a, "rotation": a, "state": a}
-	for i in pow(world.world_size, 2) - len(data):
-		data.append({"storage": a.duplicate(), "rotation": a.duplicate(), "state": a.duplicate()})
+	var keys = world["chunks"]["0"].keys()
 	
-	return data
+	# create missing chunks
+	for i in range(len(world["chunks"]), world["world_size"]**2):
+		var b:Dictionary
+		for k in keys:
+			b[k] = a.duplicate()
+		world["chunks"][str(i)] = b
+	
+	self.world = world
+
 
 func make_tileset_exist(tile_size:int):
 	var ts = TileSet.new()
