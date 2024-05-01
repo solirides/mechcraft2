@@ -126,6 +126,10 @@ shader_parameter/noise_size = 512.0
 shader_parameter/amount = 0.8
 shader_parameter/noise = SubResource("NoiseTexture2D_3vi5g")
 
+[sub_resource type="LabelSettings" id="LabelSettings_mnp4j"]
+font_size = 22
+font_color = Color(0.952941, 1, 0.486275, 1)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b0gy7"]
 bg_color = Color(0.262745, 0.262745, 0.262745, 0.254902)
 corner_radius_top_left = 8
@@ -139,10 +143,6 @@ corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
-
-[sub_resource type="LabelSettings" id="LabelSettings_mnp4j"]
-font_size = 22
-font_color = Color(0.952941, 1, 0.486275, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_2faln"]
 shader = ExtResource("16_udpk1")
@@ -319,6 +319,64 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 1
 
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Camera/Camera2D/GUI/GUI"]
+stream = ExtResource("14_agi1x")
+
+[node name="Center" type="CenterContainer" parent="Camera/Camera2D/GUI/GUI"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.43
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Alert" type="Label" parent="Camera/Camera2D/GUI/GUI/Center"]
+custom_minimum_size = Vector2(600, 0)
+layout_mode = 2
+mouse_filter = 1
+theme = ExtResource("13_clh56")
+text = "alert text"
+label_settings = SubResource("LabelSettings_mnp4j")
+horizontal_alignment = 1
+
+[node name="BottomBar" type="VBoxContainer" parent="Camera/Camera2D/GUI/GUI"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Panel" type="Panel" parent="Camera/Camera2D/GUI/GUI/BottomBar"]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+
+[node name="Hotbar" type="HBoxContainer" parent="Camera/Camera2D/GUI/GUI/BottomBar/Panel"]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="LeftBar" type="VBoxContainer" parent="Camera/Camera2D/GUI/GUI"]
+custom_minimum_size = Vector2(100, 300)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.24
+anchor_right = 0.1
+anchor_bottom = 0.825
+offset_left = 20.0
+grow_vertical = 2
+theme = ExtResource("13_clh56")
+
 [node name="TopBar" type="VBoxContainer" parent="Camera/Camera2D/GUI/GUI"]
 layout_mode = 1
 anchors_preset = -1
@@ -326,6 +384,7 @@ anchor_right = 1.0
 offset_left = 20.0
 offset_top = 10.0
 offset_right = -20.0
+offset_bottom = 98.0
 grow_horizontal = 2
 
 [node name="Bar1" type="Control" parent="Camera/Camera2D/GUI/GUI/TopBar"]
@@ -416,63 +475,6 @@ theme_override_styles/background = SubResource("StyleBoxFlat_b0gy7")
 theme_override_styles/fill = SubResource("StyleBoxFlat_jbbp0")
 value = 30.0
 show_percentage = false
-
-[node name="Center" type="CenterContainer" parent="Camera/Camera2D/GUI/GUI"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 1.0
-anchor_bottom = 0.43
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="Alert" type="Label" parent="Camera/Camera2D/GUI/GUI/Center"]
-custom_minimum_size = Vector2(600, 0)
-layout_mode = 2
-mouse_filter = 1
-theme = ExtResource("13_clh56")
-text = "alert text"
-label_settings = SubResource("LabelSettings_mnp4j")
-horizontal_alignment = 1
-
-[node name="BottomBar" type="VBoxContainer" parent="Camera/Camera2D/GUI/GUI"]
-layout_mode = 1
-anchors_preset = -1
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 20.0
-offset_right = -20.0
-offset_bottom = -20.0
-grow_horizontal = 2
-grow_vertical = 0
-
-[node name="Panel" type="Panel" parent="Camera/Camera2D/GUI/GUI/BottomBar"]
-custom_minimum_size = Vector2(0, 60)
-layout_mode = 2
-
-[node name="Hotbar" type="HBoxContainer" parent="Camera/Camera2D/GUI/GUI/BottomBar/Panel"]
-custom_minimum_size = Vector2(0, 60)
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-alignment = 1
-
-[node name="LeftBar" type="VBoxContainer" parent="Camera/Camera2D/GUI/GUI"]
-custom_minimum_size = Vector2(100, 300)
-layout_mode = 1
-anchors_preset = -1
-anchor_top = 0.24
-anchor_right = 0.1
-anchor_bottom = 0.825
-offset_left = 20.0
-grow_vertical = 2
-theme = ExtResource("13_clh56")
-
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Camera/Camera2D/GUI/GUI"]
-stream = ExtResource("14_agi1x")
 
 [node name="Menu" type="Control" parent="Camera/Camera2D/GUI/GUI"]
 visible = false

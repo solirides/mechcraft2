@@ -60,13 +60,17 @@ func write_save(file_path:String = saving_path):
 
 func load_save():
 	var world = json.duplicate()
-	var a = world["chunks"]["0"].duplicate()
-	for i in a.values():
-		#i.resize(world["chunk_area"])
-		if i is Array:
-			i.fill(0)
+	var a:Array = []
+	a.resize(world["chunk_area"])
+	a.fill(0)
+	var keys = world["chunks"]["0"].keys()
+	
+	# create missing chunks
 	for i in range(len(world["chunks"]), world["world_size"]**2):
-		world["chunks"][str(i)] = a.duplicate()
+		var b:Dictionary
+		for k in keys:
+			b[k] = a.duplicate()
+		world["chunks"][str(i)] = b
 	
 	self.world = world
 
