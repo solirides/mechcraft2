@@ -40,6 +40,9 @@ var world_loaded = false
 
 const SIDES = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
 
+var input_direction
+var input_started = false
+var input_start_gc = null
 var selected_tile = 1
 var tile_rotation = 0
 
@@ -91,7 +94,6 @@ func _physics_process(delta):
 		tick()
 
 func _input(event):
-	
 	if world_accepts_input:
 		if event.is_action_pressed("reload"):
 			print("this does nothing")
@@ -126,13 +128,27 @@ func _input(event):
 
 func _unhandled_input(event):
 	if world_accepts_input:
-		if event.is_action_pressed("place"):
+		if event is InputEventMouseMotion and input_started == true:
+			var p = get_global_mouse_position()
+			var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
+			var lc = global2local(gc)
+			
+			input_mouse_motion(gc, lc, local2index(Vector2i(lc.x, lc.y)), input_start_gc)
+		
+		if Input.is_action_just_pressed("place"):
 			var p = get_global_mouse_position()
 			var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
 			var lc = global2local(gc)
 			#print(p)
 			#print(gc)
-			place_tile(gc, lc, local2index(Vector2i(lc.x, lc.y)), selected_tile, tile_rotation)
+			#place_tile(gc, lc, local2index(Vector2i(lc.x, lc.y)), selected_tile, tile_rotation)
+			input_start(gc, lc, local2index(Vector2i(lc.x, lc.y)))
+		
+		if Input.is_action_just_released("place"):
+			var p = get_global_mouse_position()
+			var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
+			var lc = global2local(gc)
+			input_end(gc, selected_tile, tile_rotation, input_start_gc, input_direction)
 		
 		if Input.is_action_pressed("pan") and event is InputEventMouseMotion:
 			camera.camera.position -= event.relative / camera.camera.zoom
@@ -163,13 +179,73 @@ func _unhandled_input(event):
 
 func place_tile(gc, lc, idx, id, rotation):
 	if (bounds.has_point(gc) and world["chunks"][str(lc.z)]["integrity"][idx] >= 0):
-		if world["chunks"][str(lc.z)]["tiles"][idx] != id:
-			if world["central_storage"].has(str(id)) and world["central_storage"][str(id)] > 0:
-				set_tile(0, gc, id, rotation)
-				world["central_storage"][str(id)] -= 1
-				self.storage_changed.emit()
+		#if world["chunks"][str(lc.z)]["tiles"][idx] != id:
+		var old_id = world["chunks"][str(lc.z)]["tiles"][idx]
+		if old_id != 0:
+			if world["central_storage"].has(str(old_id)):
+				world["central_storage"][str(old_id)] += 1
 			else:
-				gui.alert("Not enough resources")
+				world["central_storage"][str(old_id)] == 1
+			
+		if world["central_storage"].has(str(id)) and world["central_storage"][str(id)] > 0:
+			set_tile(0, gc, id, rotation)
+			world["central_storage"][str(id)] -= 1
+			self.storage_changed.emit()
+		else:
+			gui.alert("Not enough resources")
+
+func input_start(gc, lc, idx):
+	input_start_gc = gc
+	input_started = true
+	input_direction = 0
+
+func input_mouse_motion(gc, lc, idx, input_start_gc):
+	var a:Vector2i = gc - input_start_gc
+	#if a != Vector2i(0,0):
+		#if abs(a.x) > abs(a.y):
+			#input_direction = 1
+		#else:
+			#input_direction = 2
+	if a.x == 0:
+		input_direction = 2
+	elif a.y == 0:
+		input_direction = 1
+
+func input_end(gc, id, rotation, input_start_gc, input_direction):
+	match input_direction:
+		0:
+			var lc = global2local(gc)
+			var idx = local2index(Vector2i(lc.x, lc.y))
+			place_tile(gc, lc, idx, selected_tile, tile_rotation)
+		1:
+			var s = -sign(input_start_gc.x - gc.x)
+			for x in range(abs(input_start_gc.x - gc.x)):
+				var lc = global2local(input_start_gc + s * Vector2i(x, 0))
+				var idx = local2index(Vector2i(lc.x, lc.y))
+				place_tile(input_start_gc + s * Vector2i(x, 0), lc, idx, selected_tile, (s + 4) % 4)
+			
+			s = -sign(input_start_gc.y - gc.y)
+			for y in range(abs(input_start_gc.y - gc.y)):
+				var lc = global2local(Vector2i(gc.x, input_start_gc.y + s * y))
+				var idx = local2index(Vector2i(lc.x, lc.y))
+				place_tile(Vector2i(gc.x, input_start_gc.y + s * y), lc, idx, selected_tile, (s + 5) % 4)
+			
+			#print("x")
+			
+		2:
+			var s = -sign(input_start_gc.y - gc.y)
+			for y in range(abs(input_start_gc.y - gc.y)):
+				var lc = global2local(input_start_gc + s * Vector2i(0, y))
+				var idx = local2index(Vector2i(lc.x, lc.y))
+				place_tile(input_start_gc + s * Vector2i(0, y), lc, idx, selected_tile, (s + 5) % 4)
+			
+			s = -sign(input_start_gc.x - gc.x)
+			for x in range(abs(input_start_gc.x - gc.x)):
+				var lc = global2local(Vector2i(input_start_gc.x + s * x, gc.y))
+				var idx = local2index(Vector2i(lc.x, lc.y))
+				place_tile(Vector2i(input_start_gc.x + s * x, gc.y), lc, idx, selected_tile, (s + 4) % 4)
+			
+			#print("y")
 
 # Detecting conveyor lines:
 #region
@@ -397,7 +473,7 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 
 #endregion
 
-# Processing world.tiles
+# Processing world tiles
 #region
 
 func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement():
