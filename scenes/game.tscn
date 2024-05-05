@@ -250,6 +250,22 @@ centered = false
 position = Vector2(16, 16)
 texture = ExtResource("2_obwd8")
 
+[node name="LineX" type="Line2D" parent="TileMap"]
+visible = false
+points = PackedVector2Array(0, 0, 100, 100)
+default_color = Color(0.85098, 0.941176, 0.964706, 0.627451)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="LineY" type="Line2D" parent="TileMap"]
+visible = false
+points = PackedVector2Array(0, 0, 0, 0)
+default_color = Color(0.85098, 0.941176, 0.964706, 0.627451)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
 [node name="Camera" type="Node2D" parent="." node_paths=PackedStringArray("background", "camera")]
 script = ExtResource("4_3i4pa")
 background = NodePath("Camera2D/Shaders/Grid")

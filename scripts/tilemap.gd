@@ -85,7 +85,25 @@ func _process(delta):
 			#"\n" + str(gc2.x) + " " + str(gc2.y))
 		gui.debug(str(gc.x) + " " + str(gc.y) + "\n" + str(lc.x) + " " + str(lc.y) + " " + str(lc.z))
 		
-		selector.position = selector.position.lerp(gc * 32, delta * 10)
+		selector.position = selector.position.lerp(gc * tile_size, delta * 10)
+		
+		if input_started:
+			var offset_y = 0
+			var offset_x = 0
+			if input_direction == 1:
+				$LineY.points[0] = $LineY.points[0].lerp(Vector2(gc.x, input_start_gc.y) * tile_size + Vector2(tile_size*0.5, tile_size*0.5), delta * 10)
+				$LineY.points[1] = $LineY.points[1].lerp(Vector2(gc)*tile_size + 0.5*Vector2(tile_size, tile_size), delta * 10)
+				
+				$LineX.points[0] = $LineX.points[0].lerp(Vector2(input_start_gc) * tile_size + Vector2(tile_size*0.5, tile_size*0.5), delta * 10)
+				$LineX.points[1] = $LineX.points[1].lerp(Vector2(gc.x, input_start_gc.y)*tile_size + 0.5*Vector2(tile_size, tile_size), delta * 10)
+			elif input_direction == 2:
+				$LineY.points[0] = $LineY.points[0].lerp(Vector2(input_start_gc) * tile_size + Vector2(tile_size*0.5, tile_size*0.5), delta * 10)
+				$LineY.points[1] = $LineY.points[1].lerp(Vector2(input_start_gc.x, gc.y)*tile_size + 0.5*Vector2(tile_size, tile_size), delta * 10)
+				
+				$LineX.points[0] = $LineX.points[0].lerp(Vector2(input_start_gc.x, gc.y) * tile_size + Vector2(tile_size*0.5, tile_size*0.5), delta * 10)
+				$LineX.points[1] = $LineX.points[1].lerp(Vector2(gc)*tile_size + 0.5*Vector2(tile_size, tile_size), delta * 10)
+			
+			
 
 func _physics_process(delta):
 	#print(last_tick)
@@ -198,6 +216,13 @@ func input_start(gc, lc, idx):
 	input_start_gc = gc
 	input_started = true
 	input_direction = 0
+	$LineX.visible = true
+	$LineY.visible = true
+	
+	$LineX.points[0] = Vector2(gc) * tile_size
+	$LineX.points[1] = Vector2(gc) * tile_size
+	$LineY.points[0] = Vector2(gc) * tile_size
+	$LineY.points[1] = Vector2(gc) * tile_size
 
 func input_mouse_motion(gc, lc, idx, input_start_gc):
 	var a:Vector2i = gc - input_start_gc
@@ -210,6 +235,11 @@ func input_mouse_motion(gc, lc, idx, input_start_gc):
 		input_direction = 2
 	elif a.y == 0:
 		input_direction = 1
+	#else:
+		#input_direction = 0
+	
+	
+	
 
 func input_end(gc, id, rotation, input_start_gc, input_direction):
 	match input_direction:
@@ -219,33 +249,34 @@ func input_end(gc, id, rotation, input_start_gc, input_direction):
 			place_tile(gc, lc, idx, selected_tile, tile_rotation)
 		1:
 			var s = -sign(input_start_gc.x - gc.x)
-			for x in range(abs(input_start_gc.x - gc.x)):
+			for x in range(abs(input_start_gc.x - gc.x) + 1):
 				var lc = global2local(input_start_gc + s * Vector2i(x, 0))
 				var idx = local2index(Vector2i(lc.x, lc.y))
 				place_tile(input_start_gc + s * Vector2i(x, 0), lc, idx, selected_tile, (s + 4) % 4)
 			
 			s = -sign(input_start_gc.y - gc.y)
-			for y in range(abs(input_start_gc.y - gc.y)):
-				var lc = global2local(Vector2i(gc.x, input_start_gc.y + s * y))
-				var idx = local2index(Vector2i(lc.x, lc.y))
-				place_tile(Vector2i(gc.x, input_start_gc.y + s * y), lc, idx, selected_tile, (s + 5) % 4)
-			
-			#print("x")
+			if s != 0:
+				for y in range(abs(input_start_gc.y - gc.y) + 1):
+					var lc = global2local(Vector2i(gc.x, input_start_gc.y + s * y))
+					var idx = local2index(Vector2i(lc.x, lc.y))
+					place_tile(Vector2i(gc.x, input_start_gc.y + s * y), lc, idx, selected_tile, (s + 5) % 4)
 			
 		2:
 			var s = -sign(input_start_gc.y - gc.y)
-			for y in range(abs(input_start_gc.y - gc.y)):
+			for y in range(abs(input_start_gc.y - gc.y) + 1):
 				var lc = global2local(input_start_gc + s * Vector2i(0, y))
 				var idx = local2index(Vector2i(lc.x, lc.y))
 				place_tile(input_start_gc + s * Vector2i(0, y), lc, idx, selected_tile, (s + 5) % 4)
 			
 			s = -sign(input_start_gc.x - gc.x)
-			for x in range(abs(input_start_gc.x - gc.x)):
-				var lc = global2local(Vector2i(input_start_gc.x + s * x, gc.y))
-				var idx = local2index(Vector2i(lc.x, lc.y))
-				place_tile(Vector2i(input_start_gc.x + s * x, gc.y), lc, idx, selected_tile, (s + 4) % 4)
+			if s != 0:
+				for x in range(abs(input_start_gc.x - gc.x) + 1):
+					var lc = global2local(Vector2i(input_start_gc.x + s * x, gc.y))
+					var idx = local2index(Vector2i(lc.x, lc.y))
+					place_tile(Vector2i(input_start_gc.x + s * x, gc.y), lc, idx, selected_tile, (s + 4) % 4)
 			
-			#print("y")
+	$LineX.visible = false
+	$LineY.visible = false
 
 # Detecting conveyor lines:
 #region
@@ -614,7 +645,7 @@ func summon_the_sandworm_from_the_depths_of_the_dunes(gc:Vector2i, lc:Vector3i, 
 			if (bounds.has_point(coords)):
 				set_tile(0, coords, 0, 0)
 				var local = global2local(coords)
-				world["chunks"][str(local.z)]["integrity"][local2index(Vector2i(local.x, local.y))] = -200
+				world["chunks"][str(local.z)]["integrity"][local2index(Vector2i(local.x, local.y))] = -400
 				set_overlay(3, coords, 2001)
 	
 	camera.camera_shake(0.4, 40, 30, 10)
