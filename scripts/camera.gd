@@ -19,8 +19,13 @@ var shake_level = 0
 
 # the total number of times zoomed in
 var status = 0
-
 var zoom_base = 1
+
+var velocity = Vector2.ZERO
+var acceleration = 8
+var speed = 4
+var movement_direction = Vector2.ZERO
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	self.add_child(duration_timer)
@@ -31,6 +36,8 @@ func _ready():
 	
 
 func _input(event: InputEvent):
+	movement_direction = Input.get_vector("camera_left", "camera_right", "camera_up", "camera_down")
+	
 	if event.is_action_pressed("zoom_in"):
 		status += 1
 		zoom(1)
@@ -56,7 +63,15 @@ func zoom(direction):
 	camera.set_zoom(camera.get_zoom() * (1 + a))
 	#self.set_zoom(Vector2(zoom_base, zoom_base))
 
+func _physics_process(delta):
+	#velocity += acceleration * movement_direction * delta
+	pass
+	
+
 func _process(delta):
+	velocity = velocity.lerp(speed * movement_direction / camera.get_zoom().x, delta * acceleration)
+	camera.position += velocity
+	
 	background.draw_grid(camera.get_global_transform().origin, camera.get_zoom().x)
 
 func camera_shake(duration = 0.1, amplitude = 16, frequency:float = 10, level = 0):

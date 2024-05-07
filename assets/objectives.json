@@ -1,0 +1,15 @@
+{
+	"launch_pad":{
+		"name":"dasjkf",
+		"description":"adfjkhgajkfdhgajk",
+		"resource_goals":{
+			"1101":5
+		},
+		"unlock_quests":[
+			"control_tower"
+		]
+	},
+	"control_tower": {
+		
+	}
+}
