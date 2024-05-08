@@ -65,7 +65,7 @@ func _ready():
 	
 	setup()
 	
-	gui.noise_bar.max_value = world["settings"]["sandworm_noise_threshold_3"]
+	gui.noise_bar.max_value = world["settings"]["sandworm_noise_thresholds"][2]
 	gui.noise_bar.value = 0
 	
 	
@@ -184,6 +184,16 @@ func _unhandled_input(event):
 					e.explode()
 					camera.camera_shake(0.4, 16, 50, 10)
 					set_tile(0, gc, 0, 0)
+			
+			if event.is_action_pressed("delay_tile"):
+				var p = get_global_mouse_position()
+				var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
+				var lc = global2local(gc)
+				var idx = local2index(Vector2i(lc.x, lc.y))
+				
+				if (bounds.has_point(gc)):
+					decrease_state(gc, lc, idx)
+				
 		
 		if Input.is_action_pressed("pan") and event is InputEventMouseMotion:
 			camera.camera.position -= event.relative / camera.camera.zoom
@@ -613,9 +623,12 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 									world["chunks"][str(lc.z)]["state"][index] = 1
 								else:
 									world["chunks"][str(lc.z)]["state"][index] += 1
-					
-					world["chunks"][str(lc.z)]["noise"][index] = max(world["chunks"][str(lc.z)]["noise"][index] - 5, 0)
-					if world["chunks"][str(lc.z)]["noise"][index] >= world["settings"]["sandworm_noise_threshold_3"] and world["settings"]["sandworm_current_cooldown"] <= 0:
+					var a = world["settings"]["max_noise_decay"]
+					for i in len(world["settings"]["sandworm_noise_thresholds"]):
+						if world["chunks"][str(lc.z)]["noise"][index] < world["settings"]["sandworm_noise_thresholds"][i]:
+							a = world["settings"]["noise_decay_rates"][i]
+					world["chunks"][str(lc.z)]["noise"][index] = max(world["chunks"][str(lc.z)]["noise"][index] - a, 0)
+					if world["chunks"][str(lc.z)]["noise"][index] >= world["settings"]["sandworm_noise_thresholds"][2] and world["settings"]["sandworm_current_cooldown"] <= 0:
 						summon_the_sandworm_from_the_depths_of_the_dunes(gc, lc, index)
 						world["settings"]["sandworm_current_cooldown"] = world["settings"]["sandworm_attack_cooldown"]
 						
@@ -769,6 +782,10 @@ func global2local(global_coords:Vector2i):
 		global_coords.y % int(world["chunk_size"]), \
 		floor(global_coords.x / world["chunk_size"]) + world["world_size"]*floor(global_coords.y/world["chunk_size"]))
 
+func decrease_state(gc:Vector2i, lc:Vector3i, idx:int):
+	if world["chunks"][str(lc.z)]["tiles"][idx] == 4:
+		world["chunks"][str(lc.z)]["state"][idx] -= 1
+
 func set_tile(layer:int, gc:Vector2i, tile:int, rotation:int):
 #	no storage data yet
 	var lc = global2local(gc)
@@ -776,6 +793,7 @@ func set_tile(layer:int, gc:Vector2i, tile:int, rotation:int):
 	
 	world["chunks"][str(lc.z)]["tiles"][index] = tile
 	world["chunks"][str(lc.z)]["rotation"][index] = rotation
+	world["chunks"][str(lc.z)]["state"][index] = 0
 	#print(gc)
 	#print(lc)
 	self.set_cell(layer, \

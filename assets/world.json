@@ -17,9 +17,9 @@
 	},
 	"settings": {
 		"sandworm_attack_cooldown":40,
-		"sandworm_noise_threshold_1":35,
-		"sandworm_noise_threshold_2":50,
-		"sandworm_noise_threshold_3":70,
+		"sandworm_noise_thresholds":[35, 50, 70],
+		"noise_decay_rates": [3, 5, 8],
+		"max_noise_decay": 10,
 		"sandworm_current_cooldown":0
 	},
 	"chunks":{
