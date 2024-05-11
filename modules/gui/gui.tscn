@@ -43,7 +43,7 @@ font_size = 20
 
 [sub_resource type="Theme" id="Theme_koqpt"]
 
-[node name="GUI" type="CanvasLayer" node_paths=PackedStringArray("selection_label", "alert_label", "debug_label", "resources_label", "menu", "music_player", "noise_bar", "hotbar", "leftbar", "popup")]
+[node name="GUI" type="CanvasLayer" node_paths=PackedStringArray("selection_label", "alert_label", "debug_label", "resources_label", "menu", "music_player", "noise_bar", "hotbar", "leftbar", "rightbar", "popup")]
 layer = 10
 script = ExtResource("1_slngm")
 create_chaos_with_music = false
@@ -56,6 +56,7 @@ music_player = NodePath("GUI/AudioStreamPlayer")
 noise_bar = NodePath("GUI/TopBar/Bar3/Noise")
 hotbar = NodePath("GUI/BottomBar/Panel/Hotbar")
 leftbar = NodePath("GUI/LeftBar")
+rightbar = NodePath("GUI/RightBar")
 popup = NodePath("Popup")
 
 [node name="GUI" type="Control" parent="."]
@@ -123,6 +124,32 @@ anchor_right = 0.1
 anchor_bottom = 0.825
 offset_left = 20.0
 grow_vertical = 2
+theme = ExtResource("3_wyw2n")
+
+[node name="RightBar" type="VBoxContainer" parent="GUI"]
+custom_minimum_size = Vector2(100, 300)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.8
+anchor_top = 0.24
+anchor_right = 1.0
+anchor_bottom = 0.825
+offset_right = -20.0
+grow_vertical = 2
+theme = ExtResource("3_wyw2n")
+
+[node name="Objective" type="Label" parent="GUI/RightBar"]
+layout_mode = 2
+theme = ExtResource("3_wyw2n")
+text = "objective"
+
+[node name="Description" type="Label" parent="GUI/RightBar"]
+layout_mode = 2
+theme = ExtResource("3_wyw2n")
+text = "description"
+
+[node name="Progress" type="VBoxContainer" parent="GUI/RightBar"]
+layout_mode = 2
 theme = ExtResource("3_wyw2n")
 
 [node name="TopBar" type="VBoxContainer" parent="GUI"]

@@ -50,6 +50,7 @@ var tileset = TileSet.new()
 var bounds:Rect2
 
 signal storage_changed()
+signal objective_changed()
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -57,6 +58,7 @@ func _ready():
 	await camera.ready
 	#await camera.gui.ready
 	self.storage_changed.connect(_on_storage_changed)
+	self.objective_changed.connect(_on_objective_changed)
 	
 	gui.selection_changed.connect(_on_selection_changed)
 	gui.world_focused.connect(_on_world_focused)
@@ -315,26 +317,23 @@ func detect_world_tiles():
 	#		print(world.tiles[0][index])
 			# one chunk
 			var gc = local2global(index2local(index, c))
-			match int(world["chunks"][str(c)]["tiles"][index]):
-				5: # line includes storage
-					print("5")
-					
-	#				print(Vector3i(index % world["chunk_size"], floor(index / world["chunk_size"]), c))
-	#				print(gc)
-					debug_marker(gc, Color(1, 0, 1, 0.7))
-					used_tiles[gc.x][gc.y] == 1
-					var a = detect_connections(gc, world["chunks"][str(c)]["tiles"][index], 1, 0, true)
-					# add self to line
-					#a[0][0].push_front(gc)
-					
-					lines_global.merge(a[0])
-					#priorities_global.merge(a[1])
-					for k in a[1].keys():
-						if (priorities_global.has(k)):
-							if (priorities_global[k] < a[1][k]):
-								priorities_global[k] = a[1][k]
-						else:
+			if [5, 7].has(int(world["chunks"][str(c)]["tiles"][index])):
+#				print(Vector3i(index % world["chunk_size"], floor(index / world["chunk_size"]), c))
+#				print(gc)
+				debug_marker(gc, Color(1, 0, 1, 0.7))
+				used_tiles[gc.x][gc.y] == 1
+				var a = detect_connections(gc, world["chunks"][str(c)]["tiles"][index], 1, 0, true)
+				# add self to line
+				#a[0][0].push_front(gc)
+				
+				lines_global.merge(a[0])
+				#priorities_global.merge(a[1])
+				for k in a[1].keys():
+					if (priorities_global.has(k)):
+						if (priorities_global[k] < a[1][k]):
 							priorities_global[k] = a[1][k]
+					else:
+						priorities_global[k] = a[1][k]
 	
 	# sort lines
 	for i in range(max_priority + 1):
@@ -379,7 +378,7 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 		3:
 			neighbors = [2, 3]
 		_:
-			neighbors = [1, 2, 3]
+			neighbors = [0,1, 2, 3]
 	
 	while loop:
 		loop = false
@@ -598,12 +597,10 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 							5:# storage recieves item
 								var item = world["chunks"][str(lc.z)]["items"][index]
 								if (item != 0):
-									#print("item recieved")
-									#gui.add_resource(1)
 									if (not world["central_storage"].has(str(item))):
 										world["central_storage"][str(item)] = 1
-									world["central_storage"][str(item)] += 1
-									# item go bye bye
+									else:
+										world["central_storage"][str(item)] += 1
 									set_item(1, gc, 0)
 									self.storage_changed.emit()
 							6:
@@ -623,6 +620,18 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 									world["chunks"][str(lc.z)]["state"][index] = 1
 								else:
 									world["chunks"][str(lc.z)]["state"][index] += 1
+							7:
+								var item = world["chunks"][str(lc.z)]["items"][index]
+								var objective = world["current_objective"]
+								if (item != 0):
+									print(item)
+									#print(world["objectives"][objective]["resources"][0])
+									if json.objectives[objective]["resource_goals"].keys().has(str(item)):
+										world["objectives"][objective]["resources"][str(item)] += 1
+									set_item(1, gc, 0)
+									self.objective_changed.emit()
+					
+					
 					var a = world["settings"]["max_noise_decay"]
 					for i in len(world["settings"]["sandworm_noise_thresholds"]):
 						if world["chunks"][str(lc.z)]["noise"][index] < world["settings"]["sandworm_noise_thresholds"][i]:
@@ -878,8 +887,11 @@ func setup():
 	world_gen.setup()
 	_on_world_updated()
 	#self.set_cell(0, Vector2i(1,1), 1, Vector2i.ZERO, 0)
-	self.storage_changed.emit()
 	world_loaded = true
+	
+	self.storage_changed.emit()
+	self.objective_changed.emit()
+	
 
 func set_tilemap_tiles():
 	for c in world["world_size"]**2:
@@ -903,7 +915,6 @@ func set_tilemap_items():
 			self.set_cell(1, gc, int(world["chunks"][str(c)]["items"][i]), \
 				Vector2i.ZERO, 0
 			)
-
 #endregion
 
 func _on_selection_changed(selected_tile, tile_rotation):
@@ -921,4 +932,26 @@ func _on_world_updated():
 func _on_storage_changed():
 	gui.update_resources(world["central_storage"])
 	gui.update_hotbar(world["central_storage"])
+
+func _on_objective_changed():
+	var objective = world["current_objective"]
+	# there is a better way but i'm lazy
+	var complete = true
+	for k in world["objectives"][objective]["resources"].keys():
+		if world["objectives"][objective]["resources"][k] < int(json.objectives[objective]["resource_goals"][k]):
+			complete = false
 	
+	if complete:
+		world["objectives"][objective]["status"] = "completed"
+		
+		world["current_objective"] = json.objectives[objective]["unlock_objectives"][0]
+		objective = world["current_objective"]
+		world["objectives"][objective] = {}
+		
+		world["objectives"][objective]["status"] = "active"
+		world["objectives"][objective]["resources"] = {}
+		
+		for k in json.objectives[objective]["resource_goals"].keys():
+			world["objectives"][objective]["resources"][str(k)] = 0
+	
+	gui.update_objective(objective, world["objectives"][objective])

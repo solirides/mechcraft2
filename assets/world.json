@@ -4,9 +4,19 @@
 	"chunk_size":8,
 	"chunk_area":64,
 	"world_size":16,
-	"bounds": [128, 128],
+	"bounds":[128, 128],
 	"elapsed_ticks":12,
 	"date":0,
+	"base_location":[64,64],
+	"current_objective":"launch_pad",
+	"objectives":{
+		"launch_pad":{
+			"status":"active",
+			"resources":{
+				"3001":2
+			}
+		}
+	},
 	"central_storage":{
 		"1":443218,
 		"2":200,
@@ -14,6 +24,7 @@
 		"4":200,
 		"5":200,
 		"6":200,
+		"7":200
 	},
 	"settings": {
 		"sandworm_attack_cooldown":40,

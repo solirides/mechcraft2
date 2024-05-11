@@ -1,15 +1,31 @@
 {
 	"launch_pad":{
-		"name":"dasjkf",
-		"description":"adfjkhgajkfdhgajk",
+		"name":"Launch Pad",
+		"description":"A fancy platform.",
 		"resource_goals":{
-			"1101":5
+			"3001":5
 		},
-		"unlock_quests":[
+		"unlock_objectives":[
 			"control_tower"
 		]
 	},
 	"control_tower": {
-		
+		"name":"Control Tower",
+		"description":"A fancy room for fancy stuff.",
+		"resource_goals":{
+			"3001":10
+		},
+		"unlock_objectives":[
+			"basically_impossible"
+		]
+	},
+	"basically_impossible": {
+		"name":"Basically Impossible",
+		"description":"for testing",
+		"resource_goals":{
+			"3001":9999999
+		},
+		"unlock_objectives":[
+		]
 	}
 }

@@ -6,7 +6,7 @@
 
 [sub_resource type="LabelSettings" id="LabelSettings_3mj87"]
 
-[node name="GuiItem" type="TextureRect"]
+[node name="HotbarItem" type="TextureRect"]
 custom_minimum_size = Vector2(64, 64)
 size_flags_horizontal = 0
 size_flags_vertical = 0

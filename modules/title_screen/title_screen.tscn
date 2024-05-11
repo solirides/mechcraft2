@@ -103,3 +103,7 @@ theme = ExtResource("3_gol26")
 text = "Quit"
 
 [connection signal="close_requested" from="Window" to="." method="_on_window_close_requested"]
+[connection signal="pressed" from="VBoxContainer2/Load" to="." method="_on_load_pressed"]
+[connection signal="pressed" from="VBoxContainer2/New" to="." method="_on_new_pressed"]
+[connection signal="pressed" from="VBoxContainer2/Options" to="." method="_on_options_pressed"]
+[connection signal="pressed" from="VBoxContainer2/Quit" to="." method="_on_quit_pressed"]

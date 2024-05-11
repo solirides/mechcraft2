@@ -98,7 +98,6 @@ glow_hdr_threshold = 0.87
 
 [node name="Json" type="Node" parent="."]
 script = ExtResource("1_mq3c1")
-loading_path = "res://assets/world.json"
 
 [node name="Marketing" type="Sprite2D" parent="."]
 self_modulate = Color(1, 1, 1, 0.247059)

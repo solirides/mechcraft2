@@ -38,3 +38,20 @@ func moving_window_thing(delta):
 	
 	window.position.x += delta * 400 * direction.x
 	window.position.y += delta * 400 * direction.y
+
+
+func _on_load_pressed():
+	Globals.load_game_type = "load"
+
+
+func _on_new_pressed():
+	Globals.load_game_type = "new"
+	get_tree().change_scene_to_file("res://modules/game/game.tscn")
+
+
+func _on_options_pressed():
+	pass # Replace with function body.
+
+
+func _on_quit_pressed():
+	get_tree().quit()

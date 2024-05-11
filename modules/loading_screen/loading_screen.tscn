@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://daocwnt6hdc8u"]
+
+[ext_resource type="Script" path="res://modules/loading_screen/loading_screen.gd" id="1_j5asb"]
+
+[node name="LoadingScreen" type="Node2D"]
+script = ExtResource("1_j5asb")

@@ -4,13 +4,14 @@ class_name Json
 
 
 @export var saving_path:String = "res://assets/world_2.json"
-@export var loading_path:String = "res://assets/world_2.json"
+@export var loading_path:String = "res://assets/world.json"
 
 var json: Dictionary
 var write_json: Dictionary
 var world:Dictionary = {}
 var recipes: Dictionary
 var ores: Dictionary
+var objectives: Dictionary
 var tileset:TileSet
 var tile_textures:Dictionary = {}
 #var bounds:Rect2i = Rect2i()
@@ -27,6 +28,7 @@ func setup(tile_size:int):
 	json = read_json(loading_path)
 	recipes = read_json("res://assets/recipes.json")
 	ores = read_json("res://assets/ores.json")
+	objectives = read_json("res://assets/objectives.json")
 	
 	tileset = make_tileset_exist(tile_size)
 	ResourceSaver.save(tileset, "res://generated_tileset.tres")

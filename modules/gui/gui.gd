@@ -16,6 +16,7 @@ signal world_focused(state)
 @export var noise_bar:ProgressBar = null
 @export var hotbar:HBoxContainer = null
 @export var leftbar:VBoxContainer = null
+@export var rightbar:VBoxContainer = null
 @export var popup:Node = null
 
 @onready var json:Node = camera.json
@@ -25,7 +26,9 @@ var selected_tile = 1
 var tile_rotation = 0
 var resource_count = 0
 
-var gui_item = preload("res://modules/gui/hotbar_item/hotbar_item.tscn")
+var sidebar_item = preload("res://modules/gui/sidebar_item/sidebar_item.tscn")
+var hotbar_item = preload("res://modules/gui/hotbar_item/hotbar_item.tscn")
+var objective_item = preload("res://modules/gui/objective_item/objective_item.tscn")
 
 func _ready():
 	pass # Replace with function body.
@@ -62,7 +65,7 @@ func update_hotbar(central_storage):
 		hotbar.remove_child(n)
 		n.queue_free()
 	for k in central_storage.keys():
-		var a = gui_item.instantiate()
+		var a = hotbar_item.instantiate()
 		a.get_child(0).text = str(central_storage[k])
 		a.slot = i
 		a.tile_id = k
@@ -78,9 +81,9 @@ func update_resources(central_storage):
 		leftbar.remove_child(n)
 		n.queue_free()
 	for k in central_storage.keys():
-		var a = gui_item.instantiate()
-		a.custom_minimum_size = Vector2(32, 32)
-		a.get_child(0).label_settings.font_size = 16
+		var a = sidebar_item.instantiate()
+		#a.custom_minimum_size = Vector2(32, 32)
+		#a.get_child(0).label_settings.font_size = 16
 		a.get_child(0).text = str(central_storage[k])
 		a.slot = i
 		a.tile_id = k
@@ -96,6 +99,26 @@ func _on_hotbar_item_clicked(slot, id, count):
 	self.selection_changed.emit(selected_tile, tile_rotation)
 	print(id)
 
+func update_objective(current_objective:String, objective:Dictionary):
+	#print(current_objective)
+	#print(json.objectives[current_objective]["name"])
+	rightbar.get_node(^"Objective").text = str(json.objectives[current_objective]["name"])
+	rightbar.get_node(^"Description").text = str(json.objectives[current_objective]["description"])
+	var i = 0
+	var progress = rightbar.get_node(^"Progress")
+	for n in progress.get_children():
+		progress.remove_child(n)
+		n.queue_free()
+	for k in objective["resources"].keys():
+		var a = objective_item.instantiate()
+		a.get_child(0).text = str(objective["resources"][k]) + " / " + str(json.objectives[current_objective]["resource_goals"][k])
+		a.slot = i
+		a.tile_id = k
+		a.texture = json.texture_from_tile(int(k))
+		#a.clicked.connect(_on_hotbar_item_clicked)
+		progress.add_child(a)
+		
+		i += 1
 
 func alert(text:String):
 	alert_label.text = text
@@ -160,7 +183,7 @@ func _on_menu_pressed():
 
 
 func _on_title_screen_pressed():
-	get_tree().change_scene_to_file("res://scenes/title_screen.tscn")
+	get_tree().change_scene_to_file("res://modules/title_screen/title_screen.tscn")
 
 
 func _on_resume_pressed():
