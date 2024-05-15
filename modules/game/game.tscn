@@ -1,4 +1,4 @@
-[gd_scene load_steps=29 format=3 uid="uid://wbpqro6tssd5"]
+[gd_scene load_steps=31 format=3 uid="uid://wbpqro6tssd5"]
 
 [ext_resource type="Script" path="res://modules/json/json.gd" id="1_mq3c1"]
 [ext_resource type="Texture2D" uid="uid://5am0arvmxore" path="res://assets/factorygame3.png" id="2_j5pph"]
@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://modules/game/world_gen.gd" id="9_d0wmh"]
 [ext_resource type="Texture2D" uid="uid://bujtksqumn34r" path="res://assets/textures/blank_slot.png" id="10_xi6q4"]
 [ext_resource type="PackedScene" uid="uid://ny288342pj6c" path="res://modules/camera/camera.tscn" id="11_3eovr"]
+[ext_resource type="Shader" path="res://assets/shaders/blueprint.gdshader" id="11_co4te"]
 [ext_resource type="Script" path="res://scripts/classes.gd" id="20_ld583"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tbejw"]
@@ -88,6 +89,11 @@ domain_warp_fractal_lacunarity = 1.705
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_fkb45"]
 noise = SubResource("FastNoiseLite_uonlq")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_sp16o"]
+shader = ExtResource("11_co4te")
+shader_parameter/color = Color(0.3, 0.4, 0.9, 1)
+shader_parameter/brightness = 5.0
 
 [sub_resource type="Environment" id="Environment_tiixt"]
 background_mode = 3
@@ -176,6 +182,7 @@ texture = ExtResource("10_xi6q4")
 centered = false
 
 [node name="Tile" type="Sprite2D" parent="TileMap/Selector"]
+material = SubResource("ShaderMaterial_sp16o")
 position = Vector2(16, 16)
 texture = ExtResource("3_kp5hp")
 
