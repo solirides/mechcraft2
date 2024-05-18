@@ -56,6 +56,7 @@ signal objective_changed()
 func _ready():
 #	print(json.json)
 	await camera.ready
+	#await json.ready
 	#await camera.gui.ready
 	self.storage_changed.connect(_on_storage_changed)
 	self.objective_changed.connect(_on_objective_changed)

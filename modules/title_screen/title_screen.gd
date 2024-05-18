@@ -41,12 +41,12 @@ func moving_window_thing(delta):
 
 
 func _on_load_pressed():
-	Globals.load_game_type = "load"
-
+	#Globals.load_game_type = "load"
+	get_tree().change_scene_to_file("res://modules/level_selector/level_selector.tscn")
 
 func _on_new_pressed():
-	Globals.load_game_type = "new"
-	get_tree().change_scene_to_file("res://modules/game/game.tscn")
+	#Globals.load_game_type = "new"
+	get_tree().change_scene_to_file("res://modules/level_creator/level_creator.tscn")
 
 
 func _on_options_pressed():

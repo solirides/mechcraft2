@@ -3,8 +3,8 @@ extends Node
 class_name Json
 
 
-@export var saving_path:String = "res://assets/world_2.json"
-@export var loading_path:String = "res://assets/world.json"
+#@export var saving_path:String = "res://assets/world_2.json"
+var save_path:String = ""
 
 var json: Dictionary
 var write_json: Dictionary
@@ -20,12 +20,40 @@ var world_properties = ["seed", "world_size", "chunk_size", "world_name", "elaps
 var world_data_int = ["tiles", "items", "noise", "terrain", "integrity", "tile_storage", "rotation", "state"]
 
 func _ready():
-	pass
+	load_world(Globals.load_game_type)
+
+func load_world(type:String):
+	match type:
+		"new":
+			if Globals.save_file_name == "":
+				Globals.save_file_name = "world.json"
+			DirAccess.make_dir_recursive_absolute(Globals.saves_directory)
+			var dir = DirAccess.open(Globals.saves_directory)
+			dir.copy("res://assets/world_template.json", Globals.saves_directory + Globals.save_file_name)
+			dir = null
+			
+			save_path = Globals.saves_directory + Globals.save_file_name
+			
+			json = read_json(save_path)
+			load_save()
+			Globals.world_override_data = {}
+			write_save()
+			
+			
+			#loading_path = Globals.save_file_path
+		"load":
+			if Globals.save_file_name != "":
+				save_path = Globals.saves_directory + Globals.save_file_name
+				
+				json = read_json(save_path)
+				load_save()
+				Globals.world_override_data = {}
+				
 	#print(json["chunks"][0]["tiles"])
 	
 
 func setup(tile_size:int):
-	json = read_json(loading_path)
+	#json = read_json(save_path)
 	recipes = read_json("res://assets/recipes.json")
 	ores = read_json("res://assets/ores.json")
 	objectives = read_json("res://assets/objectives.json")
@@ -34,8 +62,10 @@ func setup(tile_size:int):
 	ResourceSaver.save(tileset, "res://generated_tileset.tres")
 	
 	load_save()
+	
+	#Globals.world_override_data = {}
 
-func read_json(file_path:String = loading_path):
+func read_json(file_path:String = save_path):
 	var json_data
 	var file_data = FileAccess.open(file_path, FileAccess.READ)
 	
@@ -45,7 +75,7 @@ func read_json(file_path:String = loading_path):
 	
 	if file_data.get_error() == OK:
 		pass
-		print(json_data)
+		#print(json_data)
 	else:
 		print("Error: ", json_data.error)
 		print("Error Line: ", json_data.error_line)
@@ -55,13 +85,19 @@ func read_json(file_path:String = loading_path):
 	return json_data
 
 
-func write_save(file_path:String = saving_path):
+func write_save(file_path:String = save_path):
 	write_json = world
+	write_json["unix_time"] = Time.get_unix_time_from_system()
+	
 	var file = FileAccess.open(file_path, FileAccess.WRITE)
 	file.store_string(JSON.stringify(write_json))
+	file = null
 
 func load_save():
 	var world = json.duplicate()
+	
+	world.merge(Globals.world_override_data, true)
+	
 	var a:Array = []
 	a.resize(world["chunk_area"])
 	a.fill(0)
@@ -73,6 +109,7 @@ func load_save():
 		for k in keys:
 			b[k] = a.duplicate()
 		world["chunks"][str(i)] = b
+	
 	
 	self.world = world
 
@@ -100,12 +137,12 @@ func make_tileset_exist(tile_size:int):
 			elif file_name.ends_with(".png"):
 				print("Found file: " + file_name)
 				print(path + file_name)
-				var image = Image.load_from_file(path + file_name)
+				var image = load(path + file_name)
 				
 				if (tile_metadata.has(file_name.get_basename())):
 					var tile = tile_metadata[file_name.get_basename()]
 					var source = TileSetAtlasSource.new()
-					source.texture = ImageTexture.create_from_image(image)
+					source.texture = image
 					
 					if image.get_height() == 32:
 						source.texture_region_size = Vector2i(32, 32)
@@ -130,6 +167,9 @@ func make_tileset_exist(tile_size:int):
 		dir.list_dir_end()
 	else:
 		print("An error occurred when trying to access the path.")
+	
+	file_data = null
+	dir = null
 	
 	return ts
 
