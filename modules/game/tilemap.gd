@@ -5,8 +5,7 @@ extends TileMap
 
 var explosion = preload("res://modules/explosion/explosion.tscn")
 
-@onready var json = get_node("../Json")
-@onready var world_gen = get_node("WorldGen")
+@export var json:Node = null
 @export var debug_dot:Polygon2D = null
 @export var camera:Node = null
 @export var selector:Node = null
@@ -145,7 +144,7 @@ func _input(event):
 		
 		if Input.is_action_just_pressed("save"):
 			print("write to save file")
-			json.create_save()
+			#json.create_save()
 			json.write_save()
 
 func _unhandled_input(event):
@@ -166,19 +165,22 @@ func _unhandled_input(event):
 				var lc = global2local(gc)
 				input_end(gc, selected_tile, tile_rotation, input_start_gc, input_direction)
 		else:
-			if Input.is_action_just_pressed("place"):
+			if Input.is_action_pressed("place"):
 				var p = get_global_mouse_position()
 				var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
 				var lc = global2local(gc)
-				#print(p)
-				#print(gc)
-				#place_tile(gc, lc, local2index(Vector2i(lc.x, lc.y)), selected_tile, tile_rotation)
-				input_start(gc, lc, local2index(Vector2i(lc.x, lc.y)))
+				var idx = local2index(Vector2i(lc.x, lc.y))
+				
+				if selected_tile == 1:
+					input_start(gc, lc, local2index(Vector2i(lc.x, lc.y)))
+				else:
+					place_tile(gc, lc, idx, selected_tile, tile_rotation)
 			
-			if event.is_action_pressed("remove"):
+			if Input.is_action_pressed("remove"):
 				var p = get_global_mouse_position()
 				var gc = Vector2i(floor(p.x/tile_size), floor(p.y/tile_size))
-				#print(p)
+				var lc = global2local(gc)
+				var idx = local2index(Vector2i(lc.x, lc.y))
 				
 				if (bounds.has_point(gc)):
 					var e = explosion.instantiate()
@@ -186,7 +188,7 @@ func _unhandled_input(event):
 					e.position = gc * tile_size
 					e.explode()
 					camera.camera_shake(0.4, 16, 50, 10)
-					set_tile(0, gc, 0, 0)
+					remove_tile(gc, lc, idx)
 			
 			if event.is_action_pressed("delay_tile"):
 				var p = get_global_mouse_position()
@@ -214,22 +216,39 @@ func _unhandled_input(event):
 		
 		
 
+
+func remove_tile(gc, lc, idx):
+	if (bounds.has_point(gc) and world["chunks"][str(lc.z)]["integrity"][idx] >= 0):
+		#if world["chunks"][str(lc.z)]["tiles"][idx] != id:
+		var old_id = world["chunks"][str(lc.z)]["tiles"][idx]
+		if old_id != 7:
+			if old_id != 0:
+				if world["central_storage"].has(str(old_id)):
+					world["central_storage"][str(old_id)] += 1
+				else:
+					world["central_storage"][str(old_id)] == 1
+				
+				set_tile(0, gc, 0, 0)
+				self.storage_changed.emit()
+
+
 func place_tile(gc, lc, idx, id, rotation):
 	if (bounds.has_point(gc) and world["chunks"][str(lc.z)]["integrity"][idx] >= 0):
 		#if world["chunks"][str(lc.z)]["tiles"][idx] != id:
 		var old_id = world["chunks"][str(lc.z)]["tiles"][idx]
-		if old_id != 0:
-			if world["central_storage"].has(str(old_id)):
-				world["central_storage"][str(old_id)] += 1
+		if old_id != 7:
+			if old_id != 0:
+				if world["central_storage"].has(str(old_id)):
+					world["central_storage"][str(old_id)] += 1
+				else:
+					world["central_storage"][str(old_id)] == 1
+				
+			if world["central_storage"].has(str(id)) and world["central_storage"][str(id)] > 0:
+				set_tile(0, gc, id, rotation)
+				world["central_storage"][str(id)] -= 1
+				self.storage_changed.emit()
 			else:
-				world["central_storage"][str(old_id)] == 1
-			
-		if world["central_storage"].has(str(id)) and world["central_storage"][str(id)] > 0:
-			set_tile(0, gc, id, rotation)
-			world["central_storage"][str(id)] -= 1
-			self.storage_changed.emit()
-		else:
-			gui.alert("Not enough resources")
+				gui.alert("Not enough resources")
 
 func input_start(gc, lc, idx):
 	input_start_gc = gc
@@ -797,7 +816,6 @@ func decrease_state(gc:Vector2i, lc:Vector3i, idx:int):
 		world["chunks"][str(lc.z)]["state"][idx] -= 1
 
 func set_tile(layer:int, gc:Vector2i, tile:int, rotation:int):
-#	no storage data yet
 	var lc = global2local(gc)
 	var index = local2index(Vector2i(lc.x, lc.y))
 	
@@ -868,6 +886,7 @@ func clear_markers():
 #region
 
 func setup():
+	json.tilemap = self
 	json.setup(tile_size)
 	self.tile_set = json.tileset
 	
@@ -883,9 +902,8 @@ func setup():
 	
 	self.bounds = Rect2(0, 0, world["bounds"][0], world["bounds"][0])
 	
-	set_tilemap_tiles()
-	set_tilemap_items()
-	world_gen.setup()
+	set_tilemap_from_world()
+	#json.world_gen.setup()
 	_on_world_updated()
 	#self.set_cell(0, Vector2i(1,1), 1, Vector2i.ZERO, 0)
 	world_loaded = true
@@ -894,7 +912,7 @@ func setup():
 	self.objective_changed.emit()
 	
 
-func set_tilemap_tiles():
+func set_tilemap_from_world():
 	for c in world["world_size"]**2:
 		for i in world["chunk_area"]:
 			#print(world["chunks"][str(c)]["tiles"][i])
@@ -906,6 +924,12 @@ func set_tilemap_tiles():
 				#print(gc)
 			self.set_cell(0, gc, int(world["chunks"][str(c)]["tiles"][i]), \
 				Vector2i.ZERO, int(world["chunks"][str(c)]["rotation"][i])
+			)
+			self.set_cell(2, gc, int(world["chunks"][str(c)]["terrain"][i]), \
+				Vector2i.ZERO, 0
+			)
+			self.set_cell(1, gc, int(world["chunks"][str(c)]["items"][i]), \
+				Vector2i.ZERO, 0
 			)
 
 func set_tilemap_items():

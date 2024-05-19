@@ -3,7 +3,8 @@ extends Node
 class_name Json
 
 
-#@export var saving_path:String = "res://assets/world_2.json"
+@export var tilemap:Node = null
+@export var world_gen:Node = null
 var save_path:String = ""
 
 var json: Dictionary
@@ -37,6 +38,20 @@ func load_world(type:String):
 			json = read_json(save_path)
 			load_save()
 			Globals.world_override_data = {}
+			
+			world_gen.setup()
+			
+			for x in int(world["base_dimensions"][0]):
+				for y in int(world["base_dimensions"][1]):
+					var gc = Vector2i(world["base_location"][0] + x, world["base_location"][1] + y)
+					var lc = Globals.global2local(gc, world["chunk_size"], world["world_size"])
+					var idx = Globals.local2index(Vector2i(lc.x, lc.y), world["chunk_size"])
+					
+					world["chunks"][str(lc.z)]["tiles"][idx] = 7
+					world["chunks"][str(lc.z)]["terrain"][idx] = 2002
+			
+			
+			
 			write_save()
 			
 			
