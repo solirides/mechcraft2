@@ -53,8 +53,11 @@
 	"3003-raw_gold": {
 		"id": 3003
 	},
-	"3004-raw_plutonium": {
+	"3004_silica_sand": {
 		"id": 3004
+	},
+	"3005_raw_carbon": {
+		"id": 3005
 	},
 	"3101-refined_iron": {
 		"id": 3101
@@ -62,7 +65,17 @@
 	"3102-refined_copper": {
 		"id": 3102
 	},
-	"3105-garlic_bread": {
-		"id": 3005
+	"3103-refined_gold": {
+		"id": 3103
 	},
+	"3104-silica": {
+		"id": 3104
+	},
+	"3105-carbon-fiber": {
+		"id": 3105
+	},
+	"3201-garlic_bread": {
+		"id": 3201
+	},
+	
 }

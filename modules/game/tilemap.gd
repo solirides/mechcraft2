@@ -945,8 +945,7 @@ func set_tilemap_items():
 func _on_selection_changed(selected_tile, tile_rotation):
 	self.selected_tile = int(selected_tile)
 	self.tile_rotation = int(tile_rotation)
-	if(selected_tile <= 6 && selected_tile > 0):
-		self.selector.get_node("Tile").texture = json.texture_from_tile(int(selected_tile))
+	self.selector.get_node("Tile").texture = json.texture_from_tile(int(selected_tile))
 	
 	self.selector.get_node("Tile").rotation_degrees = tile_rotation * 90
 

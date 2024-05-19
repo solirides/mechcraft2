@@ -189,4 +189,6 @@ func make_tileset_exist(tile_size:int):
 	return ts
 
 func texture_from_tile(id:int):
-	return load("res://assets/tiles/" + self.tile_textures[id] + ".png")
+	if tile_textures.has(id) and ResourceLoader.exists("res://assets/tiles/" + self.tile_textures[id] + ".png"):
+		return load("res://assets/tiles/" + self.tile_textures[id] + ".png")
+	return load("res://assets/textures/missing16.png")
