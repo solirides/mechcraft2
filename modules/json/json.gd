@@ -28,6 +28,8 @@ func load_world(type:String):
 		"new":
 			if Globals.save_file_name == "":
 				Globals.save_file_name = "world.json"
+			Globals.world_override_data["file_name"] = Globals.save_file_name.trim_suffix(".json")
+			
 			DirAccess.make_dir_recursive_absolute(Globals.saves_directory)
 			var dir = DirAccess.open(Globals.saves_directory)
 			dir.copy("res://assets/world_template.json", Globals.saves_directory + Globals.save_file_name)

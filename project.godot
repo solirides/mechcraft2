@@ -11,9 +11,9 @@ config_version=5
 [application]
 
 config/name="Mechcraft"
-run/main_scene="res://modules/game/game.tscn"
+run/main_scene="res://modules/title_screen/title_screen.tscn"
 config/features=PackedStringArray("4.2", "Forward Plus")
-config/icon="res://icon.svg"
+config/icon="res://assets/factorygame3.png"
 
 [autoload]
 

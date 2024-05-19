@@ -30,6 +30,8 @@ var sidebar_item = preload("res://modules/gui/sidebar_item/sidebar_item.tscn")
 var hotbar_item = preload("res://modules/gui/hotbar_item/hotbar_item.tscn")
 var objective_item = preload("res://modules/gui/objective_item/objective_item.tscn")
 
+signal save
+
 func _ready():
 	pass # Replace with function body.
 
@@ -196,3 +198,6 @@ func _on_zoom_value_changed(value):
 	camera.camera.zoom = Vector2(v, v)
 	print("zoom")
 
+func _on_save_pressed():
+	save.emit()
+	

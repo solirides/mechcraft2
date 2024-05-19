@@ -7,6 +7,7 @@
 	"bounds":[128, 128],
 	"elapsed_ticks":12,
 	"unix_time":0,
+	"file_name":"world_template",
 	"base_location":[64,64],
 	"base_dimensions":[6,6],
 	"terrain_generated":0,

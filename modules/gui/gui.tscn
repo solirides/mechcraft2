@@ -252,7 +252,6 @@ value = 30.0
 show_percentage = false
 
 [node name="Menu" type="Control" parent="GUI"]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -295,7 +294,7 @@ text = "Resume"
 custom_minimum_size = Vector2(240, 0)
 layout_mode = 2
 theme = ExtResource("3_wyw2n")
-text = "Something"
+text = "Save Game"
 
 [node name="Button3" type="Button" parent="GUI/Menu/VBoxContainer"]
 custom_minimum_size = Vector2(240, 0)
@@ -307,15 +306,17 @@ text = "Options"
 custom_minimum_size = Vector2(240, 0)
 layout_mode = 2
 theme = ExtResource("3_wyw2n")
-text = "Main Menu"
+text = "Quit to Main Menu"
 
 [node name="Music" type="CheckButton" parent="GUI/Menu/VBoxContainer"]
+visible = false
 layout_mode = 2
 size_flags_vertical = 4
 focus_mode = 0
 text = "Delete code with music (it goes in the recycling bin)"
 
 [node name="Music2" type="CheckButton" parent="GUI/Menu/VBoxContainer"]
+visible = false
 layout_mode = 2
 size_flags_vertical = 4
 focus_mode = 0
@@ -394,6 +395,7 @@ PANIC"
 [connection signal="pressed" from="GUI/TopBar/Bar1/Menu" to="." method="_on_menu_pressed"]
 [connection signal="value_changed" from="GUI/TopBar/Bar1/Zoom" to="." method="_on_zoom_value_changed"]
 [connection signal="pressed" from="GUI/Menu/VBoxContainer/Button1" to="." method="_on_resume_pressed"]
+[connection signal="pressed" from="GUI/Menu/VBoxContainer/Button2" to="." method="_on_save_pressed"]
 [connection signal="pressed" from="GUI/Menu/VBoxContainer/Button4" to="." method="_on_title_screen_pressed"]
 [connection signal="toggled" from="GUI/Menu/VBoxContainer/Music" to="." method="_on_music_toggled"]
 [connection signal="toggled" from="GUI/Menu/VBoxContainer/Music2" to="." method="_on_music_2_toggled"]

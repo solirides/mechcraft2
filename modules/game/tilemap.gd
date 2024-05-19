@@ -62,6 +62,7 @@ func _ready():
 	
 	gui.selection_changed.connect(_on_selection_changed)
 	gui.world_focused.connect(_on_world_focused)
+	gui.save.connect(save_game)
 	
 	#await get_tree().create_timer(1.0).timeout
 	
@@ -981,3 +982,11 @@ func _on_objective_changed():
 			world["objectives"][objective]["resources"][str(k)] = 0
 	
 	gui.update_objective(objective, world["objectives"][objective])
+	
+
+func save_game():
+	var file_name = world["file_name"] + str(Time.get_datetime_string_from_system()) + ".json"
+	
+	json.write_save(Globals.saves_directory + file_name)
+	json.write_save(Globals.saves_directory + world["file_name"] + ".json")
+	

@@ -3,12 +3,16 @@ extends Control
 
 # Called when the node enters the scene tree for the first time.
 @export var window:Window = null
+@export var level_selector:Node = null
+@export var level_creator:Node = null
+@export var background:Node = null
 
 var direction = Vector2i(1, 1)
 var screen_size = DisplayServer.screen_get_size()
 
 func _ready():
-	pass
+	level_selector.back.connect(hide_background)
+	level_creator.back.connect(hide_background)
 	#get_tree().root.add_child(window)
 
 
@@ -42,11 +46,15 @@ func moving_window_thing(delta):
 
 func _on_load_pressed():
 	#Globals.load_game_type = "load"
-	get_tree().change_scene_to_file("res://modules/level_selector/level_selector.tscn")
+	level_selector.visible = true
+	background.visible = true
+	#get_tree().change_scene_to_file("res://modules/level_selector/level_selector.tscn")
 
 func _on_new_pressed():
 	#Globals.load_game_type = "new"
-	get_tree().change_scene_to_file("res://modules/level_creator/level_creator.tscn")
+	level_creator.visible = true
+	background.visible = true
+	#get_tree().change_scene_to_file("res://modules/level_creator/level_creator.tscn")
 
 
 func _on_options_pressed():
@@ -55,3 +63,6 @@ func _on_options_pressed():
 
 func _on_quit_pressed():
 	get_tree().quit()
+
+func hide_background():
+	background.visible = false

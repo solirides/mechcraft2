@@ -5,6 +5,7 @@ extends Control
 @export_category("Nodes")
 @export var name_label:Node = null
 
+signal back
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -24,16 +25,21 @@ func _on_create_pressed():
 	Globals.world_override_data["seed"] = randi()
 	
 	var regex = RegEx.new()
-	regex.compile("\\w| |-")
+	regex.compile("\\w|-")
 	
 	var file_name = ""
 	
 	for a in name_label.text:
 		if regex.search(a):
 			file_name += a
+		elif a == ' ':
+			file_name += "_"
 	
 	if file_name == "":
 		file_name = "world"
+	
+	
+	Globals.world_override_data["file_name"] = file_name
 	
 	file_name += ".json"
 	
@@ -43,6 +49,6 @@ func _on_create_pressed():
 	get_tree().change_scene_to_file("res://modules/game/game.tscn")
 	
 
-
 func _on_back_pressed():
-	pass # Replace with function body.
+	back.emit()
+	self.visible = false

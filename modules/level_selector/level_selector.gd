@@ -4,14 +4,19 @@ extends Control
 
 @export_category("Nodes")
 @export var saves:Node = null
+@export var buttons:Node = null
 
 var savefile = preload("res://modules/level_selector/save_file/save_file.tscn")
 
 var selected_file = ""
 
+signal back
+signal save
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	
+	var savefiles = {}
 	var dir = DirAccess.open(Globals.saves_directory)
 	
 	if dir:
@@ -40,9 +45,16 @@ func _ready():
 				a.get_node(^"VBoxContainer/Name").text = json_data["world_name"]
 				a.get_node(^"VBoxContainer/FileName").text = file_name
 				a.get_node(^"VBoxContainer/Date").text = Time.get_datetime_string_from_unix_time(json_data["unix_time"], true)
-				saves.add_child(a)
 				
-				a.clicked.connect(_on_save_file_clicked)
+				savefiles[int(json_data["unix_time"])] = a
+		
+		var sorted = savefiles.keys()
+		sorted.sort_custom(func(a, b): return a > b)
+		
+		for k in sorted:
+			saves.add_child(savefiles[k])
+			
+			savefiles[k].clicked.connect(_on_save_file_clicked)
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -61,8 +73,13 @@ func _on_load_pressed():
 
 
 func _on_save_pressed():
-	pass # Replace with function body.
+	save.emit()
 
 
 func _on_delete_pressed():
-	pass # Replace with function body.
+	pass
+
+
+func _on_back_pressed():
+	back.emit()
+	self.visible = false
