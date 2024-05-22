@@ -8,7 +8,12 @@ extends Node2D
 @export var json:Node = null
 @export var background:Node = null
 @export var camera:Node = null
+@export var shaders:Node = null
+@export var tilemap:Node = null
 @export var gui:Node = null
+
+@export_category("Resources")
+@export var day_cycle_gradient:Gradient = null
 
 @onready var duration_timer = Timer.new()
 @onready var frequency_timer = Timer.new()
@@ -30,6 +35,8 @@ var movement_direction = Vector2.ZERO
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	tilemap.tick_processed.connect(_on_tick_processed)
+	
 	self.add_child(duration_timer)
 	self.add_child(frequency_timer)
 	duration_timer.one_shot = true
@@ -120,3 +127,8 @@ func _on_duration_timer_timeout():
 	shake_level = 0
 	frequency_timer.stop()
 	self.position = Vector2.ZERO
+
+func _on_tick_processed(elapsed_ticks:int):
+	var color = day_cycle_gradient.sample((elapsed_ticks % 200) / 200.0)
+	shaders.get_node(^"DayCycleTint").color = lerp(Color(1,1,1,1), color, color.a)
+	#print((elapsed_ticks % 200) / 200.0)

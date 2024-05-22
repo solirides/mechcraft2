@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3 uid="uid://wbpqro6tssd5"]
+[gd_scene load_steps=24 format=3 uid="uid://wbpqro6tssd5"]
 
 [ext_resource type="PackedScene" uid="uid://cdu50wti8uan3" path="res://modules/json/json.tscn" id="1_xadu0"]
 [ext_resource type="Texture2D" uid="uid://5am0arvmxore" path="res://assets/factorygame3.png" id="2_j5pph"]
@@ -11,6 +11,8 @@
 [ext_resource type="Texture2D" uid="uid://bujtksqumn34r" path="res://assets/textures/blank_slot.png" id="10_xi6q4"]
 [ext_resource type="PackedScene" uid="uid://ny288342pj6c" path="res://modules/camera/camera.tscn" id="11_3eovr"]
 [ext_resource type="Shader" path="res://assets/shaders/blueprint.gdshader" id="11_co4te"]
+[ext_resource type="PackedScene" uid="uid://oshwg28g0vb1" path="res://modules/base/base.tscn" id="11_hq1oq"]
+[ext_resource type="Gradient" uid="uid://6k8oc2t2mj5o" path="res://assets/day_cycle_tint.tres" id="13_21404"]
 [ext_resource type="Script" path="res://scripts/classes.gd" id="20_ld583"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tbejw"]
@@ -77,7 +79,7 @@ offset_right = 2048.0
 offset_bottom = 2048.0
 color = Color(0.117647, 0.141176, 0.164706, 1)
 
-[node name="TileMap" type="TileMap" parent="." node_paths=PackedStringArray("json", "debug_dot", "camera", "selector")]
+[node name="TileMap" type="TileMap" parent="." node_paths=PackedStringArray("json", "base", "debug_dot", "camera", "selector")]
 tile_set = SubResource("TileSet_huth1")
 format = 2
 layer_0/name = "Tiles"
@@ -94,6 +96,7 @@ layer_3/z_index = -1
 layer_3/tile_data = PackedInt32Array()
 script = ExtResource("7_2dpiw")
 json = NodePath("../Json")
+base = NodePath("Base")
 debug_dot = NodePath("DebugDot")
 camera = NodePath("../Camera")
 selector = NodePath("Selector")
@@ -140,8 +143,12 @@ joint_mode = 2
 begin_cap_mode = 2
 end_cap_mode = 2
 
-[node name="Camera" parent="." node_paths=PackedStringArray("json") instance=ExtResource("11_3eovr")]
+[node name="Base" parent="TileMap" instance=ExtResource("11_hq1oq")]
+
+[node name="Camera" parent="." node_paths=PackedStringArray("json", "tilemap") instance=ExtResource("11_3eovr")]
 json = NodePath("../Json")
+tilemap = NodePath("../TileMap")
+day_cycle_gradient = ExtResource("13_21404")
 
 [node name="WorldSave" type="Node" parent="."]
 script = ExtResource("20_ld583")

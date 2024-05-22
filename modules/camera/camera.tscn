@@ -1,7 +1,8 @@
-[gd_scene load_steps=12 format=3 uid="uid://ny288342pj6c"]
+[gd_scene load_steps=14 format=3 uid="uid://ny288342pj6c"]
 
 [ext_resource type="Script" path="res://modules/camera/camera.gd" id="1_rdnut"]
 [ext_resource type="Shader" path="res://assets/shaders/background.gdshader" id="2_0rylb"]
+[ext_resource type="Gradient" uid="uid://6k8oc2t2mj5o" path="res://assets/day_cycle_tint.tres" id="2_et0bm"]
 [ext_resource type="Shader" path="res://assets/shaders/test.gdshader" id="3_wvts0"]
 [ext_resource type="Shader" path="res://assets/shaders/grain.gdshader" id="4_2imdu"]
 [ext_resource type="Script" path="res://modules/camera/grid.gd" id="5_n56r2"]
@@ -37,11 +38,16 @@ shader_parameter/noise_size = 512.0
 shader_parameter/amount = 0.8
 shader_parameter/noise = SubResource("NoiseTexture2D_3vi5g")
 
-[node name="Camera" type="Node2D" node_paths=PackedStringArray("background", "camera", "gui")]
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_x4vnc"]
+blend_mode = 3
+
+[node name="Camera" type="Node2D" node_paths=PackedStringArray("background", "camera", "shaders", "gui")]
 script = ExtResource("1_rdnut")
 background = NodePath("Camera2D/Shaders/Grid")
 camera = NodePath("Camera2D")
+shaders = NodePath("Camera2D/Shaders")
 gui = NodePath("Camera2D/GUI")
+day_cycle_gradient = ExtResource("2_et0bm")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 
@@ -77,6 +83,15 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 color = Color(1, 0.156863, 0.568627, 1)
+
+[node name="DayCycleTint" type="ColorRect" parent="Camera2D/Shaders"]
+material = SubResource("CanvasItemMaterial_x4vnc")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0)
 
 [node name="Grid" type="Node2D" parent="Camera2D/Shaders"]
 script = ExtResource("5_n56r2")

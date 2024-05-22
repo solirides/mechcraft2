@@ -24,7 +24,7 @@ func _ready():
 		for file_name in dir.get_files():
 			if dir.current_is_dir():
 				continue
-			elif file_name.ends_with(".json"):
+			if file_name.ends_with(".json"):
 				print("Found file: " + file_name)
 				
 				var file_path = ProjectSettings.globalize_path(Globals.saves_directory + file_name)

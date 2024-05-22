@@ -6,6 +6,7 @@ extends TileMap
 var explosion = preload("res://modules/explosion/explosion.tscn")
 
 @export var json:Node = null
+@export var base:Node = null
 @export var debug_dot:Polygon2D = null
 @export var camera:Node = null
 @export var selector:Node = null
@@ -50,6 +51,7 @@ var bounds:Rect2
 
 signal storage_changed()
 signal objective_changed()
+signal tick_processed(elapsed_ticks:int)
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -690,7 +692,10 @@ func tick():
 	do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement()
 	world["elapsed_ticks"] += 1;;;;;;;;;;;;;
 	world["settings"]["sandworm_current_cooldown"] = max(0, world["settings"]["sandworm_current_cooldown"] - 1)
-	gui.resources(str(floor(world["elapsed_ticks"] / 900)))
+	#gui.resources(str(floor(world["elapsed_ticks"] / 900)))
+	
+	tick_processed.emit(int(world["elapsed_ticks"]))
+	
 
 func summon_the_sandworm_from_the_depths_of_the_dunes(gc:Vector2i, lc:Vector3i, index:int):
 	var e = explosion.instantiate()
@@ -902,6 +907,8 @@ func setup():
 		used_tiles.append(a.duplicate())
 	
 	self.bounds = Rect2(0, 0, world["bounds"][0], world["bounds"][0])
+	
+	base.position = tile_size * Vector2(world["base_location"][0] + 1, world["base_location"][1] + 1)
 	
 	set_tilemap_from_world()
 	#json.world_gen.setup()

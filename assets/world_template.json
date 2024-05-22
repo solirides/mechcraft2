@@ -8,7 +8,7 @@
 	"elapsed_ticks":12,
 	"unix_time":0,
 	"file_name":"world_template",
-	"base_location":[64,64],
+	"base_location":[61,61],
 	"base_dimensions":[6,6],
 	"terrain_generated":0,
 	"current_objective":"launch_pad",
@@ -16,7 +16,6 @@
 		"launch_pad":{
 			"status":"active",
 			"resources":{
-				"3001":2
 			}
 		}
 	},
@@ -26,17 +25,7 @@
 		"3":2000,
 		"4":2000,
 		"5":2000,
-		"6":2000,
-		"3001":2000,
-		"3002":2000,
-		"3003":2000,
-		"3004":2000,
-		"3005":2000,
-		"3101":2000,
-		"3102":2000,
-		"3103":2000,
-		"3104":2000,
-		"3105":2000,
+		"6":2000
 	},
 	"settings": {
 		"sandworm_attack_cooldown":40,

@@ -43,6 +43,9 @@ func load_world(type:String):
 			
 			world_gen.setup()
 			
+			# this is really convoluted
+			var a = 1
+			
 			for x in int(world["base_dimensions"][0]):
 				for y in int(world["base_dimensions"][1]):
 					var gc = Vector2i(world["base_location"][0] + x, world["base_location"][1] + y)
@@ -52,6 +55,37 @@ func load_world(type:String):
 					world["chunks"][str(lc.z)]["tiles"][idx] = 7
 					world["chunks"][str(lc.z)]["terrain"][idx] = 2002
 			
+			for i in int(world["base_dimensions"][0]) - 2 * a:
+				var gc = Vector2i(world["base_location"][0] + i + a, world["base_location"][1])
+				var lc = Globals.global2local(gc, world["chunk_size"], world["world_size"])
+				var idx = Globals.local2index(Vector2i(lc.x, lc.y), world["chunk_size"])
+				
+				world["chunks"][str(lc.z)]["tiles"][idx] = 5
+				world["chunks"][str(lc.z)]["terrain"][idx] = 2002
+			
+			for i in int(world["base_dimensions"][0]) - 2 * a:
+				var gc = Vector2i(world["base_location"][0] + i + a, world["base_location"][1] + world["base_dimensions"][1] - 1)
+				var lc = Globals.global2local(gc, world["chunk_size"], world["world_size"])
+				var idx = Globals.local2index(Vector2i(lc.x, lc.y), world["chunk_size"])
+				
+				world["chunks"][str(lc.z)]["tiles"][idx] = 5
+				world["chunks"][str(lc.z)]["terrain"][idx] = 2002
+			
+			for i in int(world["base_dimensions"][1]) - 2 * a:
+				var gc = Vector2i(world["base_location"][0], world["base_location"][1] + i + a)
+				var lc = Globals.global2local(gc, world["chunk_size"], world["world_size"])
+				var idx = Globals.local2index(Vector2i(lc.x, lc.y), world["chunk_size"])
+				
+				world["chunks"][str(lc.z)]["tiles"][idx] = 5
+				world["chunks"][str(lc.z)]["terrain"][idx] = 2002
+			
+			for i in int(world["base_dimensions"][1]) - 2 * a:
+				var gc = Vector2i(world["base_location"][0] + world["base_dimensions"][0] - 1, world["base_location"][1] + i + a)
+				var lc = Globals.global2local(gc, world["chunk_size"], world["world_size"])
+				var idx = Globals.local2index(Vector2i(lc.x, lc.y), world["chunk_size"])
+				
+				world["chunks"][str(lc.z)]["tiles"][idx] = 5
+				world["chunks"][str(lc.z)]["terrain"][idx] = 2002
 			
 			
 			write_save()
