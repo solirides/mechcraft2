@@ -9,6 +9,7 @@ var explosion = preload("res://modules/explosion/explosion.tscn")
 @export var base:Node = null
 @export var debug_dot:Polygon2D = null
 @export var camera:Node = null
+#@export var tooltip:Node = null
 @export var selector:Node = null
 @export var tile_size = 16
 
@@ -90,6 +91,12 @@ func _process(delta):
 			#"\n" + str(idx) + "\n" + str(lc2.x) + " " + str(lc2.y) + " " + str(lc2.z) + \
 			#"\n" + str(gc2.x) + " " + str(gc2.y))
 		gui.debug(str(gc.x) + " " + str(gc.y) + "\n" + str(lc.x) + " " + str(lc.y) + " " + str(lc.z))
+		
+		gui.tooltip.visible = false
+		if bounds.has_point(gc):
+			if world["chunks"][str(lc.z)]["tiles"][idx] == 6:
+				gui.tooltip.visible = true
+				gui.update_tooltip()
 		
 		selector.position = selector.position.lerp(gc * tile_size, delta * 10)
 		
@@ -543,6 +550,23 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 						#n_dir = facing_rot
 						#loop = false
 						#split = true
+				8:
+					# same as 2
+					if facing_rot == (neighbor_dir + 2) % 4:
+						used_tiles[facing_gc.x][facing_gc.y] = 1
+						if split:
+							var a = detect_connections(facing_gc, facing_tile, priority + 1, facing_rot, true)
+							result.merge(a[0])
+							priorities.merge(a[1])
+							continue
+						debug_marker(facing_gc, color)
+						line.append(facing_gc)
+						
+						n_tile = facing_gc
+						n_dir = facing_rot
+						loop = true
+						split = true
+					
 	result[gc2string(gc)] = line
 	priorities[gc2string(gc)] = priority
 	
@@ -582,8 +606,8 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 										# construct thing
 										world["chunks"][str(lc.z)]["noise"][index] += 5
 										var key = str(world["chunks"][str(lc.z)]["tile_storage"][index]) + "," + str(item)
-										if json.recipes.has(key):
-											set_item(1, gc, json.recipes[key])
+										if json.constructor_recipes.has(key):
+											set_item(1, gc, json.constructor_recipes[key])
 											move_resource(gc, world["chunks"][str(lc.z)]["rotation"][index])
 										else:
 											set_item(1, gc, 0)
@@ -629,7 +653,7 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 							6:
 								world["chunks"][str(lc.z)]["noise"][index] += 2
 								var item = world["chunks"][str(lc.z)]["items"][index]
-								var target_item = 3001
+								var target_item = world["chunks"][str(lc.z)]["mode"][index]
 								if (item != 0):
 									move_resource(gc, world["chunks"][str(lc.z)]["rotation"][index])
 								if (world["chunks"][str(lc.z)]["state"][index] == 4):
@@ -653,6 +677,23 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 										world["objectives"][objective]["resources"][str(item)] += 1
 									set_item(1, gc, 0)
 									self.objective_changed.emit()
+							8:
+								world["chunks"][str(lc.z)]["noise"][index] += 3
+								var item = world["chunks"][str(lc.z)]["items"][index]
+								if (item != 0):
+									var a = gc2string(gc)
+									if (world["chunks"][str(lc.z)]["tile_storage"][index] != 0):
+										world["chunks"][str(lc.z)]["noise"][index] += 5
+										var key = str(world["chunks"][str(lc.z)]["tile_storage"][index]) + "," + str(item)
+										if json.smelter_recipes.has(key):
+											set_item(1, gc, json.smelter_recipes[key])
+											move_resource(gc, world["chunks"][str(lc.z)]["rotation"][index])
+										else:
+											set_item(1, gc, 0)
+										world["chunks"][str(lc.z)]["tile_storage"][index] = 0
+									else:
+										world["chunks"][str(lc.z)]["tile_storage"][index] = item
+										set_item(1, gc, 0)
 					
 					
 					var a = world["settings"]["max_noise_decay"]

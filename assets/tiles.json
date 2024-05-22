@@ -26,6 +26,10 @@
 	"7-base": {
 		"id": 7
 	},
+	"8-smelter": {
+		"id": 8,
+		"rotatable":1
+	},
 	"1001-sand": {
 		"id": 1001
 	},
@@ -74,8 +78,28 @@
 	"3105-carbon-fiber": {
 		"id": 3105
 	},
-	"3201-garlic_bread": {
+	"3201-steel": {
 		"id": 3201
 	},
-	
+	"3202-wire": {
+		"id": 3202
+	},
+	"3203-semiconductor": {
+		"id": 3203
+	},
+	"3204-inductor": {
+		"id": 3204
+	},
+	"3205-carbon_sheet": {
+		"id": 3205
+	},
+	"3301-circuit": {
+		"id": 3301
+	},
+	"3302-motor": {
+		"id": 3302
+	},
+	"3303-steel_plate": {
+		"id": 3203
+	},
 }

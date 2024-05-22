@@ -17,6 +17,7 @@ signal world_focused(state)
 @export var hotbar:HBoxContainer = null
 @export var leftbar:VBoxContainer = null
 @export var rightbar:VBoxContainer = null
+@export var tooltip:Node = null
 @export var popup:Node = null
 
 @onready var json:Node = camera.json
@@ -201,3 +202,6 @@ func _on_zoom_value_changed(value):
 func _on_save_pressed():
 	save.emit()
 	
+
+func update_tooltip():
+	tooltip.position = get_viewport().get_mouse_position()

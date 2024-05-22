@@ -1,10 +1,11 @@
-[gd_scene load_steps=13 format=3 uid="uid://jghaelellieo"]
+[gd_scene load_steps=14 format=3 uid="uid://jghaelellieo"]
 
 [ext_resource type="Script" path="res://modules/gui/gui.gd" id="1_slngm"]
 [ext_resource type="AudioStream" uid="uid://cmygilbmp72r3" path="res://assets/audio/music1.ogg" id="2_up154"]
 [ext_resource type="Theme" uid="uid://b4us1mhl0qxjp" path="res://assets/theme.tres" id="3_wyw2n"]
 [ext_resource type="Shader" path="res://assets/shaders/scanlines.gdshader" id="4_qhokn"]
 [ext_resource type="Script" path="res://modules/gui/popup.gd" id="5_trcsy"]
+[ext_resource type="PackedScene" uid="uid://cbv4iphoyccrb" path="res://modules/tooltip/tooltip.tscn" id="6_r3bcu"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_mnp4j"]
 font_size = 22
@@ -43,7 +44,7 @@ font_size = 20
 
 [sub_resource type="Theme" id="Theme_koqpt"]
 
-[node name="GUI" type="CanvasLayer" node_paths=PackedStringArray("selection_label", "alert_label", "debug_label", "resources_label", "menu", "music_player", "noise_bar", "hotbar", "leftbar", "rightbar", "popup")]
+[node name="GUI" type="CanvasLayer" node_paths=PackedStringArray("selection_label", "alert_label", "debug_label", "resources_label", "menu", "music_player", "noise_bar", "hotbar", "leftbar", "rightbar", "tooltip", "popup")]
 layer = 10
 script = ExtResource("1_slngm")
 create_chaos_with_music = false
@@ -57,6 +58,7 @@ noise_bar = NodePath("GUI/TopBar/Bar3/Noise")
 hotbar = NodePath("GUI/BottomBar/Panel/Hotbar")
 leftbar = NodePath("GUI/LeftBar")
 rightbar = NodePath("GUI/RightBar")
+tooltip = NodePath("Tooltip")
 popup = NodePath("Popup")
 
 [node name="GUI" type="Control" parent="."]
@@ -395,6 +397,8 @@ grow_horizontal = 0
 grow_vertical = 0
 text = "AAAAAAHHHHH
 PANIC"
+
+[node name="Tooltip" parent="." instance=ExtResource("6_r3bcu")]
 
 [connection signal="pressed" from="GUI/TopBar/Bar1/Menu" to="." method="_on_menu_pressed"]
 [connection signal="value_changed" from="GUI/TopBar/Bar1/Zoom" to="." method="_on_zoom_value_changed"]

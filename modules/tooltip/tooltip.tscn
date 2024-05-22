@@ -1,0 +1,33 @@
+[gd_scene load_steps=4 format=3 uid="uid://cbv4iphoyccrb"]
+
+[ext_resource type="Theme" uid="uid://b4us1mhl0qxjp" path="res://assets/theme.tres" id="1_qpmfd"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ekb30"]
+bg_color = Color(0.145098, 0.176471, 0.239216, 0.701961)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="LabelSettings" id="LabelSettings_v20hi"]
+font_size = 12
+
+[node name="Tooltip" type="Panel"]
+custom_minimum_size = Vector2(140, 60)
+theme = ExtResource("1_qpmfd")
+theme_override_styles/panel = SubResource("StyleBoxFlat_ekb30")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_qpmfd")
+text = "text"
+label_settings = SubResource("LabelSettings_v20hi")

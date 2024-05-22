@@ -5,12 +5,17 @@ class_name Json
 
 @export var tilemap:Node = null
 @export var world_gen:Node = null
+@export_file var constructor_recipes_file:String = "res://assets/constructor_recipes.json"
+@export_file var smelter_recipes_file:String = "res://assets/smelter_recipes.json"
+@export_file var ores_file:String = "res://assets/ores.json"
+@export_file var objectives_file:String = "res://assets/objectives.json"
 var save_path:String = ""
 
 var json: Dictionary
 var write_json: Dictionary
 var world:Dictionary = {}
-var recipes: Dictionary
+var constructor_recipes: Dictionary
+var smelter_recipes: Dictionary
 var ores: Dictionary
 var objectives: Dictionary
 var tileset:TileSet
@@ -105,9 +110,10 @@ func load_world(type:String):
 
 func setup(tile_size:int):
 	#json = read_json(save_path)
-	recipes = read_json("res://assets/recipes.json")
-	ores = read_json("res://assets/ores.json")
-	objectives = read_json("res://assets/objectives.json")
+	constructor_recipes = read_json(constructor_recipes_file)
+	smelter_recipes = read_json(smelter_recipes_file)
+	ores = read_json(ores_file)
+	objectives = read_json(objectives_file)
 	
 	tileset = make_tileset_exist(tile_size)
 	ResourceSaver.save(tileset, "res://generated_tileset.tres")
