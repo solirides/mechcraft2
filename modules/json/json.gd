@@ -25,8 +25,11 @@ var tile_textures:Dictionary = {}
 var world_properties = ["seed", "world_size", "chunk_size", "world_name", "elapsed_ticks", "central_storage", "settings"]
 var world_data_int = ["tiles", "items", "noise", "terrain", "integrity", "tile_storage", "rotation", "state"]
 
+signal setup_complete
+
 func _ready():
 	load_world(Globals.load_game_type)
+	setup_complete.emit()
 
 func load_world(type:String):
 	match type:
@@ -105,6 +108,8 @@ func load_world(type:String):
 				load_save()
 				Globals.world_override_data = {}
 				
+				
+	
 	#print(json["chunks"][0]["tiles"])
 	
 
@@ -233,4 +238,5 @@ func make_tileset_exist(tile_size:int):
 func texture_from_tile(id:int):
 	if tile_textures.has(id) and ResourceLoader.exists("res://assets/tiles/" + self.tile_textures[id] + ".png"):
 		return load("res://assets/tiles/" + self.tile_textures[id] + ".png")
+	print(id)
 	return load("res://assets/textures/missing16.png")

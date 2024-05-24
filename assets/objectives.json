@@ -3,15 +3,105 @@
 		"name":"Launch Pad",
 		"description":"A fancy platform.",
 		"resource_goals":{
-			"3001":5
+			"3101":20
 		},
 		"unlock_objectives":[
-			"control_tower"
+			"fence"
 		]
 	},
-	"control_tower": {
-		"name":"Control Tower",
-		"description":"A fancy room for fancy stuff.",
+	"fence": {
+		"name":"Fencing",
+		"description":"",
+		"resource_goals":{
+			"3001":10
+		},
+		"unlock_objectives":[
+			"cables"
+		]
+	},
+	"cables": {
+		"name":"Cables",
+		"description":"",
+		"resource_goals":{
+			"3001":10
+		},
+		"unlock_objectives":[
+			"cylinders"
+		]
+	},
+	"cylinders": {
+		"name":"Cylinders",
+		"description":"",
+		"resource_goals":{
+			"3001":10
+		},
+		"unlock_objectives":[
+			"crane"
+		]
+	},
+	"crane": {
+		"name":"Crane",
+		"description":"",
+		"resource_goals":{
+			"3001":10
+		},
+		"unlock_objectives":[
+			"control_building"
+		]
+	},
+	"control_building": {
+		"name":"Control Building",
+		"description":"",
+		"resource_goals":{
+			"3001":10
+		},
+		"unlock_objectives":[
+			"satellite_dish"
+		]
+	},
+	"satellite_dish": {
+		"name":"Satellite Dish",
+		"description":"",
+		"resource_goals":{
+			"3001":10
+		},
+		"unlock_objectives":[
+			"tower"
+		]
+	},
+	"tower": {
+		"name":"Tower",
+		"description":"",
+		"resource_goals":{
+			"3001":10
+		},
+		"unlock_objectives":[
+			"ship_1"
+		]
+	},
+	"ship_1": {
+		"name":"Spaceship Hull",
+		"description":"",
+		"resource_goals":{
+			"3001":10
+		},
+		"unlock_objectives":[
+			"basically_impossible"
+		]
+	},
+	"ship_2": {
+		"name":"Spaceship Thrusters",
+		"description":"",
+		"resource_goals":{
+			"3001":10
+		},
+		"unlock_objectives":[
+			"basically_impossible"
+		]
+	},
+	"ship_3": {
+		"name":"Spaceship Navigation System",
+		"description":"",
 		"resource_goals":{
 			"3001":10
 		},

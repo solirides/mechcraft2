@@ -57,22 +57,22 @@ signal tick_processed(elapsed_ticks:int)
 # Called when the node enters the scene tree for the first time.
 func _ready():
 #	print(json.json)
-	await camera.ready
-	#await json.ready
-	#await camera.gui.ready
-	self.storage_changed.connect(_on_storage_changed)
-	self.objective_changed.connect(_on_objective_changed)
+	#await camera.ready
 	
-	gui.selection_changed.connect(_on_selection_changed)
-	gui.world_focused.connect(_on_world_focused)
-	gui.save.connect(save_game)
+	if json.is_node_ready() == false:
+		await json.ready
+	if camera.is_node_ready() == false:
+		await camera.ready
+	#json.setup_complete.connect(setup())
+	setup()
+	#print(json.world)
+	
 	
 	#await get_tree().create_timer(1.0).timeout
 	
-	setup()
 	
-	gui.noise_bar.max_value = world["settings"]["sandworm_noise_thresholds"][2]
-	gui.noise_bar.value = 0
+	
+	
 	
 	
 	
@@ -337,6 +337,17 @@ func cancel_input():
 
 # Detecting conveyor lines:
 #region
+func detect_storage_tiles():
+	var coords:PackedVector2Array = []
+	
+	for c in world["world_size"]**2:
+		for index in world["chunk_area"]:
+			var gc = local2global(index2local(index, c))
+			if int(world["chunks"][str(c)]["tiles"][index]) == 5:
+				coords.push_back(gc)
+	
+
+
 func detect_world_tiles():
 #	var cells = self.get_used_cells(0)
 	var d = [world["chunk_size"], 1, -world["chunk_size"], -1]
@@ -599,13 +610,15 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 							2: #constructor
 								world["chunks"][str(lc.z)]["noise"][index] += 3
 								var item = world["chunks"][str(lc.z)]["items"][index]
+								var stored_item = world["chunks"][str(lc.z)]["tile_storage"][index]
 								if (item != 0):
 									#print("item recieved at constructor")
 									var a = gc2string(gc)
-									if (world["chunks"][str(lc.z)]["tile_storage"][index] != 0):
+									if (stored_item != 0):
 										# construct thing
 										world["chunks"][str(lc.z)]["noise"][index] += 5
-										var key = str(world["chunks"][str(lc.z)]["tile_storage"][index]) + "," + str(item)
+										var key = str(min(stored_item, item)) + "," + str(max(stored_item, item))
+										#print(key)
 										if json.constructor_recipes.has(key):
 											set_item(1, gc, json.constructor_recipes[key])
 											move_resource(gc, world["chunks"][str(lc.z)]["rotation"][index])
@@ -650,6 +663,7 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 										world["central_storage"][str(item)] += 1
 									set_item(1, gc, 0)
 									self.storage_changed.emit()
+									self.objective_changed.emit()
 							6:
 								world["chunks"][str(lc.z)]["noise"][index] += 2
 								var item = world["chunks"][str(lc.z)]["items"][index]
@@ -667,24 +681,15 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 									world["chunks"][str(lc.z)]["state"][index] = 1
 								else:
 									world["chunks"][str(lc.z)]["state"][index] += 1
-							7:
-								var item = world["chunks"][str(lc.z)]["items"][index]
-								var objective = world["current_objective"]
-								if (item != 0):
-									print(item)
-									#print(world["objectives"][objective]["resources"][0])
-									if json.objectives[objective]["resource_goals"].keys().has(str(item)):
-										world["objectives"][objective]["resources"][str(item)] += 1
-									set_item(1, gc, 0)
-									self.objective_changed.emit()
 							8:
 								world["chunks"][str(lc.z)]["noise"][index] += 3
 								var item = world["chunks"][str(lc.z)]["items"][index]
+								var stored_item = world["chunks"][str(lc.z)]["tile_storage"][index]
 								if (item != 0):
 									var a = gc2string(gc)
 									if (world["chunks"][str(lc.z)]["tile_storage"][index] != 0):
 										world["chunks"][str(lc.z)]["noise"][index] += 5
-										var key = str(world["chunks"][str(lc.z)]["tile_storage"][index]) + "," + str(item)
+										var key = str(min(stored_item, item)) + "," + str(max(stored_item, item))
 										if json.smelter_recipes.has(key):
 											set_item(1, gc, json.smelter_recipes[key])
 											move_resource(gc, world["chunks"][str(lc.z)]["rotation"][index])
@@ -933,6 +938,13 @@ func clear_markers():
 #region
 
 func setup():
+	self.storage_changed.connect(_on_storage_changed)
+	self.objective_changed.connect(_on_objective_changed)
+	
+	gui.selection_changed.connect(_on_selection_changed)
+	gui.world_focused.connect(_on_world_focused)
+	gui.save.connect(save_game)
+	
 	json.tilemap = self
 	json.setup(tile_size)
 	self.tile_set = json.tileset
@@ -960,6 +972,8 @@ func setup():
 	self.storage_changed.emit()
 	self.objective_changed.emit()
 	
+	gui.noise_bar.max_value = world["settings"]["sandworm_noise_thresholds"][2]
+	gui.noise_bar.value = 0
 
 func set_tilemap_from_world():
 	for c in world["world_size"]**2:
@@ -1009,14 +1023,25 @@ func _on_storage_changed():
 	gui.update_hotbar(world["central_storage"])
 
 func _on_objective_changed():
+	print("objective changed")
 	var objective = world["current_objective"]
 	# there is a better way but i'm lazy
+	#if len(world["objectives"][objective]["resources"]) > 0:
 	var complete = true
-	for k in world["objectives"][objective]["resources"].keys():
+	var resources = {}
+	for k:String in json.objectives[objective]["resource_goals"].keys():
+		if not world["central_storage"].has(k):
+			world["central_storage"][k] = 0
+		world["objectives"][objective]["resources"][k] = int(world["central_storage"][k])
 		if world["objectives"][objective]["resources"][k] < int(json.objectives[objective]["resource_goals"][k]):
 			complete = false
+			break
+		
 	
 	if complete:
+		for k:String in json.objectives[objective]["resource_goals"].keys():
+			world["central_storage"][k] -= int(json.objectives[objective]["resource_goals"][k])
+		
 		world["objectives"][objective]["status"] = "completed"
 		
 		world["current_objective"] = json.objectives[objective]["unlock_objectives"][0]
@@ -1026,8 +1051,10 @@ func _on_objective_changed():
 		world["objectives"][objective]["status"] = "active"
 		world["objectives"][objective]["resources"] = {}
 		
-		for k in json.objectives[objective]["resource_goals"].keys():
-			world["objectives"][objective]["resources"][str(k)] = 0
+		#for k in json.objectives[objective]["resource_goals"].keys():
+			#world["objectives"][objective]["resources"][str(k)] = 0
+	
+	
 	
 	gui.update_objective(objective, world["objectives"][objective])
 	

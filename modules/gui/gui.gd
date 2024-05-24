@@ -20,7 +20,7 @@ signal world_focused(state)
 @export var tooltip:Node = null
 @export var popup:Node = null
 
-@onready var json:Node = camera.json
+var json:Node = null
 
 var mode = 0
 var selected_tile = 1
@@ -34,7 +34,7 @@ var objective_item = preload("res://modules/gui/objective_item/objective_item.ts
 signal save
 
 func _ready():
-	pass # Replace with function body.
+	json = camera.json
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

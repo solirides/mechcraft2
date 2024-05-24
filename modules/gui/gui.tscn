@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://jghaelellieo"]
+[gd_scene load_steps=15 format=3 uid="uid://jghaelellieo"]
 
 [ext_resource type="Script" path="res://modules/gui/gui.gd" id="1_slngm"]
 [ext_resource type="AudioStream" uid="uid://cmygilbmp72r3" path="res://assets/audio/music1.ogg" id="2_up154"]
@@ -10,6 +10,9 @@
 [sub_resource type="LabelSettings" id="LabelSettings_mnp4j"]
 font_size = 22
 font_color = Color(0.952941, 1, 0.486275, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_oslo5"]
+font_color = Color(0.621524, 0.621524, 0.621524, 0.803922)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b0gy7"]
 bg_color = Color(0.262745, 0.262745, 0.262745, 0.254902)
@@ -56,7 +59,7 @@ menu = NodePath("GUI/Menu")
 music_player = NodePath("GUI/AudioStreamPlayer")
 noise_bar = NodePath("GUI/TopBar/Bar3/Noise")
 hotbar = NodePath("GUI/BottomBar/Panel/Hotbar")
-leftbar = NodePath("GUI/LeftBar")
+leftbar = NodePath("GUI/LeftScroll/LeftBar")
 rightbar = NodePath("GUI/RightBar")
 tooltip = NodePath("Tooltip")
 popup = NodePath("Popup")
@@ -118,7 +121,7 @@ grow_horizontal = 2
 grow_vertical = 2
 alignment = 1
 
-[node name="LeftBar" type="VBoxContainer" parent="GUI"]
+[node name="LeftScroll" type="ScrollContainer" parent="GUI"]
 custom_minimum_size = Vector2(100, 300)
 layout_mode = 1
 anchors_preset = -1
@@ -127,7 +130,13 @@ anchor_right = 0.1
 anchor_bottom = 0.825
 offset_left = 20.0
 grow_vertical = 2
+mouse_filter = 0
 theme = ExtResource("3_wyw2n")
+
+[node name="LeftBar" type="VBoxContainer" parent="GUI/LeftScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [node name="RightBar" type="VBoxContainer" parent="GUI"]
 custom_minimum_size = Vector2(100, 300)
@@ -142,15 +151,18 @@ grow_vertical = 2
 theme = ExtResource("3_wyw2n")
 
 [node name="Objective" type="Label" parent="GUI/RightBar"]
+custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 theme = ExtResource("3_wyw2n")
 text = "objective"
 autowrap_mode = 2
 
 [node name="Description" type="Label" parent="GUI/RightBar"]
+custom_minimum_size = Vector2(100, 0)
 layout_mode = 2
 theme = ExtResource("3_wyw2n")
 text = "description"
+label_settings = SubResource("LabelSettings_oslo5")
 autowrap_mode = 2
 
 [node name="Progress" type="VBoxContainer" parent="GUI/RightBar"]
