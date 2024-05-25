@@ -21,6 +21,8 @@ var tps:float = 3
 var last_tick = 0
 var highest_noise = 0
 
+var last_ambient_noise = 0
+
 # these vars are all from the world save file
 
 var world:Dictionary = {}
@@ -49,9 +51,11 @@ var tile_rotation = 0
 
 var tileset = TileSet.new()
 var bounds:Rect2
+var immutable_tiles = [5,7]
 
 signal storage_changed()
 signal objective_changed()
+signal objective_updated()
 signal tick_processed(elapsed_ticks:int)
 
 # Called when the node enters the scene tree for the first time.
@@ -67,10 +71,10 @@ func _ready():
 	setup()
 	#print(json.world)
 	
-	
+	#$AudioStreamPlayer.play()
 	#await get_tree().create_timer(1.0).timeout
 	
-	
+	$AudioStreamPlayer2.play()
 	
 	
 	
@@ -116,7 +120,14 @@ func _process(delta):
 				$LineX.points[0] = $LineX.points[0].lerp(Vector2(input_start_gc.x, gc.y) * tile_size + Vector2(tile_size*0.5, tile_size*0.5), delta * 10)
 				$LineX.points[1] = $LineX.points[1].lerp(Vector2(gc)*tile_size + 0.5*Vector2(tile_size, tile_size), delta * 10)
 			
-			
+		
+		var time = Time.get_ticks_msec()
+		if last_ambient_noise + 40000 < time:
+			last_ambient_noise = Time.get_ticks_msec()
+			$AudioStreamPlayer2.play()
+		
+		
+		
 
 func _physics_process(delta):
 	#print(last_tick)
@@ -231,7 +242,7 @@ func remove_tile(gc, lc, idx):
 	if (bounds.has_point(gc) and world["chunks"][str(lc.z)]["integrity"][idx] >= 0):
 		#if world["chunks"][str(lc.z)]["tiles"][idx] != id:
 		var old_id = world["chunks"][str(lc.z)]["tiles"][idx]
-		if old_id != 7:
+		if not immutable_tiles.has(int(old_id)):
 			if old_id != 0:
 				if world["central_storage"].has(str(old_id)):
 					world["central_storage"][str(old_id)] += 1
@@ -246,7 +257,7 @@ func place_tile(gc, lc, idx, id, rotation):
 	if (bounds.has_point(gc) and world["chunks"][str(lc.z)]["integrity"][idx] >= 0):
 		#if world["chunks"][str(lc.z)]["tiles"][idx] != id:
 		var old_id = world["chunks"][str(lc.z)]["tiles"][idx]
-		if old_id != 7:
+		if not immutable_tiles.has(int(old_id)):
 			if old_id != 0:
 				if world["central_storage"].has(str(old_id)):
 					world["central_storage"][str(old_id)] += 1
@@ -663,7 +674,7 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 										world["central_storage"][str(item)] += 1
 									set_item(1, gc, 0)
 									self.storage_changed.emit()
-									self.objective_changed.emit()
+									self.objective_updated.emit()
 							6:
 								world["chunks"][str(lc.z)]["noise"][index] += 2
 								var item = world["chunks"][str(lc.z)]["items"][index]
@@ -940,6 +951,7 @@ func clear_markers():
 func setup():
 	self.storage_changed.connect(_on_storage_changed)
 	self.objective_changed.connect(_on_objective_changed)
+	self.objective_updated.connect(_on_objective_updated)
 	
 	gui.selection_changed.connect(_on_selection_changed)
 	gui.world_focused.connect(_on_world_focused)
@@ -971,6 +983,12 @@ func setup():
 	
 	self.storage_changed.emit()
 	self.objective_changed.emit()
+	self.objective_updated.emit()
+	
+	for k in world["objectives"].keys():
+		if world["objectives"][k]["status"] == "completed":
+			for layer in json.objectives[k]["sprites"]:
+				base.show_layer(layer)
 	
 	gui.noise_bar.max_value = world["settings"]["sandworm_noise_thresholds"][2]
 	gui.noise_bar.value = 0
@@ -1022,8 +1040,7 @@ func _on_storage_changed():
 	gui.update_resources(world["central_storage"])
 	gui.update_hotbar(world["central_storage"])
 
-func _on_objective_changed():
-	print("objective changed")
+func _on_objective_updated():
 	var objective = world["current_objective"]
 	# there is a better way but i'm lazy
 	#if len(world["objectives"][objective]["resources"]) > 0:
@@ -1039,25 +1056,36 @@ func _on_objective_changed():
 		
 	
 	if complete:
+		var new_objective = json.objectives[objective]["unlock_objectives"][0]
+		objective_changed.emit(new_objective, objective)
+		
 		for k:String in json.objectives[objective]["resource_goals"].keys():
 			world["central_storage"][k] -= int(json.objectives[objective]["resource_goals"][k])
 		
 		world["objectives"][objective]["status"] = "completed"
 		
 		world["current_objective"] = json.objectives[objective]["unlock_objectives"][0]
-		objective = world["current_objective"]
-		world["objectives"][objective] = {}
 		
-		world["objectives"][objective]["status"] = "active"
-		world["objectives"][objective]["resources"] = {}
 		
 		#for k in json.objectives[objective]["resource_goals"].keys():
 			#world["objectives"][objective]["resources"][str(k)] = 0
 	
-	
-	
 	gui.update_objective(objective, world["objectives"][objective])
 	
+
+func _on_objective_changed(objective, previous_objective:String=""):
+	world["objectives"][objective] = {}
+	world["objectives"][objective]["status"] = "active"
+	world["objectives"][objective]["resources"] = {}
+	
+	
+	gui.change_objective(objective, world["objectives"][objective])
+	
+	
+	if json.objectives.has(previous_objective):
+		for layer in json.objectives[previous_objective]["sprites"]:
+			base.show_layer(layer)
+
 
 func save_game():
 	var file_name = world["file_name"] + str(Time.get_datetime_string_from_system()) + ".json"

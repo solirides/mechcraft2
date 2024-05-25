@@ -2,16 +2,22 @@
 	"launch_pad":{
 		"name":"Launch Pad",
 		"description":"A fancy platform.",
+		"sprites":[
+			"platform"
+		],
 		"resource_goals":{
 			"3101":20
 		},
 		"unlock_objectives":[
 			"fence"
-		]
+		],
 	},
 	"fence": {
 		"name":"Fencing",
 		"description":"",
+		"sprites":[
+			"fence","overlay_1"
+		],
 		"resource_goals":{
 			"3001":10
 		},
@@ -22,6 +28,9 @@
 	"cables": {
 		"name":"Cables",
 		"description":"",
+		"sprites":[
+			"cables"
+		],
 		"resource_goals":{
 			"3001":10
 		},
@@ -32,6 +41,9 @@
 	"cylinders": {
 		"name":"Cylinders",
 		"description":"",
+		"sprites":[
+			"cylinders"
+		],
 		"resource_goals":{
 			"3001":10
 		},
@@ -42,6 +54,9 @@
 	"crane": {
 		"name":"Crane",
 		"description":"",
+		"sprites":[
+			"crane","overlay_2"
+		],
 		"resource_goals":{
 			"3001":10
 		},
@@ -52,6 +67,9 @@
 	"control_building": {
 		"name":"Control Building",
 		"description":"",
+		"sprites":[
+			"control_building"
+		],
 		"resource_goals":{
 			"3001":10
 		},
@@ -62,6 +80,9 @@
 	"satellite_dish": {
 		"name":"Satellite Dish",
 		"description":"",
+		"sprites":[
+			"satellite_dish"
+		],
 		"resource_goals":{
 			"3001":10
 		},
@@ -72,6 +93,9 @@
 	"tower": {
 		"name":"Tower",
 		"description":"",
+		"sprites":[
+			"tower"
+		],
 		"resource_goals":{
 			"3001":10
 		},
@@ -82,6 +106,7 @@
 	"ship_1": {
 		"name":"Spaceship Hull",
 		"description":"",
+		"sprites":[],
 		"resource_goals":{
 			"3001":10
 		},
@@ -92,6 +117,7 @@
 	"ship_2": {
 		"name":"Spaceship Thrusters",
 		"description":"",
+		"sprites":[],
 		"resource_goals":{
 			"3001":10
 		},
@@ -102,6 +128,9 @@
 	"ship_3": {
 		"name":"Spaceship Navigation System",
 		"description":"",
+		"sprites":[
+			"overlay_3"
+		],
 		"resource_goals":{
 			"3001":10
 		},
@@ -112,6 +141,7 @@
 	"basically_impossible": {
 		"name":"Basically Impossible",
 		"description":"for testing",
+		"sprites":[],
 		"resource_goals":{
 			"3001":9999999
 		},

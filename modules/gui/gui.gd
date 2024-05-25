@@ -105,8 +105,6 @@ func _on_hotbar_item_clicked(slot, id, count):
 func update_objective(current_objective:String, objective:Dictionary):
 	#print(current_objective)
 	#print(json.objectives[current_objective]["name"])
-	rightbar.get_node(^"Objective").text = str(json.objectives[current_objective]["name"])
-	rightbar.get_node(^"Description").text = str(json.objectives[current_objective]["description"])
 	var i = 0
 	var progress = rightbar.get_node(^"Progress")
 	for n in progress.get_children():
@@ -122,6 +120,12 @@ func update_objective(current_objective:String, objective:Dictionary):
 		progress.add_child(a)
 		
 		i += 1
+
+func change_objective(current_objective:String, objective:Dictionary):
+	rightbar.get_node(^"Objective").text = str(json.objectives[current_objective]["name"])
+	rightbar.get_node(^"Description").text = str(json.objectives[current_objective]["description"])
+	
+
 
 func alert(text:String):
 	alert_label.text = text

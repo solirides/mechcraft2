@@ -6,10 +6,12 @@ extends Node2D
 @export var overlays = ["overlay_1", "overlay_2", "overlay_3"]
 @export var overlay_shader:Resource = null
 
+var sprites = {}
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	var dir = DirAccess.open(texture_dir)
-	var sprites = {}
+	
 	
 	if dir:
 		dir.list_dir_begin()
@@ -30,11 +32,18 @@ func _ready():
 		for k in overlays:
 			#sprites[k].material = ShaderMaterial.new()
 			#sprites[k].material.shader = overlay_shader
-			sprites[k].modulate = Color(2,2,2,0.1)
+			sprites[k].material = CanvasItemMaterial.new()
+			sprites[k].material.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+			
+			sprites[k].modulate = Color(1,1,1,0.4)
 		
 		for k in order:
+			sprites[k].visible = false
 			self.add_child(sprites[k])
 
+func show_layer(name:String, visible=true):
+	if order.has(name):
+		sprites[name].visible = visible
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):

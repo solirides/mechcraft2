@@ -4,8 +4,7 @@
 [ext_resource type="Shader" path="res://assets/shaders/overlay.gdshader" id="2_046bt"]
 [ext_resource type="Texture2D" uid="uid://byongkde5r8ta" path="res://modules/base/textures/overlay_2.png" id="2_t5mtv"]
 
-[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_m5ec1"]
-blend_mode = 1
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_ajtl3"]
 
 [node name="Base" type="Node2D"]
 script = ExtResource("1_jve3s")
@@ -13,6 +12,6 @@ overlay_shader = ExtResource("2_046bt")
 
 [node name="Sprite2D" type="TextureRect" parent="."]
 visible = false
-material = SubResource("CanvasItemMaterial_m5ec1")
+material = SubResource("CanvasItemMaterial_ajtl3")
 custom_minimum_size = Vector2(512, 512)
 texture = ExtResource("2_t5mtv")

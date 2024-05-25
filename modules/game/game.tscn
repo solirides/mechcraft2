@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://wbpqro6tssd5"]
+[gd_scene load_steps=25 format=3 uid="uid://wbpqro6tssd5"]
 
 [ext_resource type="PackedScene" uid="uid://cdu50wti8uan3" path="res://modules/json/json.tscn" id="1_xadu0"]
 [ext_resource type="Texture2D" uid="uid://5am0arvmxore" path="res://assets/factorygame3.png" id="2_j5pph"]
@@ -12,6 +12,8 @@
 [ext_resource type="PackedScene" uid="uid://ny288342pj6c" path="res://modules/camera/camera.tscn" id="11_3eovr"]
 [ext_resource type="Shader" path="res://assets/shaders/blueprint.gdshader" id="11_co4te"]
 [ext_resource type="PackedScene" uid="uid://oshwg28g0vb1" path="res://modules/base/base.tscn" id="11_hq1oq"]
+[ext_resource type="AudioStream" uid="uid://bas3vtglhg5ir" path="res://assets/audio/motor.ogg" id="12_udgx0"]
+[ext_resource type="AudioStream" uid="uid://dry8dy3gqrkm3" path="res://assets/audio/wind.wav" id="13_45mpe"]
 [ext_resource type="Script" path="res://scripts/classes.gd" id="20_ld583"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tbejw"]
@@ -143,6 +145,16 @@ begin_cap_mode = 2
 end_cap_mode = 2
 
 [node name="Base" parent="TileMap" instance=ExtResource("11_hq1oq")]
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="TileMap"]
+stream = ExtResource("12_udgx0")
+volume_db = 2.657
+bus = &"Ambient"
+
+[node name="AudioStreamPlayer2" type="AudioStreamPlayer" parent="TileMap"]
+stream = ExtResource("13_45mpe")
+volume_db = -11.207
+max_polyphony = 4
 
 [node name="Camera" parent="." node_paths=PackedStringArray("json", "tilemap") instance=ExtResource("11_3eovr")]
 json = NodePath("../Json")

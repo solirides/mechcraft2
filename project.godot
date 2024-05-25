@@ -15,6 +15,10 @@ run/main_scene="res://modules/title_screen/title_screen.tscn"
 config/features=PackedStringArray("4.2", "Forward Plus")
 config/icon="res://assets/factorygame3.png"
 
+[audio]
+
+driver/driver="ALSA"
+
 [autoload]
 
 Globals="*res://modules/globals/globals.gd"
