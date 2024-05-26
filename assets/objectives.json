@@ -1,7 +1,7 @@
 {
 	"launch_pad":{
 		"name":"Launch Pad",
-		"description":"A fancy platform.",
+		"description":"A fancy platform for fancy science stuff",
 		"sprites":[
 			"platform"
 		],
@@ -14,7 +14,7 @@
 	},
 	"fence": {
 		"name":"Fencing",
-		"description":"",
+		"description":"For security...against the sandworms",
 		"sprites":[
 			"fence","overlay_1"
 		],
@@ -40,7 +40,7 @@
 	},
 	"cylinders": {
 		"name":"Cylinders",
-		"description":"",
+		"description":"I have no idea what these hold but they seem important",
 		"sprites":[
 			"cylinders"
 		],
@@ -53,7 +53,7 @@
 	},
 	"crane": {
 		"name":"Crane",
-		"description":"",
+		"description":"Wait, how did you build the other stuff without a crane?",
 		"sprites":[
 			"crane","overlay_2"
 		],
@@ -66,7 +66,7 @@
 	},
 	"control_building": {
 		"name":"Control Building",
-		"description":"",
+		"description":"A very scientific building",
 		"sprites":[
 			"control_building"
 		],
@@ -79,7 +79,7 @@
 	},
 	"satellite_dish": {
 		"name":"Satellite Dish",
-		"description":"",
+		"description":"I don't think dish tv has service on this planet...",
 		"sprites":[
 			"satellite_dish"
 		],
@@ -92,7 +92,7 @@
 	},
 	"tower": {
 		"name":"Tower",
-		"description":"",
+		"description":"It's really just glorified scaffolding. A wizard tower would be way cooler, but its not very scientific.",
 		"sprites":[
 			"tower"
 		],
@@ -105,30 +105,48 @@
 	},
 	"ship_1": {
 		"name":"Spaceship Hull",
-		"description":"",
-		"sprites":[],
+		"description":"A sturdy shell to keep your spaceship from exploding (hopefully)",
+		"sprites":[
+			"ship_hull"
+		],
 		"resource_goals":{
 			"3001":10
 		},
 		"unlock_objectives":[
-			"basically_impossible"
+			"ship_2"
 		]
 	},
 	"ship_2": {
 		"name":"Spaceship Thrusters",
-		"description":"",
-		"sprites":[],
+		"description":"These things are loud",
+		"sprites":[
+			"ship_tail"
+		],
 		"resource_goals":{
 			"3001":10
 		},
 		"unlock_objectives":[
-			"basically_impossible"
+			"ship_3"
 		]
 	},
 	"ship_3": {
-		"name":"Spaceship Navigation System",
-		"description":"",
+		"name":"Spaceship Booster Rockets",
+		"description":"More thrusters, but on the sides",
 		"sprites":[
+			"ship_boosters"
+		],
+		"resource_goals":{
+			"3001":10
+		},
+		"unlock_objectives":[
+			"ship_4"
+		]
+	},
+	"ship_4": {
+		"name":"Spaceship Navigation System",
+		"description":"Lots of computers for computing stuff",
+		"sprites":[
+			"ship_front",
 			"overlay_3"
 		],
 		"resource_goals":{
@@ -138,6 +156,7 @@
 			"basically_impossible"
 		]
 	},
+	
 	"basically_impossible": {
 		"name":"Basically Impossible",
 		"description":"for testing",

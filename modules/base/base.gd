@@ -2,7 +2,7 @@ extends Node2D
 
 
 @export_dir var texture_dir:String = "res://modules/base/textures/"
-@export var order = ["platform", "cables", "fence", "overlay_1", "control_building", "satellite_dish", "cylinders", "crane", "overlay_2", "tower", "ship", "overlay_3"]
+@export var order = ["platform", "cables", "fence", "overlay_1", "control_building", "satellite_dish", "cylinders", "crane", "overlay_2", "tower", "ship_boosters", "ship_tail", "ship_hull", "ship_front", "overlay_3"]
 @export var overlays = ["overlay_1", "overlay_2", "overlay_3"]
 @export var overlay_shader:Resource = null
 

@@ -1,11 +1,7 @@
-[gd_scene load_steps=11 format=3 uid="uid://cdu50wti8uan3"]
+[gd_scene load_steps=9 format=3 uid="uid://cdu50wti8uan3"]
 
 [ext_resource type="Script" path="res://modules/json/json.gd" id="1_kpy2f"]
 [ext_resource type="Script" path="res://modules/json/world_gen.gd" id="2_wx5ul"]
-
-[sub_resource type="Gradient" id="Gradient_k1d5f"]
-interpolation_mode = 1
-offsets = PackedFloat32Array(0, 0.0737564)
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_e0op7"]
 noise_type = 2
@@ -18,10 +14,7 @@ width = 128
 height = 128
 generate_mipmaps = false
 normalize = false
-color_ramp = SubResource("Gradient_k1d5f")
 noise = SubResource("FastNoiseLite_e0op7")
-
-[sub_resource type="Gradient" id="Gradient_23xud"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_ngppb"]
 fractal_octaves = 3
@@ -31,31 +24,35 @@ domain_warp_amplitude = 24.685
 domain_warp_fractal_lacunarity = 1.705
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_j5vnu"]
-color_ramp = SubResource("Gradient_23xud")
 noise = SubResource("FastNoiseLite_ngppb")
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_uonlq"]
-fractal_octaves = 3
+noise_type = 2
+frequency = 0.05
+fractal_octaves = 2
+fractal_lacunarity = 3.0
 domain_warp_enabled = true
-domain_warp_type = 2
-domain_warp_amplitude = 24.685
-domain_warp_fractal_lacunarity = 1.705
+domain_warp_amplitude = 10.0
+domain_warp_frequency = 0.08
+domain_warp_fractal_lacunarity = 1.0
+metadata/_preview_in_3d_space_ = true
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_ocvot"]
+in_3d_space = true
 noise = SubResource("FastNoiseLite_uonlq")
 
 [node name="Json" type="Node" node_paths=PackedStringArray("world_gen")]
 script = ExtResource("1_kpy2f")
 world_gen = NodePath("WorldGen")
 
-[node name="WorldGen" type="Node2D" parent="." node_paths=PackedStringArray("json", "noise_sprite")]
+[node name="WorldGen" type="Node2D" parent="." node_paths=PackedStringArray("json", "noise_sprite", "noise_sprite2")]
 script = ExtResource("2_wx5ul")
 json = NodePath("..")
 noise_sprite = NodePath("Noise2")
+noise_sprite2 = NodePath("Noise2")
 
 [node name="Noise" type="Sprite2D" parent="WorldGen"]
 visible = false
-modulate = Color(1, 1, 0, 0.270588)
 texture_filter = 1
 scale = Vector2(32, 32)
 texture = SubResource("NoiseTexture2D_4jgiv")

@@ -3,8 +3,10 @@ extends Node2D
 
 @export var json:Node = null
 @export var noise_sprite:Sprite2D = null
-@export var thresholds:Dictionary = {-0.4: 1001, -0.5: 1002, -0.6: 1001, -1: 1002}
-@export var ore_thresholds:Dictionary = {-0.75: 1101}
+@export var noise_sprite2:Sprite2D = null
+#@export var thresholds:Dictionary = {-0.4: 1001, -0.5: 1002, -0.6: 1001, -1: 1002}
+@export var thresholds:Dictionary = {-1.0: 1001}
+@export var ore_thresholds:Array = [[1101, -1.0, -0.7], [1002, -0.9, -0.8]]
 
 var ore_noise = FastNoiseLite.new()
 
@@ -19,6 +21,10 @@ func setup():
 	noise_sprite.texture.height = a
 	noise_sprite.texture.noise.seed = json.world["seed"]
 	
+	noise_sprite2.texture.width = a
+	noise_sprite2.texture.height = a
+	noise_sprite2.texture.noise.seed = json.world["seed"]
+	
 	ore_noise.noise_type = FastNoiseLite.TYPE_CELLULAR
 	ore_noise.fractal_octaves = 2
 	ore_noise.frequency = 0.05
@@ -32,23 +38,24 @@ func generate_world():
 	var a = json.world["chunk_size"] * json.world["world_size"]
 	for x:float in a:
 		for y:float in a:
-			var value = ore_noise.get_noise_2d(x, y)
 			var placed = false
 			#if value > 0.6:
 				#tilemap.set_terrain(2, Vector2i(x, y), 1101)
-			for k in ore_thresholds.keys():
-				if value < float(k):
+			for i in len(ore_thresholds):
+				var value = noise_sprite2.texture.noise.get_noise_3d(x, y, 10 * i)
+				if float(ore_thresholds[i][1]) < value and value < float(ore_thresholds[i][2]):
 					#json.tilemap.set_terrain(2, Vector2i(x, y), ore_thresholds[k])
 					var gc = Vector2i(x, y)
 					var lc = Globals.global2local(gc, json.world["chunk_size"], json.world["world_size"])
 					var idx = Globals.local2index(Vector2i(lc.x, lc.y), json.world["chunk_size"])
 						
-					json.world["chunks"][str(lc.z)]["terrain"][idx] = ore_thresholds[k]
+					json.world["chunks"][str(lc.z)]["terrain"][idx] = ore_thresholds[i][0]
 					placed = true
 					break
-					
+				
+			
 			if placed != true:
-				value = noise_sprite.texture.noise.get_noise_2d(x, y)
+				var value = noise_sprite.texture.noise.get_noise_2d(x, y)
 				#print(value)
 				for k in thresholds.keys():
 					#print(k)

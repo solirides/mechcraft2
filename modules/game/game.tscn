@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://wbpqro6tssd5"]
+[gd_scene load_steps=24 format=3 uid="uid://wbpqro6tssd5"]
 
 [ext_resource type="PackedScene" uid="uid://cdu50wti8uan3" path="res://modules/json/json.tscn" id="1_xadu0"]
 [ext_resource type="Texture2D" uid="uid://5am0arvmxore" path="res://assets/factorygame3.png" id="2_j5pph"]
@@ -7,7 +7,6 @@
 [ext_resource type="Texture2D" uid="uid://dj7h73b0ck0od" path="res://assets/tiles/3-balancer.png" id="5_2blxd"]
 [ext_resource type="Texture2D" uid="uid://eg1scyadfujp" path="res://assets/tiles/5-storage.png" id="6_ckvpr"]
 [ext_resource type="Script" path="res://modules/game/tilemap.gd" id="7_2dpiw"]
-[ext_resource type="Theme" uid="uid://b4us1mhl0qxjp" path="res://assets/theme.tres" id="8_bvp2x"]
 [ext_resource type="Texture2D" uid="uid://bujtksqumn34r" path="res://assets/textures/blank_slot.png" id="10_xi6q4"]
 [ext_resource type="PackedScene" uid="uid://ny288342pj6c" path="res://modules/camera/camera.tscn" id="11_3eovr"]
 [ext_resource type="Shader" path="res://assets/shaders/blueprint.gdshader" id="11_co4te"]
@@ -80,7 +79,7 @@ offset_right = 2048.0
 offset_bottom = 2048.0
 color = Color(0.117647, 0.141176, 0.164706, 1)
 
-[node name="TileMap" type="TileMap" parent="." node_paths=PackedStringArray("json", "base", "debug_dot", "camera", "selector")]
+[node name="TileMap" type="TileMap" parent="." node_paths=PackedStringArray("json", "base", "debug", "camera", "selector")]
 tile_set = SubResource("TileSet_huth1")
 format = 2
 layer_0/name = "Tiles"
@@ -98,26 +97,12 @@ layer_3/tile_data = PackedInt32Array()
 script = ExtResource("7_2dpiw")
 json = NodePath("../Json")
 base = NodePath("Base")
-debug_dot = NodePath("DebugDot")
+debug = NodePath("Debug")
 camera = NodePath("../Camera")
 selector = NodePath("Selector")
 tile_size = 32
 
-[node name="DebugDot" type="Polygon2D" parent="TileMap"]
-scale = Vector2(4, 4)
-color = Color(1, 0, 0.713726, 0.584314)
-polygon = PackedVector2Array(1, 1, -1, 1, -1, -1, 1, -1)
-
 [node name="Debug" type="Node" parent="TileMap"]
-
-[node name="DebugText" type="RichTextLabel" parent="TileMap"]
-offset_right = 40.0
-offset_bottom = 40.0
-scale = Vector2(0.1, 0.1)
-theme = ExtResource("8_bvp2x")
-theme_override_font_sizes/normal_font_size = 100
-fit_content = true
-scroll_active = false
 
 [node name="Selector" type="Sprite2D" parent="TileMap"]
 texture = ExtResource("10_xi6q4")
@@ -148,7 +133,8 @@ end_cap_mode = 2
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="TileMap"]
 stream = ExtResource("12_udgx0")
-volume_db = 2.657
+volume_db = -80.0
+autoplay = true
 bus = &"Ambient"
 
 [node name="AudioStreamPlayer2" type="AudioStreamPlayer" parent="TileMap"]

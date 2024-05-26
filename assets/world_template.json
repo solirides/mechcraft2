@@ -32,8 +32,10 @@
 		"sandworm_attack_cooldown":40,
 		"sandworm_noise_thresholds":[35, 50, 70],
 		"noise_decay_rates": [3, 5, 8],
+		"sandworm_probability":[0, 0.001, 0.003],
 		"max_noise_decay": 10,
-		"sandworm_current_cooldown":0
+		"sandworm_current_cooldown":0,
+		"day_length":500
 	},
 	"chunks":{
 		"0":{

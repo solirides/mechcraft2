@@ -129,6 +129,7 @@ func _on_duration_timer_timeout():
 	self.position = Vector2.ZERO
 
 func _on_tick_processed(elapsed_ticks:int):
-	var color = day_cycle_gradient.sample((elapsed_ticks % 200) / 200.0)
+	var day_length = 500
+	var color = day_cycle_gradient.sample((elapsed_ticks % day_length) / float(day_length))
 	shaders.get_node(^"DayCycleTint").color = lerp(Color(1,1,1,1), color, color.a)
 	#print((elapsed_ticks % 200) / 200.0)

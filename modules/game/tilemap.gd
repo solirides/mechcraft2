@@ -7,7 +7,9 @@ var explosion = preload("res://modules/explosion/explosion.tscn")
 
 @export var json:Node = null
 @export var base:Node = null
-@export var debug_dot:Polygon2D = null
+@export var debug:Node = null
+var debug_label = preload("res://modules/game/debug_label.tscn")
+var debug_dot = preload("res://modules/game/debug_dot.tscn")
 @export var camera:Node = null
 #@export var tooltip:Node = null
 @export var selector:Node = null
@@ -53,6 +55,9 @@ var tileset = TileSet.new()
 var bounds:Rect2
 var immutable_tiles = [5,7]
 
+var mutex: Mutex
+var thread: Thread
+
 signal storage_changed()
 signal objective_changed()
 signal objective_updated()
@@ -62,6 +67,8 @@ signal tick_processed(elapsed_ticks:int)
 func _ready():
 #	print(json.json)
 	#await camera.ready
+	mutex = Mutex.new()
+	thread = Thread.new()
 	
 	if json.is_node_ready() == false:
 		await json.ready
@@ -76,10 +83,7 @@ func _ready():
 	
 	$AudioStreamPlayer2.play()
 	
-	
-	
-	
-	
+
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -126,14 +130,28 @@ func _process(delta):
 			last_ambient_noise = Time.get_ticks_msec()
 			$AudioStreamPlayer2.play()
 		
+		$AudioStreamPlayer.volume_db = lerp($AudioStreamPlayer.volume_db, -80 + 110 * (min(highest_noise, 100) / 100.0)**0.3, delta)
 		
 		
 
 func _physics_process(delta):
 	#print(last_tick)
-	last_tick += delta
-	if running == true and last_tick >= (1.0 / tps):
-		tick()
+	#last_tick += delta
+	if running == true and Time.get_ticks_msec() - last_tick >= (1000.0 / tps):
+		# very sketchy multi threading
+		if needs_recalculation:
+			if thread.is_started():
+				if not thread.is_alive():
+					thread.wait_to_finish()
+					needs_recalculation = false
+			else:
+				clear_markers()
+				#thread = Thread.new()
+				thread.start(recalculate)
+				
+		else:
+			last_tick = Time.get_ticks_msec()
+			tick()
 
 func _input(event):
 	if world_accepts_input:
@@ -414,7 +432,7 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 	
 	var color = Color.from_hsv(randf(), randf_range(0.7, 1), randf_range(0.7, 1))
 	debug_marker(tile, color)
-	debug_text(gc, str(p))
+	#debug_text(gc, str(p))
 	
 	var priority:int = p
 	var priorities:Dictionary = {}
@@ -536,7 +554,7 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 							max_priority = max(max_priority, priority + 1)
 							var color2 = Color.from_hsv(randf(), randf_range(0.7, 1), randf_range(0.7, 1))
 							debug_marker(facing_gc, color2)
-							debug_text(facing_gc, str(priority + 1))
+							#debug_text(facing_gc, str(priority + 1))
 							
 							continue
 						
@@ -557,7 +575,7 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 							#print(a)
 							var color2 = Color.from_hsv(randf(), randf_range(0.7, 1), randf_range(0.7, 1))
 							debug_marker(facing_gc, color2)
-							debug_text(facing_gc, str((priority + 1)))
+							#debug_text(facing_gc, str((priority + 1)))
 							
 							var line2:Array[Vector2i] = [facing_gc]
 							result.merge({gc2string(facing_gc):line2})
@@ -601,6 +619,7 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 #region
 
 func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement():
+	mutex.lock()
 	highest_noise = 0
 	for p in priorities_index: # p = array of lines of the same priority
 			for p2 in p: # i = index of one line
@@ -711,40 +730,42 @@ func do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_th
 										world["chunks"][str(lc.z)]["tile_storage"][index] = item
 										set_item(1, gc, 0)
 					
-					
-					var a = world["settings"]["max_noise_decay"]
-					for i in len(world["settings"]["sandworm_noise_thresholds"]):
-						if world["chunks"][str(lc.z)]["noise"][index] < world["settings"]["sandworm_noise_thresholds"][i]:
-							a = world["settings"]["noise_decay_rates"][i]
-					world["chunks"][str(lc.z)]["noise"][index] = max(world["chunks"][str(lc.z)]["noise"][index] - a, 0)
-					if world["chunks"][str(lc.z)]["noise"][index] >= world["settings"]["sandworm_noise_thresholds"][2] and world["settings"]["sandworm_current_cooldown"] <= 0:
-						summon_the_sandworm_from_the_depths_of_the_dunes(gc, lc, index)
-						world["settings"]["sandworm_current_cooldown"] = world["settings"]["sandworm_attack_cooldown"]
+					if world["chunks"][str(lc.z)]["noise"][index] > 0:
+						var a = world["settings"]["max_noise_decay"]
+						var b = 1
+						for i in len(world["settings"]["sandworm_noise_thresholds"]):
+							if world["chunks"][str(lc.z)]["noise"][index] < world["settings"]["sandworm_noise_thresholds"][i]:
+								a = world["settings"]["noise_decay_rates"][i]
+								b = world["settings"]["sandworm_probability"][i]
+								break
 						
-					
-					highest_noise = max(highest_noise, world["chunks"][str(lc.z)]["noise"][index])
-					
-					gui.noise_bar.value = highest_noise
+						world["chunks"][str(lc.z)]["noise"][index] = max(world["chunks"][str(lc.z)]["noise"][index] - a, 0)
+						
+						#if world["chunks"][str(lc.z)]["noise"][index] >= world["settings"]["sandworm_noise_thresholds"][2] and world["settings"]["sandworm_current_cooldown"] <= 0:
+						if randf() < b:
+							summon_the_sandworm_from_the_depths_of_the_dunes(gc, lc, index)
+							world["settings"]["sandworm_current_cooldown"] = world["settings"]["sandworm_attack_cooldown"]
+							
+						
+						highest_noise = max(highest_noise, world["chunks"][str(lc.z)]["noise"][index])
+						
+						gui.noise_bar.value = highest_noise
 					#last_gc = gc
 					#last_lc = lc
 					#last_index = index
+	mutex.unlock()
 
 func make_the_terrain_less_bad():
 	for c in world["world_size"]**2:
 		for i in world["chunk_area"]:
 			var gc = local2global(index2local(i, c))
 			if world["chunks"][str(c)]["integrity"][i] < 0:
-				world["chunks"][str(c)]["integrity"][i] = min(0, world["chunks"][str(c)]["integrity"][i] + 4)
+				world["chunks"][str(c)]["integrity"][i] = min(0, world["chunks"][str(c)]["integrity"][i] + 1)
 			else:
 				set_overlay(3, gc, -1)
 
 func tick():
 	#print("tick")
-	if needs_recalculation:
-		recalculate()
-		needs_recalculation = false
-	
-	last_tick = 0
 	make_the_terrain_less_bad()
 	do_positive_net_work_on_the_items_located_on_conveyors_and_similar_tiles_that_facillitate_movement()
 	world["elapsed_ticks"] += 1;;;;;;;;;;;;;
@@ -765,7 +786,7 @@ func summon_the_sandworm_from_the_depths_of_the_dunes(gc:Vector2i, lc:Vector3i, 
 			if (bounds.has_point(coords)):
 				set_tile(0, coords, 0, 0)
 				var local = global2local(coords)
-				world["chunks"][str(local.z)]["integrity"][local2index(Vector2i(local.x, local.y))] = -400
+				world["chunks"][str(local.z)]["integrity"][local2index(Vector2i(local.x, local.y))] = -800
 				set_overlay(3, coords, 2001)
 	
 	camera.camera_shake(0.4, 40, 30, 10)
@@ -776,9 +797,10 @@ func summon_the_sandworm_from_the_depths_of_the_dunes(gc:Vector2i, lc:Vector3i, 
 
 func recalculate():
 	print("recalculate")
-	clear_markers()
+	
 	#detect miners and create conveyor lines
 	#var roots:Array = []
+	mutex.lock()
 	lines_global = {}
 	priorities_global = {}
 	priorities_index = []
@@ -788,6 +810,7 @@ func recalculate():
 		used_tiles[i].fill(0)
 	
 	detect_world_tiles()
+	mutex.unlock()
 
 
 
@@ -926,10 +949,11 @@ func debug_marker(gc:Vector2i, color:Color):
 	a.color = color
 	a.position = Vector2(tile_size * gc.x + 8, \
 		tile_size * gc.y + 8)
-	$Debug.add_child(a)
+	debug.call_deferred("add_child", a)
 
 func debug_text(gc:Vector2i, text:String):
-	var a = $DebugText.duplicate()
+	#var a = debug_label.instantiate()
+	var a = Label.new()
 	a.text = text
 	a.z_index = 10
 	a.clip_contents = false
@@ -937,11 +961,14 @@ func debug_text(gc:Vector2i, text:String):
 	#a.set_theme(theme)
 	a.position = Vector2(tile_size * gc.x + 8, \
 		tile_size * gc.y + 8)
-	$Debug.add_child(a)
+	debug.call_deferred("add_child", a)
 
 func clear_markers():
-	for node in $Debug.get_children():
-		$Debug.remove_child(node)
+	var nodes = debug.get_children()
+	for node in nodes:
+		#$Debug.remove_child(node)
+		# thread safe
+		debug.call_deferred("remove_child", node)
 
 #endregion
 
@@ -982,7 +1009,7 @@ func setup():
 	world_loaded = true
 	
 	self.storage_changed.emit()
-	self.objective_changed.emit()
+	self.objective_changed.emit(world["current_objective"])
 	self.objective_updated.emit()
 	
 	for k in world["objectives"].keys():
@@ -1093,3 +1120,6 @@ func save_game():
 	json.write_save(Globals.saves_directory + file_name)
 	json.write_save(Globals.saves_directory + world["file_name"] + ".json")
 	
+
+func _exit_tree():
+	thread.wait_to_finish()
