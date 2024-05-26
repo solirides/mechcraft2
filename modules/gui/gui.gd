@@ -207,7 +207,8 @@ func _on_save_pressed():
 	save.emit()
 	
 
-func update_tooltip():
+func update_tooltip(text:String):
 	tooltip.position = get_viewport().get_mouse_position()
+	tooltip.get_node(^"Label").text = text
 
 

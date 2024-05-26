@@ -102,9 +102,19 @@ func _process(delta):
 		
 		gui.tooltip.visible = false
 		if bounds.has_point(gc):
-			if world["chunks"][str(lc.z)]["tiles"][idx] == 6:
+			var text:String = ""
+			match int(world["chunks"][str(lc.z)]["tiles"][idx]):
+				2:
+					text = str(world["chunks"][str(lc.z)]["items"][idx])
+				4:
+					text = str(world["chunks"][str(lc.z)]["state"][idx])
+				6:
+					text = str(world["chunks"][str(lc.z)]["state"][idx]) + "\n" + str(world["chunks"][str(lc.z)]["mode"][idx])
+				8:
+					text = str(world["chunks"][str(lc.z)]["items"][idx])
+			if text != "":
 				gui.tooltip.visible = true
-				gui.update_tooltip()
+				gui.update_tooltip(text)
 		
 		selector.position = selector.position.lerp(gc * tile_size, delta * 10)
 		
@@ -184,7 +194,7 @@ func _input(event):
 		if Input.is_action_just_pressed("save"):
 			print("write to save file")
 			#json.create_save()
-			json.write_save()
+			save_game()
 
 func _unhandled_input(event):
 	if world_accepts_input:
@@ -275,7 +285,7 @@ func place_tile(gc, lc, idx, id, rotation):
 	if (bounds.has_point(gc) and world["chunks"][str(lc.z)]["integrity"][idx] >= 0):
 		#if world["chunks"][str(lc.z)]["tiles"][idx] != id:
 		var old_id = world["chunks"][str(lc.z)]["tiles"][idx]
-		if not immutable_tiles.has(int(old_id)):
+		if not immutable_tiles.has(int(old_id)) and int(id) < 1000:
 			if old_id != 0:
 				if world["central_storage"].has(str(old_id)):
 					world["central_storage"][str(old_id)] += 1

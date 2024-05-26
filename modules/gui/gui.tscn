@@ -58,7 +58,7 @@ resources_label = NodePath("GUI/TopBar/Bar2/Resources")
 menu = NodePath("GUI/Menu")
 music_player = NodePath("GUI/AudioStreamPlayer")
 noise_bar = NodePath("GUI/TopBar/Bar3/Noise")
-hotbar = NodePath("GUI/BottomBar/Panel/Hotbar")
+hotbar = NodePath("GUI/BottomBar/Panel/ScrollContainer/Hotbar")
 leftbar = NodePath("GUI/LeftScroll/LeftBar")
 rightbar = NodePath("GUI/RightBar")
 tooltip = NodePath("Tooltip")
@@ -111,14 +111,19 @@ grow_vertical = 0
 custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
 
-[node name="Hotbar" type="HBoxContainer" parent="GUI/BottomBar/Panel"]
-custom_minimum_size = Vector2(0, 60)
+[node name="ScrollContainer" type="ScrollContainer" parent="GUI/BottomBar/Panel"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="Hotbar" type="HBoxContainer" parent="GUI/BottomBar/Panel/ScrollContainer"]
+custom_minimum_size = Vector2(300, 60)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 alignment = 1
 
 [node name="LeftScroll" type="ScrollContainer" parent="GUI"]

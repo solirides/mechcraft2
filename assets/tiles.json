@@ -1,34 +1,34 @@
 {
 	"1-conveyor": {
 		"id": 1,
-		"rotatable":1
+		"rotatable": 1
 	},
 	"2-constructor": {
 		"id": 2,
-		"rotatable":1
+		"rotatable": 1
 	},
 	"3-balancer": {
 		"id": 3,
-		"rotatable":1
+		"rotatable": 1
 	},
 	"4-miner": {
 		"id": 4,
-		"rotatable":1
+		"rotatable": 1
 	},
 	"5-storage": {
 		"id": 5,
-		"rotatable":1
+		"rotatable": 1
 	},
 	"6-retriever": {
 		"id": 6,
-		"rotatable":1
+		"rotatable": 1
 	},
 	"7-base": {
 		"id": 7
 	},
 	"8-smelter": {
 		"id": 8,
-		"rotatable":1
+		"rotatable": 1
 	},
 	"1001-sand": {
 		"id": 1001
@@ -41,6 +41,18 @@
 	},
 	"1101-iron_ore": {
 		"id": 1101
+	},
+	"1102-copper_ore": {
+		"id": 1102
+	},
+	"1103-gold_ore": {
+		"id": 1103
+	},
+	"1104-silica_ore": {
+		"id": 1103
+	},
+	"1105-carbon_ore": {
+		"id": 1105
 	},
 	"2001-collapsed": {
 		"id": 2001
@@ -87,11 +99,8 @@
 	"3203-semiconductor": {
 		"id": 3203
 	},
-	"3204-inductor": {
+	"3204-glass": {
 		"id": 3204
-	},
-	"3205-carbon_sheet": {
-		"id": 3205
 	},
 	"3301-circuit": {
 		"id": 3301
@@ -102,4 +111,13 @@
 	"3303-steel_plate": {
 		"id": 3203
 	},
+	"3304-inductor": {
+		"id": 3204
+	},
+	"3401-microchip": {
+		"id": 3401
+	},
+	"3501-cpu": {
+		"id": 3501
+	}
 }
