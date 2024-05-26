@@ -1,0 +1,92 @@
+[gd_scene load_steps=3 format=3 uid="uid://dksm6dq4p26by"]
+
+[ext_resource type="Script" path="res://modules/help/help.gd" id="1_2dqv1"]
+[ext_resource type="Theme" uid="uid://b4us1mhl0qxjp" path="res://assets/theme.tres" id="2_uexmh"]
+
+[node name="Help" type="Control" node_paths=PackedStringArray("box")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_2dqv1")
+box = NodePath("ScrollContainer/VBoxContainer")
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Panel" type="Panel" parent="."]
+visible = false
+custom_minimum_size = Vector2(300, 200)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_top = 0.3
+anchor_right = 0.7
+anchor_bottom = 0.7
+offset_top = 40.0
+offset_bottom = -40.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+alignment = 1
+
+[node name="Create" type="Button" parent="Panel/HBoxContainer"]
+custom_minimum_size = Vector2(140, 40)
+layout_mode = 2
+theme = ExtResource("2_uexmh")
+text = "Create"
+
+[node name="Back" type="Button" parent="."]
+custom_minimum_size = Vector2(140, 40)
+layout_mode = 1
+anchors_preset = -1
+offset_left = 20.0
+offset_top = 20.0
+theme = ExtResource("2_uexmh")
+text = "Back"
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 0
+grow_vertical = 2
+text = "W A S D - move camera
+Middle Mouse - pan camera
+Space - pause
+Scroll Wheel - zoom
+Q E - rotate tile
+Left Click - place
+Right Click - remove
+R - delay miner tile by 1 tick
+"
+
+[connection signal="pressed" from="Panel/HBoxContainer/Create" to="." method="_on_create_pressed"]
+[connection signal="pressed" from="Back" to="." method="_on_back_pressed"]

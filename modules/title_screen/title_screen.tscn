@@ -1,12 +1,13 @@
-[gd_scene load_steps=6 format=3 uid="uid://d4jv5xkb7a1m8"]
+[gd_scene load_steps=7 format=3 uid="uid://d4jv5xkb7a1m8"]
 
 [ext_resource type="Script" path="res://modules/title_screen/title_screen.gd" id="1_h5krl"]
 [ext_resource type="Texture2D" uid="uid://5am0arvmxore" path="res://assets/factorygame3.png" id="2_b0chy"]
 [ext_resource type="Theme" uid="uid://b4us1mhl0qxjp" path="res://assets/theme.tres" id="3_gol26"]
 [ext_resource type="PackedScene" uid="uid://k40wfhx7mcyc" path="res://modules/level_selector/level_selector.tscn" id="4_wkuil"]
 [ext_resource type="PackedScene" uid="uid://n1w8kvpbdvrq" path="res://modules/level_creator/level_creator.tscn" id="5_vh5r2"]
+[ext_resource type="PackedScene" uid="uid://dksm6dq4p26by" path="res://modules/help/help.tscn" id="6_602qa"]
 
-[node name="TitleScreen" type="Control" node_paths=PackedStringArray("window", "level_selector", "level_creator", "background")]
+[node name="TitleScreen" type="Control" node_paths=PackedStringArray("window", "level_selector", "level_creator", "help", "background")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -17,6 +18,7 @@ script = ExtResource("1_h5krl")
 window = NodePath("Window")
 level_selector = NodePath("CanvasLayer/LevelSelector")
 level_creator = NodePath("CanvasLayer/LevelCreator")
+help = NodePath("CanvasLayer/Help")
 background = NodePath("CanvasLayer/ColorRect")
 
 [node name="TextureRect" type="TextureRect" parent="."]
@@ -107,12 +109,11 @@ layout_mode = 2
 theme = ExtResource("3_gol26")
 text = "New Game"
 
-[node name="Options" type="Button" parent="VBoxContainer2"]
-visible = false
+[node name="Help" type="Button" parent="VBoxContainer2"]
 custom_minimum_size = Vector2(240, 0)
 layout_mode = 2
 theme = ExtResource("3_gol26")
-text = "Options"
+text = "Help"
 
 [node name="Quit" type="Button" parent="VBoxContainer2"]
 custom_minimum_size = Vector2(240, 0)
@@ -138,8 +139,11 @@ visible = false
 [node name="LevelCreator" parent="CanvasLayer" instance=ExtResource("5_vh5r2")]
 visible = false
 
+[node name="Help" parent="CanvasLayer" instance=ExtResource("6_602qa")]
+visible = false
+
 [connection signal="close_requested" from="Window" to="." method="_on_window_close_requested"]
 [connection signal="pressed" from="VBoxContainer2/Load" to="." method="_on_load_pressed"]
 [connection signal="pressed" from="VBoxContainer2/New" to="." method="_on_new_pressed"]
-[connection signal="pressed" from="VBoxContainer2/Options" to="." method="_on_options_pressed"]
+[connection signal="pressed" from="VBoxContainer2/Help" to="." method="_on_help_pressed"]
 [connection signal="pressed" from="VBoxContainer2/Quit" to="." method="_on_quit_pressed"]

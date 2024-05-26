@@ -1000,6 +1000,7 @@ func setup():
 	json.tilemap = self
 	json.setup(tile_size)
 	self.tile_set = json.tileset
+	#print(json.tileset)
 	
 	# same dictionary (like literally the same memory address)
 	self.world = json.world

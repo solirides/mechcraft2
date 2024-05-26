@@ -5,6 +5,7 @@ extends Control
 @export var window:Window = null
 @export var level_selector:Node = null
 @export var level_creator:Node = null
+@export var help:Node = null
 @export var background:Node = null
 
 var direction = Vector2i(1, 1)
@@ -13,6 +14,7 @@ var screen_size = DisplayServer.screen_get_size()
 func _ready():
 	level_selector.back.connect(hide_background)
 	level_creator.back.connect(hide_background)
+	help.back.connect(hide_background)
 	
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	#get_tree().root.add_child(window)
@@ -59,8 +61,9 @@ func _on_new_pressed():
 	#get_tree().change_scene_to_file("res://modules/level_creator/level_creator.tscn")
 
 
-func _on_options_pressed():
-	pass # Replace with function body.
+func _on_help_pressed():
+	help.visible = true
+	background.visible = true
 
 
 func _on_quit_pressed():

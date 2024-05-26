@@ -121,7 +121,7 @@ func setup(tile_size:int):
 	objectives = read_json(objectives_file)
 	
 	tileset = make_tileset_exist(tile_size)
-	#ResourceSaver.save(tileset, "res://generated_tileset.tres")
+	ResourceSaver.save(tileset, "res://generated_tileset.tres")
 	
 	load_save()
 	
@@ -178,7 +178,6 @@ func load_save():
 
 func make_tileset_exist(tile_size:int):
 	var ts = TileSet.new()
-	var id = 0
 	var path = "res://assets/tiles/"
 	var dir = DirAccess.open(path)
 	
@@ -190,53 +189,48 @@ func make_tileset_exist(tile_size:int):
 	json_thing.parse(file_data.get_as_text())
 	var tile_metadata = json_thing.get_data()
 	
+	file_data = FileAccess.open("res://assets/tile_path_list.json", FileAccess.READ)
+	json_thing.parse(file_data.get_as_text())
+	var tile_paths:Dictionary = json_thing.get_data()
+	
 	print("start finding textures")
 	
 	if dir:
 		dir.list_dir_begin()
 		print("dir exists")
 		#var file_name = dir.get_next()
-		for file_name in dir.get_files():
-			#print(file_name)
-			if dir.current_is_dir():
-				print("Found directory: " + file_name)
-			elif file_name.replace('.import', '').ends_with(".png"):
-				print("Found file: " + file_name)
-				print(path + file_name)
-				var image = load(path + file_name.replace('.import', ''))
-				image.resize(32,32,0)
-				var texture = ImageTexture.create_from_image(image)
+		for id in tile_paths.keys():
+			print(tile_paths[id])
+			var image = load(tile_paths[id])
+			image.resize(32,32,0)
+			var texture = ImageTexture.create_from_image(image)
+			
+			if (tile_metadata.has(tile_paths[id].get_file().get_basename())):
+				var tile = tile_metadata[tile_paths[id].get_file().get_basename()]
+				var source = TileSetAtlasSource.new()
+				source.texture = texture
 				
-				if (tile_metadata.has(file_name.replace('.import', ''))):
-					var tile = tile_metadata[file_name.replace('.import', '')]
-					var source = TileSetAtlasSource.new()
-					source.texture = texture
+				#if image.get_height() == 32:
+					#source.texture_region_size = Vector2i(32, 32)
+					#source.texture
+				source.texture_region_size = Vector2i(image.get_width(), image.get_height())
+				#print(image.get_height())
+				
+				source.create_tile(Vector2i(0,0))
+				
+				if tile.has("rotatable") and tile["rotatable"] == 1:
+					for i in range(3):
+						source.create_alternative_tile(Vector2i(0,0), -1)
 					
-					#if image.get_height() == 32:
-						#source.texture_region_size = Vector2i(32, 32)
-						#source.texture
-					source.texture_region_size = Vector2i(image.get_width(), image.get_height())
-					#print(image.get_height())
-					
-					source.create_tile(Vector2i(0,0))
-					
-					if tile.has("rotatable") and tile["rotatable"] == 1:
-						for i in range(3):
-							source.create_alternative_tile(Vector2i(0,0), -1)
-						
-						for i in [1,2]:
-							source.get_tile_data(Vector2i(0,0), i).flip_h = true
-						for i in [2,3]:
-							source.get_tile_data(Vector2i(0,0), i).flip_v = true
-						for i in [1,3]:
-							source.get_tile_data(Vector2i(0,0), i).transpose = true
-					
-					ts.add_source(source, tile["id"])
-					tile_textures[int(tile["id"])] = file_name.replace('.import', '').trim_suffix(".png")
-			file_name = dir.get_next()
-		dir.list_dir_end()
-	else:
-		print("An error occurred when trying to access the path.")
+					for i in [1,2]:
+						source.get_tile_data(Vector2i(0,0), i).flip_h = true
+					for i in [2,3]:
+						source.get_tile_data(Vector2i(0,0), i).flip_v = true
+					for i in [1,3]:
+						source.get_tile_data(Vector2i(0,0), i).transpose = true
+				
+				ts.add_source(source, int(id))
+				tile_textures[int(id)] = tile_paths[id].get_file().get_basename()
 	
 	file_data = null
 	dir = null
@@ -244,7 +238,8 @@ func make_tileset_exist(tile_size:int):
 	return ts
 
 func texture_from_tile(id:int):
-	if tile_textures.has(id) and ResourceLoader.exists("res://assets/tiles/" + self.tile_textures[id] + ".png.import"):
+	#ResourceLoader.exists("res://assets/tiles/" + self.tile_textures[id] + ".png")
+	if tile_textures.has(id):
 		return ImageTexture.create_from_image(load("res://assets/tiles/" + self.tile_textures[id] + ".png"))
 	print(id)
 	return load("res://assets/textures/missing16.png")

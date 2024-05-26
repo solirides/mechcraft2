@@ -10,25 +10,25 @@ var sprites = {}
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	
+	#$Sprite2D.texture = ResourceLoader.load("res://assets/tiles/1101-iron-ore.png")
+	
 	var dir = DirAccess.open(texture_dir)
 	
 	if dir:
 		print("dir exists")
 		dir.list_dir_begin()
-		for file_name in dir.get_files():
-			if dir.current_is_dir():
-				continue
-			if file_name.replace('.import', '').ends_with(".png"):
-				var sprite = TextureRect.new()
-				var texture = load(texture_dir + file_name.replace('.import', ''))
-				
-				sprite.custom_minimum_size = Vector2(128, 128)
-				sprite.texture = texture
-				
-				sprites[file_name.replace('.import', '').trim_suffix(".png")] = sprite
-				
-				print(file_name)
-				print(file_name.replace('.import', ''))
+		for file_name in order:
+			var sprite = TextureRect.new()
+			var texture = ResourceLoader.load(texture_dir + file_name + ".png")
+			
+			sprite.custom_minimum_size = Vector2(128, 128)
+			sprite.texture = texture
+			
+			sprites[file_name] = sprite
+			
+			#print(file_name)
+			print(file_name)
 		
 		for k in overlays:
 			#sprites[k].material = ShaderMaterial.new()
