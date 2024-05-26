@@ -3,18 +3,21 @@
 [ext_resource type="Script" path="res://modules/json/json.gd" id="1_kpy2f"]
 [ext_resource type="Script" path="res://modules/json/world_gen.gd" id="2_wx5ul"]
 
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_e0op7"]
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_raqx7"]
 noise_type = 2
-frequency = 0.0511
 fractal_octaves = 1
-domain_warp_amplitude = 10.0
+domain_warp_enabled = true
+domain_warp_amplitude = 40.0
+domain_warp_frequency = 0.03
+domain_warp_fractal_octaves = 3
+domain_warp_fractal_lacunarity = 3.0
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_4jgiv"]
 width = 128
 height = 128
 generate_mipmaps = false
 normalize = false
-noise = SubResource("FastNoiseLite_e0op7")
+noise = SubResource("FastNoiseLite_raqx7")
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_ngppb"]
 fractal_octaves = 3
@@ -48,7 +51,7 @@ world_gen = NodePath("WorldGen")
 [node name="WorldGen" type="Node2D" parent="." node_paths=PackedStringArray("json", "noise_sprite", "noise_sprite2")]
 script = ExtResource("2_wx5ul")
 json = NodePath("..")
-noise_sprite = NodePath("Noise2")
+noise_sprite = NodePath("Noise")
 noise_sprite2 = NodePath("Noise2")
 
 [node name="Noise" type="Sprite2D" parent="WorldGen"]

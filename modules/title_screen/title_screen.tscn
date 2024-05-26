@@ -19,6 +19,17 @@ level_selector = NodePath("CanvasLayer/LevelSelector")
 level_creator = NodePath("CanvasLayer/LevelCreator")
 background = NodePath("CanvasLayer/ColorRect")
 
+[node name="TextureRect" type="TextureRect" parent="."]
+self_modulate = Color(1, 1, 1, 0.156863)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_b0chy")
+expand_mode = 2
+
 [node name="Window" type="Window" parent="."]
 title = "thing"
 initial_position = 2
@@ -57,15 +68,16 @@ centered = false
 
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
 layout_mode = 1
-anchors_preset = 15
+anchors_preset = -1
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = 25.0
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("3_gol26")
-theme_override_font_sizes/normal_font_size = 100
+theme_override_font_sizes/normal_font_size = 80
 bbcode_enabled = true
-text = "[center]FACTORY GAME"
+text = "[center]GENERIC FACTORY GAME"
 scroll_active = false
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="."]
@@ -96,6 +108,7 @@ theme = ExtResource("3_gol26")
 text = "New Game"
 
 [node name="Options" type="Button" parent="VBoxContainer2"]
+visible = false
 custom_minimum_size = Vector2(240, 0)
 layout_mode = 2
 theme = ExtResource("3_gol26")

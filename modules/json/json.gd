@@ -121,7 +121,7 @@ func setup(tile_size:int):
 	objectives = read_json(objectives_file)
 	
 	tileset = make_tileset_exist(tile_size)
-	ResourceSaver.save(tileset, "res://generated_tileset.tres")
+	#ResourceSaver.save(tileset, "res://generated_tileset.tres")
 	
 	load_save()
 	
@@ -190,25 +190,33 @@ func make_tileset_exist(tile_size:int):
 	json_thing.parse(file_data.get_as_text())
 	var tile_metadata = json_thing.get_data()
 	
+	print("start finding textures")
+	
 	if dir:
 		dir.list_dir_begin()
+		print("dir exists")
 		#var file_name = dir.get_next()
 		for file_name in dir.get_files():
+			#print(file_name)
 			if dir.current_is_dir():
 				print("Found directory: " + file_name)
-			elif file_name.ends_with(".png"):
+			elif file_name.replace('.import', '').ends_with(".png"):
 				print("Found file: " + file_name)
 				print(path + file_name)
-				var image = load(path + file_name)
+				var image = load(path + file_name.replace('.import', ''))
+				image.resize(32,32,0)
+				var texture = ImageTexture.create_from_image(image)
 				
-				if (tile_metadata.has(file_name.get_basename())):
-					var tile = tile_metadata[file_name.get_basename()]
+				if (tile_metadata.has(file_name.replace('.import', ''))):
+					var tile = tile_metadata[file_name.replace('.import', '')]
 					var source = TileSetAtlasSource.new()
-					source.texture = image
+					source.texture = texture
 					
-					if image.get_height() == 32:
-						source.texture_region_size = Vector2i(32, 32)
+					#if image.get_height() == 32:
+						#source.texture_region_size = Vector2i(32, 32)
 						#source.texture
+					source.texture_region_size = Vector2i(image.get_width(), image.get_height())
+					#print(image.get_height())
 					
 					source.create_tile(Vector2i(0,0))
 					
@@ -224,7 +232,7 @@ func make_tileset_exist(tile_size:int):
 							source.get_tile_data(Vector2i(0,0), i).transpose = true
 					
 					ts.add_source(source, tile["id"])
-					tile_textures[int(tile["id"])] = file_name.get_basename()
+					tile_textures[int(tile["id"])] = file_name.replace('.import', '').trim_suffix(".png")
 			file_name = dir.get_next()
 		dir.list_dir_end()
 	else:
@@ -236,7 +244,7 @@ func make_tileset_exist(tile_size:int):
 	return ts
 
 func texture_from_tile(id:int):
-	if tile_textures.has(id) and ResourceLoader.exists("res://assets/tiles/" + self.tile_textures[id] + ".png"):
-		return load("res://assets/tiles/" + self.tile_textures[id] + ".png")
+	if tile_textures.has(id) and ResourceLoader.exists("res://assets/tiles/" + self.tile_textures[id] + ".png.import"):
+		return ImageTexture.create_from_image(load("res://assets/tiles/" + self.tile_textures[id] + ".png"))
 	print(id)
 	return load("res://assets/textures/missing16.png")

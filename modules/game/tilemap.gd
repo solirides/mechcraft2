@@ -18,7 +18,7 @@ var debug_dot = preload("res://modules/game/debug_dot.tscn")
 @onready var gui:CanvasLayer = camera.gui
 
 var world_accepts_input = true
-var running = false
+var running = true
 var tps:float = 3
 var last_tick = 0
 var highest_noise = 0
@@ -62,6 +62,7 @@ signal storage_changed()
 signal objective_changed()
 signal objective_updated()
 signal tick_processed(elapsed_ticks:int)
+signal victory
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -71,8 +72,10 @@ func _ready():
 	thread = Thread.new()
 	
 	if json.is_node_ready() == false:
+		print("waiting for json")
 		await json.ready
 	if camera.is_node_ready() == false:
+		print("waiting for camera")
 		await camera.ready
 	#json.setup_complete.connect(setup())
 	setup()
@@ -400,7 +403,7 @@ func detect_world_tiles():
 			if [5, 7].has(int(world["chunks"][str(c)]["tiles"][index])):
 #				print(Vector3i(index % world["chunk_size"], floor(index / world["chunk_size"]), c))
 #				print(gc)
-				debug_marker(gc, Color(1, 0, 1, 0.7))
+				#debug_marker(gc, Color(1, 0, 1, 0.7))
 				used_tiles[gc.x][gc.y] == 1
 				var a = detect_connections(gc, world["chunks"][str(c)]["tiles"][index], 1, 0, true)
 				# add self to line
@@ -441,7 +444,7 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 	var split = false
 	
 	var color = Color.from_hsv(randf(), randf_range(0.7, 1), randf_range(0.7, 1))
-	debug_marker(tile, color)
+	#debug_marker(tile, color)
 	#debug_text(gc, str(p))
 	
 	var priority:int = p
@@ -498,7 +501,7 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 							continue
 						
 						# extend line
-						debug_marker(facing_gc, color)
+						#debug_marker(facing_gc, color)
 						line.append(facing_gc)
 						
 						n_tile = facing_gc
@@ -517,7 +520,7 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 							priorities.merge(a[1])
 							continue
 						# extend line
-						debug_marker(facing_gc, color)
+						#debug_marker(facing_gc, color)
 						line.append(facing_gc)
 						
 						n_tile = facing_gc
@@ -545,7 +548,7 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 								priorities.merge(a[1])
 								continue
 							
-							debug_marker(facing_gc, color)
+							#debug_marker(facing_gc, color)
 							line.append(facing_gc)
 							
 							n_tile = facing_gc
@@ -563,13 +566,13 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 							priorities[gc2string(facing_gc)] = priority + 1
 							max_priority = max(max_priority, priority + 1)
 							var color2 = Color.from_hsv(randf(), randf_range(0.7, 1), randf_range(0.7, 1))
-							debug_marker(facing_gc, color2)
+							#debug_marker(facing_gc, color2)
 							#debug_text(facing_gc, str(priority + 1))
 							
 							continue
 						
 						# extend line
-						debug_marker(facing_gc, color)
+						#debug_marker(facing_gc, color)
 						line.append(facing_gc)
 						
 						n_tile = facing_gc
@@ -584,7 +587,7 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 							#var a = detect_connections(facing_gc, facing_tile, priority + 1, facing_rot, false)
 							#print(a)
 							var color2 = Color.from_hsv(randf(), randf_range(0.7, 1), randf_range(0.7, 1))
-							debug_marker(facing_gc, color2)
+							#debug_marker(facing_gc, color2)
 							#debug_text(facing_gc, str((priority + 1)))
 							
 							var line2:Array[Vector2i] = [facing_gc]
@@ -593,7 +596,7 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 							max_priority = max(max_priority, priority + 1)
 							continue
 						
-						debug_marker(facing_gc, color)
+						#debug_marker(facing_gc, color)
 						line.append(facing_gc)
 						
 						#n_tile = facing_gc
@@ -609,7 +612,7 @@ func detect_connections(gc:Vector2i, id:int, p:int, start_dir:int, recurse:bool)
 							result.merge(a[0])
 							priorities.merge(a[1])
 							continue
-						debug_marker(facing_gc, color)
+						#debug_marker(facing_gc, color)
 						line.append(facing_gc)
 						
 						n_tile = facing_gc
@@ -1122,7 +1125,15 @@ func _on_objective_changed(objective, previous_objective:String=""):
 	if json.objectives.has(previous_objective):
 		for layer in json.objectives[previous_objective]["sprites"]:
 			base.show_layer(layer)
+	
+	if objective == "basically_impossible":
+		#victory.emit()
+		_on_victory()
+	
 
+func _on_victory():
+	running = false
+	gui.show_victory_screen()
 
 func save_game():
 	var file_name = world["file_name"] + str(Time.get_datetime_string_from_system()) + ".json"
@@ -1132,4 +1143,5 @@ func save_game():
 	
 
 func _exit_tree():
-	thread.wait_to_finish()
+	if thread.is_started():
+		thread.wait_to_finish()

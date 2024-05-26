@@ -13,6 +13,8 @@ var screen_size = DisplayServer.screen_get_size()
 func _ready():
 	level_selector.back.connect(hide_background)
 	level_creator.back.connect(hide_background)
+	
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	#get_tree().root.add_child(window)
 
 

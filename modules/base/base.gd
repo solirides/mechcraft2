@@ -12,22 +12,23 @@ var sprites = {}
 func _ready():
 	var dir = DirAccess.open(texture_dir)
 	
-	
 	if dir:
+		print("dir exists")
 		dir.list_dir_begin()
 		for file_name in dir.get_files():
 			if dir.current_is_dir():
 				continue
-			if file_name.ends_with(".png"):
+			if file_name.replace('.import', '').ends_with(".png"):
 				var sprite = TextureRect.new()
-				var texture = load(texture_dir + file_name)
+				var texture = load(texture_dir + file_name.replace('.import', ''))
 				
 				sprite.custom_minimum_size = Vector2(128, 128)
 				sprite.texture = texture
 				
-				sprites[file_name.trim_suffix(".png")] = sprite
+				sprites[file_name.replace('.import', '').trim_suffix(".png")] = sprite
 				
 				print(file_name)
+				print(file_name.replace('.import', ''))
 		
 		for k in overlays:
 			#sprites[k].material = ShaderMaterial.new()
@@ -40,6 +41,8 @@ func _ready():
 		for k in order:
 			sprites[k].visible = false
 			self.add_child(sprites[k])
+	
+	dir = null
 
 func show_layer(name:String, visible=true):
 	if order.has(name):

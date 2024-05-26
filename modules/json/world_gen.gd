@@ -4,9 +4,9 @@ extends Node2D
 @export var json:Node = null
 @export var noise_sprite:Sprite2D = null
 @export var noise_sprite2:Sprite2D = null
-#@export var thresholds:Dictionary = {-0.4: 1001, -0.5: 1002, -0.6: 1001, -1: 1002}
-@export var thresholds:Dictionary = {-1.0: 1001}
-@export var ore_thresholds:Array = [[1101, -1.0, -0.7], [1002, -0.9, -0.8]]
+@export var thresholds:Dictionary = {-0.4: 1001, -0.5: 1002, -0.96:1001, -1.0: 1002}
+#@export var thresholds:Dictionary = {-1.0: 1001}
+@export var ore_thresholds:Array = [[1101, -1.0, -0.75], [1102, -1.0, -0.75], [1103, -1.0, -0.78], [1105, -1.0, -0.7]]
 
 var ore_noise = FastNoiseLite.new()
 

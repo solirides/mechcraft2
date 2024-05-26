@@ -79,12 +79,14 @@ theme = ExtResource("2_r2e7w")
 text = "Load"
 
 [node name="Save" type="Button" parent="Panel/VBoxContainer/Buttons"]
+visible = false
 custom_minimum_size = Vector2(140, 40)
 layout_mode = 2
 theme = ExtResource("2_r2e7w")
 text = "Save"
 
 [node name="Delete" type="Button" parent="Panel/VBoxContainer/Buttons"]
+visible = false
 custom_minimum_size = Vector2(140, 40)
 layout_mode = 2
 theme = ExtResource("2_r2e7w")

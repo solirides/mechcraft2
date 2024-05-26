@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://jghaelellieo"]
+[gd_scene load_steps=17 format=3 uid="uid://jghaelellieo"]
 
 [ext_resource type="Script" path="res://modules/gui/gui.gd" id="1_slngm"]
 [ext_resource type="AudioStream" uid="uid://cmygilbmp72r3" path="res://assets/audio/music1.ogg" id="2_up154"]
@@ -47,7 +47,19 @@ font_size = 20
 
 [sub_resource type="Theme" id="Theme_koqpt"]
 
-[node name="GUI" type="CanvasLayer" node_paths=PackedStringArray("selection_label", "alert_label", "debug_label", "resources_label", "menu", "music_player", "noise_bar", "hotbar", "leftbar", "rightbar", "tooltip", "popup")]
+[sub_resource type="LabelSettings" id="LabelSettings_6l1br"]
+font_size = 60
+font_color = Color(0.587139, 0.911053, 0.66101, 1)
+outline_size = 2
+outline_color = Color(0.082766, 0.131086, 0.177723, 0.788235)
+
+[sub_resource type="LabelSettings" id="LabelSettings_75wqf"]
+font_size = 24
+font_color = Color(0.741176, 0.85098, 0.768627, 0.360784)
+outline_size = 2
+outline_color = Color(0.082766, 0.131086, 0.177723, 0.788235)
+
+[node name="GUI" type="CanvasLayer" node_paths=PackedStringArray("selection_label", "alert_label", "debug_label", "resources_label", "menu", "music_player", "noise_bar", "hotbar", "leftbar", "rightbar", "tooltip", "popup", "victory_screen")]
 layer = 10
 script = ExtResource("1_slngm")
 create_chaos_with_music = false
@@ -63,6 +75,7 @@ leftbar = NodePath("GUI/LeftScroll/LeftBar")
 rightbar = NodePath("GUI/RightBar")
 tooltip = NodePath("Tooltip")
 popup = NodePath("Popup")
+victory_screen = NodePath("Victory")
 
 [node name="GUI" type="Control" parent="."]
 layout_mode = 3
@@ -209,6 +222,7 @@ step = 0.05
 value = 1.0
 
 [node name="Bar2" type="Control" parent="GUI/TopBar"]
+visible = false
 custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 mouse_filter = 1
@@ -320,6 +334,7 @@ theme = ExtResource("3_wyw2n")
 text = "Save Game"
 
 [node name="Button3" type="Button" parent="GUI/Menu/VBoxContainer"]
+visible = false
 custom_minimum_size = Vector2(240, 0)
 layout_mode = 2
 theme = ExtResource("3_wyw2n")
@@ -416,6 +431,48 @@ text = "AAAAAAHHHHH
 PANIC"
 
 [node name="Tooltip" parent="." instance=ExtResource("6_r3bcu")]
+
+[node name="Victory" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchor_left = 0.1
+anchor_top = 0.1
+anchor_right = 0.9
+anchor_bottom = 0.9
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Victory"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="Victory/VBoxContainer"]
+layout_mode = 2
+text = "You Win!"
+label_settings = SubResource("LabelSettings_6l1br")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Label2" type="Label" parent="Victory/VBoxContainer"]
+layout_mode = 2
+text = "(we didn't have the budget for a cutscene)"
+label_settings = SubResource("LabelSettings_75wqf")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Button1" type="Button" parent="Victory/VBoxContainer"]
+visible = false
+custom_minimum_size = Vector2(100, 40)
+layout_mode = 2
+size_flags_horizontal = 4
+theme = SubResource("Theme_koqpt")
+text = "Yay!"
 
 [connection signal="pressed" from="GUI/TopBar/Bar1/Menu" to="." method="_on_menu_pressed"]
 [connection signal="value_changed" from="GUI/TopBar/Bar1/Zoom" to="." method="_on_zoom_value_changed"]

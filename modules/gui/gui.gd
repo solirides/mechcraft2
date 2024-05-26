@@ -19,6 +19,7 @@ signal world_focused(state)
 @export var rightbar:VBoxContainer = null
 @export var tooltip:Node = null
 @export var popup:Node = null
+@export var victory_screen:Node = null
 
 var json:Node = null
 
@@ -35,6 +36,7 @@ signal save
 
 func _ready():
 	json = camera.json
+	popup.tilemap = camera.tilemap
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -211,4 +213,5 @@ func update_tooltip(text:String):
 	tooltip.position = get_viewport().get_mouse_position()
 	tooltip.get_node(^"Label").text = text
 
-
+func show_victory_screen():
+	victory_screen.visible = true

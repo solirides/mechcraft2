@@ -1,11 +1,8 @@
-[gd_scene load_steps=24 format=3 uid="uid://wbpqro6tssd5"]
+[gd_scene load_steps=14 format=3 uid="uid://wbpqro6tssd5"]
 
 [ext_resource type="PackedScene" uid="uid://cdu50wti8uan3" path="res://modules/json/json.tscn" id="1_xadu0"]
 [ext_resource type="Texture2D" uid="uid://5am0arvmxore" path="res://assets/factorygame3.png" id="2_j5pph"]
-[ext_resource type="Texture2D" uid="uid://y7usubla6juc" path="res://assets/tiles/1-conveyor.png" id="3_kp5hp"]
-[ext_resource type="Texture2D" uid="uid://yqteq3q57wm2" path="res://assets/tiles/2-constructor.png" id="4_nj3cm"]
-[ext_resource type="Texture2D" uid="uid://dj7h73b0ck0od" path="res://assets/tiles/3-balancer.png" id="5_2blxd"]
-[ext_resource type="Texture2D" uid="uid://eg1scyadfujp" path="res://assets/tiles/5-storage.png" id="6_ckvpr"]
+[ext_resource type="TileSet" uid="uid://b5femrdcs2hnt" path="res://generated_tileset.tres" id="3_hq7xd"]
 [ext_resource type="Script" path="res://modules/game/tilemap.gd" id="7_2dpiw"]
 [ext_resource type="Texture2D" uid="uid://bujtksqumn34r" path="res://assets/textures/blank_slot.png" id="10_xi6q4"]
 [ext_resource type="PackedScene" uid="uid://ny288342pj6c" path="res://modules/camera/camera.tscn" id="11_3eovr"]
@@ -14,41 +11,6 @@
 [ext_resource type="AudioStream" uid="uid://bas3vtglhg5ir" path="res://assets/audio/motor.ogg" id="12_udgx0"]
 [ext_resource type="AudioStream" uid="uid://dry8dy3gqrkm3" path="res://assets/audio/wind.wav" id="13_45mpe"]
 [ext_resource type="Script" path="res://scripts/classes.gd" id="20_ld583"]
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tbejw"]
-texture = ExtResource("3_kp5hp")
-texture_region_size = Vector2i(8, 8)
-0:0/next_alternative_id = 2
-0:0/0 = 0
-0:0/1 = 1
-0:0/1/transpose = true
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_y1uis"]
-texture = ExtResource("4_nj3cm")
-0:0/0 = 0
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_vmbpx"]
-texture = ExtResource("5_2blxd")
-0:0/0 = 0
-
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_rsajy"]
-load_path = "res://.godot/imported/4-miner.png-725af819550ba49d44ea822fce8ceeeb.ctex"
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_w0fur"]
-texture = SubResource("CompressedTexture2D_rsajy")
-0:0/0 = 0
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_c0vm1"]
-texture = ExtResource("6_ckvpr")
-0:0/0 = 0
-
-[sub_resource type="TileSet" id="TileSet_huth1"]
-tile_size = Vector2i(32, 32)
-sources/1 = SubResource("TileSetAtlasSource_tbejw")
-sources/5 = SubResource("TileSetAtlasSource_c0vm1")
-sources/4 = SubResource("TileSetAtlasSource_w0fur")
-sources/3 = SubResource("TileSetAtlasSource_vmbpx")
-sources/2 = SubResource("TileSetAtlasSource_y1uis")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_sp16o"]
 shader = ExtResource("11_co4te")
@@ -80,7 +42,7 @@ offset_bottom = 2048.0
 color = Color(0.117647, 0.141176, 0.164706, 1)
 
 [node name="TileMap" type="TileMap" parent="." node_paths=PackedStringArray("json", "base", "debug", "camera", "selector")]
-tile_set = SubResource("TileSet_huth1")
+tile_set = ExtResource("3_hq7xd")
 format = 2
 layer_0/name = "Tiles"
 layer_0/z_index = -5
@@ -111,7 +73,6 @@ centered = false
 [node name="Tile" type="Sprite2D" parent="TileMap/Selector"]
 material = SubResource("ShaderMaterial_sp16o")
 position = Vector2(16, 16)
-texture = ExtResource("3_kp5hp")
 
 [node name="LineX" type="Line2D" parent="TileMap"]
 visible = false
