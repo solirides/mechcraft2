@@ -2,7 +2,7 @@
 
 [ext_resource type="PackedScene" uid="uid://cdu50wti8uan3" path="res://modules/json/json.tscn" id="1_xadu0"]
 [ext_resource type="Texture2D" uid="uid://5am0arvmxore" path="res://assets/factorygame3.png" id="2_j5pph"]
-[ext_resource type="TileSet" uid="uid://ddpvf7gutsbid" path="res://generated_tileset.tres" id="3_hq7xd"]
+[ext_resource type="TileSet" path="res://generated_tileset.tres" id="3_hq7xd"]
 [ext_resource type="Script" path="res://modules/game/tilemap.gd" id="7_2dpiw"]
 [ext_resource type="Texture2D" uid="uid://bujtksqumn34r" path="res://assets/textures/blank_slot.png" id="10_xi6q4"]
 [ext_resource type="PackedScene" uid="uid://ny288342pj6c" path="res://modules/camera/camera.tscn" id="11_3eovr"]
