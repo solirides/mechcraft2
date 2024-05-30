@@ -1,0 +1,204 @@
+{
+	"launch_pad":{
+		"name":"Launch Pad",
+		"description":"A fancy platform for fancy science stuff",
+		"sprites":[
+			"platform"
+		],
+		"resource_goals":{
+			"3001":20
+		},
+		"unlock_objectives":[
+			"fence"
+		],
+	},
+	"fence": {
+		"name":"Fencing",
+		"description":"For security...against the sandworms",
+		"sprites":[
+			"fence","overlay_1"
+		],
+		"resource_goals":{
+			"3101":10,
+			"3201":10
+		},
+		"unlock_objectives":[
+			"cables"
+		]
+	},
+	"cables": {
+		"name":"Cables",
+		"description":"",
+		"sprites":[
+			"cables"
+		],
+		"resource_goals":{
+			"3201":10,
+			"3202":15
+		},
+		"unlock_objectives":[
+			"cylinders"
+		]
+	},
+	"cylinders": {
+		"name":"Cylinders",
+		"description":"I have no idea what these hold but they seem important",
+		"sprites":[
+			"cylinders"
+		],
+		"resource_goals":{
+			"3201":10,
+			"3202":10,
+			"3105":10
+		},
+		"unlock_objectives":[
+			"crane"
+		]
+	},
+	"crane": {
+		"name":"Crane",
+		"description":"Wait, how did you build the other stuff without a crane?",
+		"sprites":[
+			"crane","overlay_2"
+		],
+		"resource_goals":{
+			"3201":20,
+			"3105":15,
+			"3204":10
+		},
+		"unlock_objectives":[
+			"control_building"
+		]
+	},
+	"control_building": {
+		"name":"Control Building",
+		"description":"A very scientific building",
+		"sprites":[
+			"control_building"
+		],
+		"resource_goals":{
+			"3303":10,
+			"3105":10,
+			"3103":10,
+			"3204":10,
+			"3203":5
+		},
+		"unlock_objectives":[
+			"satellite_dish"
+		]
+	},
+	"satellite_dish": {
+		"name":"Satellite Dish",
+		"description":"I don't think dish tv has service on this planet...",
+		"sprites":[
+			"satellite_dish"
+		],
+		"resource_goals":{
+			"3303":20,
+			"3104":5,
+			"3302":12,
+			"3304":8,
+			"3301":5
+		},
+		"unlock_objectives":[
+			"tower"
+		]
+	},
+	"tower": {
+		"name":"Tower",
+		"description":"It's really just glorified scaffolding. A wizard tower would be way cooler, but its not very scientific.",
+		"sprites":[
+			"tower"
+		],
+		"resource_goals":{
+			"3303":10,
+			"3105":5,
+			"3103":10,
+			"3401":10
+		},
+		"unlock_objectives":[
+			"ship_1"
+		]
+	},
+	"ship_1": {
+		"name":"Spaceship Hull",
+		"description":"A sturdy shell to keep your spaceship from exploding (hopefully)",
+		"sprites":[
+			"ship_hull"
+		],
+		"resource_goals":{
+			"3303":20,
+			"3105":20,
+			"3302":5,
+			"3401":10,
+			"3204":10
+		},
+		"unlock_objectives":[
+			"ship_2"
+		]
+	},
+	"ship_2": {
+		"name":"Spaceship Thrusters",
+		"description":"These things are loud",
+		"sprites":[
+			"ship_tail"
+		],
+		"resource_goals":{
+			"3103":5,
+			"3105":20,
+			"3302":15,
+			"3401":12,
+			"3202":10
+		},
+		"unlock_objectives":[
+			"ship_3"
+		]
+	},
+	"ship_3": {
+		"name":"Spaceship Booster Rockets",
+		"description":"More thrusters, but on the sides",
+		"sprites":[
+			"ship_boosters"
+		],
+		"resource_goals":{
+			"3103":10,
+			"3105":10,
+			"3302":10,
+			"3501":5,
+			"3304":10,
+			"3104":20
+		},
+		"unlock_objectives":[
+			"ship_4"
+		]
+	},
+	"ship_4": {
+		"name":"Spaceship Navigation System",
+		"description":"Lots of computers for computing stuff",
+		"sprites":[
+			"ship_front",
+			"overlay_3"
+		],
+		"resource_goals":{
+			"3202":20,
+			"3303":20,
+			"3302":5,
+			"3401":20,
+			"3501":15,
+			"3204":5
+		},
+		"unlock_objectives":[
+			"basically_impossible"
+		]
+	},
+	"basically_impossible": {
+		"name":"You Win!",
+		"description":"Yay!",
+		"sprites":[],
+		"resource_goals":{
+			"3001":9999999
+		},
+		"unlock_objectives":[
+		]
+	}
+}

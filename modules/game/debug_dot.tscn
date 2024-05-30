@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://baktj8aex22ce"]
+
+[node name="DebugDot" type="Polygon2D"]
+scale = Vector2(4, 4)
+color = Color(1, 0, 0.713726, 0.584314)
+polygon = PackedVector2Array(1, 1, -1, 1, -1, -1, 1, -1)

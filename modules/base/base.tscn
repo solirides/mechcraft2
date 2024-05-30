@@ -1,0 +1,17 @@
+[gd_scene load_steps=5 format=3 uid="uid://oshwg28g0vb1"]
+
+[ext_resource type="Script" path="res://modules/base/base.gd" id="1_jve3s"]
+[ext_resource type="Shader" path="res://assets/shaders/overlay.gdshader" id="2_046bt"]
+[ext_resource type="Texture2D" uid="uid://byongkde5r8ta" path="res://modules/base/textures/overlay_2.png" id="2_t5mtv"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_ajtl3"]
+
+[node name="Base" type="Node2D"]
+script = ExtResource("1_jve3s")
+overlay_shader = ExtResource("2_046bt")
+
+[node name="Sprite2D" type="TextureRect" parent="."]
+visible = false
+material = SubResource("CanvasItemMaterial_ajtl3")
+custom_minimum_size = Vector2(512, 512)
+texture = ExtResource("2_t5mtv")

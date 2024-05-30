@@ -1,0 +1,14 @@
+[remap]
+
+importer="image"
+type="Image"
+uid="uid://ciyqtonx4ka2w"
+path="res://.godot/imported/2002-base.png-0106f827a2757e316f3fb5e7b6e0fdf1.image"
+
+[deps]
+
+source_file="res://assets/tiles/2002-base.png"
+dest_files=["res://.godot/imported/2002-base.png-0106f827a2757e316f3fb5e7b6e0fdf1.image"]
+
+[params]
+

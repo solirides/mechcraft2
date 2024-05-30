@@ -1,0 +1,14 @@
+[remap]
+
+importer="image"
+type="Image"
+uid="uid://cw8hlkvouatps"
+path="res://.godot/imported/1103-gold_ore.png-2f946f013892fc6dfbe938fb5dcfb742.image"
+
+[deps]
+
+source_file="res://assets/tiles/1103-gold_ore.png"
+dest_files=["res://.godot/imported/1103-gold_ore.png-2f946f013892fc6dfbe938fb5dcfb742.image"]
+
+[params]
+

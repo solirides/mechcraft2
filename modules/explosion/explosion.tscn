@@ -1,0 +1,66 @@
+[gd_scene load_steps=10 format=3 uid="uid://bj0bk6v1kl11r"]
+
+[ext_resource type="Material" uid="uid://c1kk3xv35uc3c" path="res://assets/particles/explosion3.tres" id="1_lkgc8"]
+[ext_resource type="Script" path="res://modules/explosion/explosion.gd" id="1_we173"]
+[ext_resource type="Texture2D" uid="uid://cyfxa8sgg6uyi" path="res://assets/literally_one_pixel.tres" id="2_2s8ae"]
+[ext_resource type="Material" uid="uid://c8qbpsamo5v4c" path="res://assets/particles/explosion4.tres" id="2_lgwhb"]
+[ext_resource type="Material" uid="uid://cd4xldnsdpb6p" path="res://assets/particles/explosion2.tres" id="2_vgy3m"]
+[ext_resource type="Material" uid="uid://b3uhyjaneolkv" path="res://assets/particles/explosion5.tres" id="3_lp1eu"]
+
+[sub_resource type="Gradient" id="Gradient_ud8p1"]
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_kc022"]
+gradient = SubResource("Gradient_ud8p1")
+width = 2
+height = 2
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_ip7pj"]
+particle_flag_disable_z = true
+inherit_velocity_ratio = 1.0
+initial_velocity_min = 148.51
+initial_velocity_max = 148.51
+gravity = Vector3(0, 0, 0)
+scale_min = 4.3
+scale_max = 7.61
+
+[node name="Explosion" type="Node2D" node_paths=PackedStringArray("fire", "smoke", "thing")]
+script = ExtResource("1_we173")
+fire = NodePath("Fire")
+smoke = NodePath("Fire/Smoke")
+thing = NodePath("Fire/IDK")
+
+[node name="Fire" type="GPUParticles2D" parent="."]
+amount = 100
+process_material = ExtResource("1_lkgc8")
+texture = ExtResource("2_2s8ae")
+explosiveness = 0.67
+
+[node name="Smoke" type="GPUParticles2D" parent="Fire"]
+amount = 80
+process_material = ExtResource("2_lgwhb")
+texture = ExtResource("2_2s8ae")
+explosiveness = 0.76
+
+[node name="IDK" type="GPUParticles2D" parent="Fire"]
+amount = 10
+sub_emitter = NodePath("../../GPUParticles2D3")
+process_material = ExtResource("3_lp1eu")
+texture = ExtResource("2_2s8ae")
+explosiveness = 0.81
+
+[node name="GPUParticles2D2" type="GPUParticles2D" parent="."]
+visible = false
+position = Vector2(182, 103)
+amount = 40
+process_material = ExtResource("2_vgy3m")
+texture = SubResource("GradientTexture2D_kc022")
+lifetime = 3.0
+explosiveness = 1.0
+trail_enabled = true
+
+[node name="GPUParticles2D3" type="GPUParticles2D" parent="."]
+visible = false
+process_material = SubResource("ParticleProcessMaterial_ip7pj")
+texture = ExtResource("2_2s8ae")
+lifetime = 0.25

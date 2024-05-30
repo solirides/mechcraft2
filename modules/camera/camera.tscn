@@ -1,0 +1,100 @@
+[gd_scene load_steps=14 format=3 uid="uid://ny288342pj6c"]
+
+[ext_resource type="Script" path="res://modules/camera/camera.gd" id="1_rdnut"]
+[ext_resource type="Shader" path="res://assets/shaders/background.gdshader" id="2_0rylb"]
+[ext_resource type="Gradient" uid="uid://6k8oc2t2mj5o" path="res://assets/day_cycle_tint.tres" id="2_et0bm"]
+[ext_resource type="Shader" path="res://assets/shaders/test.gdshader" id="3_wvts0"]
+[ext_resource type="Shader" path="res://assets/shaders/grain.gdshader" id="4_2imdu"]
+[ext_resource type="Script" path="res://modules/camera/grid.gd" id="5_n56r2"]
+[ext_resource type="PackedScene" uid="uid://jghaelellieo" path="res://modules/gui/gui.tscn" id="6_e58f0"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_srgol"]
+shader = ExtResource("2_0rylb")
+shader_parameter/color1 = Color(0.129412, 0.172549, 0.25098, 1)
+shader_parameter/color2 = Color(0.117647, 0.137255, 0.247059, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tfcjj"]
+shader = ExtResource("3_wvts0")
+shader_parameter/exponent = 1.0
+shader_parameter/strength = 0.003
+shader_parameter/variation = 0.001
+shader_parameter/frequency = 0.4
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_0oh36"]
+noise_type = 2
+fractal_octaves = 4
+fractal_lacunarity = 5.0
+fractal_gain = 2.0
+metadata/_preview_in_3d_space_ = true
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_3vi5g"]
+seamless = true
+noise = SubResource("FastNoiseLite_0oh36")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_hjsx2"]
+shader = ExtResource("4_2imdu")
+shader_parameter/color = Color(1, 1, 1, 1)
+shader_parameter/noise_size = 512.0
+shader_parameter/amount = 0.8
+shader_parameter/noise = SubResource("NoiseTexture2D_3vi5g")
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_x4vnc"]
+blend_mode = 3
+
+[node name="Camera" type="Node2D" node_paths=PackedStringArray("background", "camera", "shaders", "gui")]
+script = ExtResource("1_rdnut")
+background = NodePath("Camera2D/Shaders/Grid")
+camera = NodePath("Camera2D")
+shaders = NodePath("Camera2D/Shaders")
+gui = NodePath("Camera2D/GUI")
+day_cycle_gradient = ExtResource("2_et0bm")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="Camera2D"]
+layer = -1
+
+[node name="ColorRect" type="ColorRect" parent="Camera2D/CanvasLayer"]
+material = SubResource("ShaderMaterial_srgol")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Shaders" type="CanvasLayer" parent="Camera2D"]
+
+[node name="ColorRect" type="ColorRect" parent="Camera2D/Shaders"]
+material = SubResource("ShaderMaterial_tfcjj")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 0.156863, 0.568627, 1)
+
+[node name="ColorRect2" type="ColorRect" parent="Camera2D/Shaders"]
+material = SubResource("ShaderMaterial_hjsx2")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 0.156863, 0.568627, 1)
+
+[node name="DayCycleTint" type="ColorRect" parent="Camera2D/Shaders"]
+material = SubResource("CanvasItemMaterial_x4vnc")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0)
+
+[node name="Grid" type="Node2D" parent="Camera2D/Shaders"]
+script = ExtResource("5_n56r2")
+
+[node name="GUI" parent="Camera2D" node_paths=PackedStringArray("camera") instance=ExtResource("6_e58f0")]
+camera = NodePath("../..")

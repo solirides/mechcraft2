@@ -1,0 +1,99 @@
+[gd_scene load_steps=4 format=3 uid="uid://k40wfhx7mcyc"]
+
+[ext_resource type="Script" path="res://modules/level_selector/level_selector.gd" id="1_3pi1d"]
+[ext_resource type="Theme" uid="uid://b4us1mhl0qxjp" path="res://assets/theme.tres" id="2_r2e7w"]
+[ext_resource type="PackedScene" uid="uid://dhq0gqevpfm2h" path="res://modules/level_selector/save_file/save_file.tscn" id="2_vp1ko"]
+
+[node name="LevelSelector" type="Control" node_paths=PackedStringArray("saves", "buttons")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_3pi1d")
+saves = NodePath("Panel/VBoxContainer/ScrollContainer/Saves")
+buttons = NodePath("Panel/VBoxContainer/Buttons")
+
+[node name="Buttons2" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+
+[node name="Back" type="Button" parent="Buttons2"]
+custom_minimum_size = Vector2(140, 40)
+layout_mode = 2
+theme = ExtResource("2_r2e7w")
+text = "Back"
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 0.7
+anchor_bottom = 1.0
+offset_top = 40.0
+offset_bottom = -40.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Panel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Saves" type="VBoxContainer" parent="Panel/VBoxContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="SaveFile" parent="Panel/VBoxContainer/ScrollContainer/Saves" instance=ExtResource("2_vp1ko")]
+visible = false
+layout_mode = 2
+
+[node name="Buttons" type="HBoxContainer" parent="Panel/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Load" type="Button" parent="Panel/VBoxContainer/Buttons"]
+custom_minimum_size = Vector2(140, 40)
+layout_mode = 2
+theme = ExtResource("2_r2e7w")
+text = "Load"
+
+[node name="Save" type="Button" parent="Panel/VBoxContainer/Buttons"]
+visible = false
+custom_minimum_size = Vector2(140, 40)
+layout_mode = 2
+theme = ExtResource("2_r2e7w")
+text = "Save"
+
+[node name="Delete" type="Button" parent="Panel/VBoxContainer/Buttons"]
+visible = false
+custom_minimum_size = Vector2(140, 40)
+layout_mode = 2
+theme = ExtResource("2_r2e7w")
+text = "Delete
+"
+
+[connection signal="pressed" from="Buttons2/Back" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="Panel/VBoxContainer/Buttons/Load" to="." method="_on_load_pressed"]
+[connection signal="pressed" from="Panel/VBoxContainer/Buttons/Save" to="." method="_on_save_pressed"]
+[connection signal="pressed" from="Panel/VBoxContainer/Buttons/Delete" to="." method="_on_delete_pressed"]

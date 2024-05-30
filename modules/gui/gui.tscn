@@ -1,0 +1,485 @@
+[gd_scene load_steps=17 format=3 uid="uid://jghaelellieo"]
+
+[ext_resource type="Script" path="res://modules/gui/gui.gd" id="1_slngm"]
+[ext_resource type="AudioStream" uid="uid://cmygilbmp72r3" path="res://assets/audio/music1.ogg" id="2_up154"]
+[ext_resource type="Theme" uid="uid://b4us1mhl0qxjp" path="res://assets/theme.tres" id="3_wyw2n"]
+[ext_resource type="Shader" path="res://assets/shaders/scanlines.gdshader" id="4_qhokn"]
+[ext_resource type="Script" path="res://modules/gui/popup.gd" id="5_trcsy"]
+[ext_resource type="PackedScene" uid="uid://cbv4iphoyccrb" path="res://modules/tooltip/tooltip.tscn" id="6_r3bcu"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_mnp4j"]
+font_size = 22
+font_color = Color(0.952941, 1, 0.486275, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_oslo5"]
+font_color = Color(0.621524, 0.621524, 0.621524, 0.803922)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b0gy7"]
+bg_color = Color(0.262745, 0.262745, 0.262745, 0.254902)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jbbp0"]
+bg_color = Color(0.960784, 0.823529, 0.145098, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_2faln"]
+shader = ExtResource("4_qhokn")
+shader_parameter/color1 = Color(0.866667, 0.905882, 0.992157, 0.54902)
+shader_parameter/color2 = Color(0.85098, 0.882353, 0.968627, 0.627451)
+shader_parameter/speed = 16.0
+shader_parameter/size = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8om3o"]
+bg_color = Color(0.239216, 0.301961, 0.380392, 0.921569)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="LabelSettings" id="LabelSettings_pb51a"]
+font_size = 20
+
+[sub_resource type="Theme" id="Theme_koqpt"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_6l1br"]
+font_size = 60
+font_color = Color(0.587139, 0.911053, 0.66101, 1)
+outline_size = 2
+outline_color = Color(0.082766, 0.131086, 0.177723, 0.788235)
+
+[sub_resource type="LabelSettings" id="LabelSettings_75wqf"]
+font_size = 24
+font_color = Color(0.741176, 0.85098, 0.768627, 0.360784)
+outline_size = 2
+outline_color = Color(0.082766, 0.131086, 0.177723, 0.788235)
+
+[node name="GUI" type="CanvasLayer" node_paths=PackedStringArray("selection_label", "alert_label", "debug_label", "resources_label", "menu", "music_player", "noise_bar", "hotbar", "leftbar", "rightbar", "tooltip", "popup", "victory_screen")]
+layer = 10
+script = ExtResource("1_slngm")
+create_chaos_with_music = false
+selection_label = NodePath("GUI/TopBar/Bar2/Selection")
+alert_label = NodePath("GUI/Center/Alert")
+debug_label = NodePath("GUI/TopBar/Bar2/Debug")
+resources_label = NodePath("GUI/TopBar/Bar2/Resources")
+menu = NodePath("GUI/Menu")
+music_player = NodePath("GUI/AudioStreamPlayer")
+noise_bar = NodePath("GUI/TopBar/Bar3/Noise")
+hotbar = NodePath("GUI/BottomBar/Panel/ScrollContainer/Hotbar")
+leftbar = NodePath("GUI/LeftScroll/LeftBar")
+rightbar = NodePath("GUI/RightBar")
+tooltip = NodePath("Tooltip")
+popup = NodePath("Popup")
+victory_screen = NodePath("Victory")
+
+[node name="GUI" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="GUI"]
+stream = ExtResource("2_up154")
+
+[node name="Center" type="CenterContainer" parent="GUI"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.43
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Alert" type="Label" parent="GUI/Center"]
+visible = false
+custom_minimum_size = Vector2(600, 0)
+layout_mode = 2
+mouse_filter = 1
+theme = ExtResource("3_wyw2n")
+text = "alert text"
+label_settings = SubResource("LabelSettings_mnp4j")
+horizontal_alignment = 1
+
+[node name="BottomBar" type="VBoxContainer" parent="GUI"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Panel" type="Panel" parent="GUI/BottomBar"]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="GUI/BottomBar/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Hotbar" type="HBoxContainer" parent="GUI/BottomBar/Panel/ScrollContainer"]
+custom_minimum_size = Vector2(300, 60)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+alignment = 1
+
+[node name="LeftScroll" type="ScrollContainer" parent="GUI"]
+custom_minimum_size = Vector2(100, 300)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.24
+anchor_right = 0.1
+anchor_bottom = 0.825
+offset_left = 20.0
+grow_vertical = 2
+mouse_filter = 0
+theme = ExtResource("3_wyw2n")
+
+[node name="LeftBar" type="VBoxContainer" parent="GUI/LeftScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="RightBar" type="VBoxContainer" parent="GUI"]
+custom_minimum_size = Vector2(100, 300)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.8
+anchor_top = 0.24
+anchor_right = 1.0
+anchor_bottom = 0.825
+offset_right = -20.0
+grow_vertical = 2
+theme = ExtResource("3_wyw2n")
+
+[node name="Objective" type="Label" parent="GUI/RightBar"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+theme = ExtResource("3_wyw2n")
+text = "objective"
+autowrap_mode = 2
+
+[node name="Description" type="Label" parent="GUI/RightBar"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+theme = ExtResource("3_wyw2n")
+text = "description"
+label_settings = SubResource("LabelSettings_oslo5")
+autowrap_mode = 2
+
+[node name="Progress" type="VBoxContainer" parent="GUI/RightBar"]
+layout_mode = 2
+theme = ExtResource("3_wyw2n")
+
+[node name="TopBar" type="VBoxContainer" parent="GUI"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+offset_left = 20.0
+offset_top = 10.0
+offset_right = -20.0
+offset_bottom = 98.0
+grow_horizontal = 2
+
+[node name="Bar1" type="Control" parent="GUI/TopBar"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+mouse_filter = 1
+
+[node name="Menu" type="Button" parent="GUI/TopBar/Bar1"]
+layout_mode = 0
+offset_right = 89.0
+offset_bottom = 39.0
+theme = ExtResource("3_wyw2n")
+text = "⚙️Menu"
+
+[node name="Zoom" type="HSlider" parent="GUI/TopBar/Bar1"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.2
+anchor_right = 0.8
+offset_bottom = 16.0
+grow_horizontal = 2
+min_value = -3.0
+max_value = 3.0
+step = 0.05
+value = 1.0
+
+[node name="Bar2" type="Control" parent="GUI/TopBar"]
+visible = false
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+mouse_filter = 1
+
+[node name="Selection" type="RichTextLabel" parent="GUI/TopBar/Bar2"]
+clip_contents = false
+layout_mode = 1
+offset_right = 1.0
+mouse_filter = 1
+theme = ExtResource("3_wyw2n")
+text = "hello"
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+
+[node name="Debug" type="RichTextLabel" parent="GUI/TopBar/Bar2"]
+clip_contents = false
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -300.0
+offset_right = 300.0
+offset_bottom = 31.0
+grow_horizontal = 2
+mouse_filter = 1
+theme = ExtResource("3_wyw2n")
+bbcode_enabled = true
+text = "[center]debug"
+fit_content = true
+scroll_active = false
+
+[node name="Resources" type="RichTextLabel" parent="GUI/TopBar/Bar2"]
+clip_contents = false
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -49.0
+offset_bottom = 28.0
+grow_horizontal = 0
+mouse_filter = 1
+theme = ExtResource("3_wyw2n")
+bbcode_enabled = true
+text = "[right]what"
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+
+[node name="Bar3" type="Control" parent="GUI/TopBar"]
+layout_mode = 2
+mouse_filter = 1
+
+[node name="Noise" type="ProgressBar" parent="GUI/TopBar/Bar3"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 0
+offset_right = 4.0
+offset_bottom = 27.0
+theme = ExtResource("3_wyw2n")
+theme_override_styles/background = SubResource("StyleBoxFlat_b0gy7")
+theme_override_styles/fill = SubResource("StyleBoxFlat_jbbp0")
+value = 30.0
+show_percentage = false
+
+[node name="Menu" type="Control" parent="GUI"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="GUI/Menu"]
+material = SubResource("ShaderMaterial_2faln")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.827451, 0, 0.521569, 1)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="GUI/Menu"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -120.0
+offset_top = -84.0
+offset_right = 120.0
+offset_bottom = 84.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="Button1" type="Button" parent="GUI/Menu/VBoxContainer"]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+theme = ExtResource("3_wyw2n")
+text = "Resume"
+
+[node name="Button2" type="Button" parent="GUI/Menu/VBoxContainer"]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+theme = ExtResource("3_wyw2n")
+text = "Save Game"
+
+[node name="Button3" type="Button" parent="GUI/Menu/VBoxContainer"]
+visible = false
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+theme = ExtResource("3_wyw2n")
+text = "Options"
+
+[node name="Button4" type="Button" parent="GUI/Menu/VBoxContainer"]
+custom_minimum_size = Vector2(240, 0)
+layout_mode = 2
+theme = ExtResource("3_wyw2n")
+text = "Quit to Main Menu"
+
+[node name="Music" type="CheckButton" parent="GUI/Menu/VBoxContainer"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 4
+focus_mode = 0
+text = "Delete code with music (it goes in the recycling bin)"
+
+[node name="Music2" type="CheckButton" parent="GUI/Menu/VBoxContainer"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 4
+focus_mode = 0
+text = "Shut down computer with music"
+
+[node name="Popup" type="Panel" parent="."]
+visible = false
+custom_minimum_size = Vector2(500, 250)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_8om3o")
+script = ExtResource("5_trcsy")
+
+[node name="Control" type="Control" parent="Popup"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 32.0
+offset_top = 25.0
+offset_right = -32.0
+offset_bottom = -25.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="Popup/Control"]
+layout_mode = 2
+offset_right = 464.0
+offset_bottom = 28.0
+theme = ExtResource("3_wyw2n")
+text = "A sandworm has attacked!"
+label_settings = SubResource("LabelSettings_pb51a")
+
+[node name="Control" type="Control" parent="Popup/Control"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Button1" type="Button" parent="Popup/Control/Control"]
+custom_minimum_size = Vector2(140, 40)
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -40.0
+offset_right = 100.0
+grow_vertical = 0
+theme = SubResource("Theme_koqpt")
+text = "Challenge the 
+sandworm to an epic 1v1"
+
+[node name="Button2" type="Button" parent="Popup/Control/Control"]
+custom_minimum_size = Vector2(140, 40)
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -140.0
+offset_top = -40.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "AAAAAAHHHHH
+PANIC"
+
+[node name="Tooltip" parent="." instance=ExtResource("6_r3bcu")]
+
+[node name="Victory" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchor_left = 0.1
+anchor_top = 0.1
+anchor_right = 0.9
+anchor_bottom = 0.9
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Victory"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Label" type="Label" parent="Victory/VBoxContainer"]
+layout_mode = 2
+text = "You Win!"
+label_settings = SubResource("LabelSettings_6l1br")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Label2" type="Label" parent="Victory/VBoxContainer"]
+layout_mode = 2
+text = "(we didn't have the budget for a cutscene)"
+label_settings = SubResource("LabelSettings_75wqf")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Button1" type="Button" parent="Victory/VBoxContainer"]
+visible = false
+custom_minimum_size = Vector2(100, 40)
+layout_mode = 2
+size_flags_horizontal = 4
+theme = SubResource("Theme_koqpt")
+text = "Yay!"
+
+[connection signal="pressed" from="GUI/TopBar/Bar1/Menu" to="." method="_on_menu_pressed"]
+[connection signal="value_changed" from="GUI/TopBar/Bar1/Zoom" to="." method="_on_zoom_value_changed"]
+[connection signal="pressed" from="GUI/Menu/VBoxContainer/Button1" to="." method="_on_resume_pressed"]
+[connection signal="pressed" from="GUI/Menu/VBoxContainer/Button2" to="." method="_on_save_pressed"]
+[connection signal="pressed" from="GUI/Menu/VBoxContainer/Button4" to="." method="_on_title_screen_pressed"]
+[connection signal="toggled" from="GUI/Menu/VBoxContainer/Music" to="." method="_on_music_toggled"]
+[connection signal="toggled" from="GUI/Menu/VBoxContainer/Music2" to="." method="_on_music_2_toggled"]
+[connection signal="pressed" from="Popup/Control/Control/Button1" to="Popup" method="_on_button_1_pressed"]
+[connection signal="pressed" from="Popup/Control/Control/Button2" to="Popup" method="_on_button_2_pressed"]

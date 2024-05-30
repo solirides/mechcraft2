@@ -1,0 +1,28 @@
+[gd_resource type="AudioBusLayout" load_steps=3 format=3 uid="uid://cqyebwvmc3rnl"]
+
+[sub_resource type="AudioEffectChorus" id="AudioEffectChorus_yx3y1"]
+resource_name = "Chorus"
+voice_count = 3
+voice/3/delay_ms = 12.0
+voice/3/rate_hz = 1.0
+voice/3/depth_ms = 0.0
+voice/3/level_db = 0.0
+voice/3/cutoff_hz = 16000.0
+voice/3/pan = 0.0
+
+[sub_resource type="AudioEffectReverb" id="AudioEffectReverb_an75y"]
+resource_name = "Reverb"
+damping = 0.84
+wet = 0.11
+
+[resource]
+bus/1/name = &"Ambient"
+bus/1/solo = false
+bus/1/mute = false
+bus/1/bypass_fx = false
+bus/1/volume_db = 0.0
+bus/1/send = &"Master"
+bus/1/effect/0/effect = SubResource("AudioEffectChorus_yx3y1")
+bus/1/effect/0/enabled = true
+bus/1/effect/1/effect = SubResource("AudioEffectReverb_an75y")
+bus/1/effect/1/enabled = true

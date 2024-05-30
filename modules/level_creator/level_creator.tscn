@@ -1,0 +1,76 @@
+[gd_scene load_steps=3 format=3 uid="uid://n1w8kvpbdvrq"]
+
+[ext_resource type="Script" path="res://modules/level_creator/level_creator.gd" id="1_hw66p"]
+[ext_resource type="Theme" uid="uid://b4us1mhl0qxjp" path="res://assets/theme.tres" id="2_6lrfc"]
+
+[node name="LevelCreator" type="Control" node_paths=PackedStringArray("name_label")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_hw66p")
+name_label = NodePath("Panel/ScrollContainer/Name")
+
+[node name="Panel" type="Panel" parent="."]
+custom_minimum_size = Vector2(300, 200)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_top = 0.3
+anchor_right = 0.7
+anchor_bottom = 0.7
+offset_top = 40.0
+offset_bottom = -40.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ScrollContainer" type="Control" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -100.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Name" type="LineEdit" parent="Panel/ScrollContainer"]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+grow_horizontal = 2
+theme = ExtResource("2_6lrfc")
+text = "New World"
+placeholder_text = "Name your world"
+max_length = 32
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+alignment = 1
+
+[node name="Back" type="Button" parent="Panel/HBoxContainer"]
+custom_minimum_size = Vector2(140, 40)
+layout_mode = 2
+theme = ExtResource("2_6lrfc")
+text = "Back"
+
+[node name="Create" type="Button" parent="Panel/HBoxContainer"]
+custom_minimum_size = Vector2(140, 40)
+layout_mode = 2
+theme = ExtResource("2_6lrfc")
+text = "Create"
+
+[connection signal="pressed" from="Panel/HBoxContainer/Back" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="Panel/HBoxContainer/Create" to="." method="_on_create_pressed"]

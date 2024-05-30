@@ -1,0 +1,14 @@
+[remap]
+
+importer="image"
+type="Image"
+uid="uid://bcwt5fx24pwp3"
+path="res://.godot/imported/1101-iron_ore.png-f47c4caf09b8caf2929ed3fe19a7a770.image"
+
+[deps]
+
+source_file="res://assets/tiles/1101-iron_ore.png"
+dest_files=["res://.godot/imported/1101-iron_ore.png-f47c4caf09b8caf2929ed3fe19a7a770.image"]
+
+[params]
+
